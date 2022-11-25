@@ -15,8 +15,8 @@ class ScopeTable
 
     // sdbm hash function
     // https://www.programmingalgorithms.com/algorithm/sdbm-hash/cpp/
-    unsigned int SDBMHash(std::string &str) {
-	    unsigned int hash = 0;
+    unsigned long long int SDBMHash(std::string &str) {
+	    unsigned long long int hash = 0;
 	    unsigned int i = 0;
 	    unsigned int len = str.length();
 
@@ -28,7 +28,7 @@ class ScopeTable
 	    return hash;
     }
 
-    int hash(std::string &str){
+    inline int hash(std::string &str){
         return SDBMHash(str) % bucketSize;
     }
 
@@ -42,6 +42,8 @@ public:
         this->parentScope = parentScope;
         symbolTable = new SymbolInfo*[bucketSize];
         for(int i = 0; i < bucketSize; i++) symbolTable[i] = nullptr;
+
+        std::cout<<"\tScopeTable# " << id << " created"<<std::endl;
     }
 
     // getters
@@ -50,20 +52,21 @@ public:
     ScopeTable* getParentScope(){ return parentScope; }
 
     // insert
-    bool insert(std::string &key, std::string &type){
+    bool insert(std::string &name, std::string &type){
 
-        if(lookup(key)!=nullptr){
+        if(lookup(name)!=nullptr){
             return false;
         }
 
-        SymbolInfo* symbol = new SymbolInfo(key, type);
-        int index = hash(key);
+        SymbolInfo* symbol = new SymbolInfo(name, type);
+        int index = hash(name);
         int pos = 0;
         SymbolInfo *curr = symbolTable[index];
 
         if(curr == nullptr) symbolTable[index] = symbol;
         
         else{
+            pos = 1;
             while (curr->getNext() != nullptr)
             {   
                 curr = curr->getNext();
@@ -72,19 +75,19 @@ public:
 
             curr->setNext(symbol);
         }
-
+        std::cout << "\tInserted in ScopeTable# " << id << " at position "<< index+1 <<", "<< pos+1 <<std::endl;
         return true;
     }
 
     // lookup
-    SymbolInfo* lookup(std::string &key){
-        int index = hash(key);
+    SymbolInfo* lookup(std::string &name, bool printMessage = false){
+        int index = hash(name);
         int pos = 0;
 
         SymbolInfo* curr = symbolTable[index];
         while(curr != nullptr){
-            if(key == curr->getName()){
-                std::cout<<"found"<<std::endl;
+            if(name == curr->getName()){
+                if(printMessage) std::cout << "\t'" << name << "'" << " found in ScopeTable# " << id << " at position "<< index+1 <<", "<< pos+1 <<std::endl;
                 return curr;
             }
 
@@ -92,26 +95,28 @@ public:
             curr = curr->getNext();
         }
 
-        std::cout<<"Not found"<<std::endl;
         return nullptr;
     }
 
     // delete symbol
-    bool deleteSymbol(std::string key){
+    bool deleteSymbol(std::string &name, bool printMessage = false){
 
-        int index = hash(key);
+        int index = hash(name);
         int pos = 0;
         SymbolInfo* curr = symbolTable[index];
         SymbolInfo* prev = nullptr;
 
         while (curr != nullptr)
         {
-            if(key == curr->getName()){
+            if(name == curr->getName()){
                 // if the first element is being deleted
                 if(prev == nullptr) symbolTable[index] = curr->getNext();
                 else prev->setNext(curr->getNext());
 
                 delete curr;
+                if(printMessage)
+                    std::cout << "\t" << "Deleted '" << name <<"'" << " from ScopeTable# " << id << " at position "<< index+1 <<", "<< pos+1 <<std::endl;
+
                 return true;
             }
 
@@ -125,8 +130,32 @@ public:
 
     //print
     void print(){
-
+        std::cout << "\tScopeTable# " << id << std::endl;
+        for(int i = 0; i < bucketSize; i++){
+            std::cout << "\t" << i+1 << "--> ";
+            SymbolInfo* curr = symbolTable[i];
+            while(curr != nullptr){
+                std::cout << *curr << " ";
+                curr = curr->getNext();
+            }
+            std::cout << std::endl;
+        }
     }
+
+    // destructor
+    ~ScopeTable(){
+        for(int i = 0; i < bucketSize; i++){
+            SymbolInfo* curr = symbolTable[i];
+            while(curr != nullptr){
+                SymbolInfo* temp = curr;
+                curr = curr->getNext();
+                delete temp;
+            }
+        }
+        delete[] symbolTable;
+        std::cout << "\tScopeTable# " << id << " removed" << std::endl;
+    }
+
 };
 
 

@@ -35,7 +35,7 @@ public:
 
     //print
     friend std::ostream& operator<<(std::ostream& out, SymbolInfo& symbolInfo){
-        out << "Name: " << symbolInfo.name << " Type: " << symbolInfo.type;
+        out<< "<"<<symbolInfo.name<<","<<symbolInfo.type<<">";
         return out;
     }
 };
