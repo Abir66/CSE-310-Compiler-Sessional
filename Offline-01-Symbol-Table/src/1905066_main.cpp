@@ -19,8 +19,14 @@ void getCommand(std::string &str, char &cmd, int &commandCount)
 }
 
 bool parameterMismatch(std::string &str, char cmd, int parameter){
-    int spaceCount = std::count(str.begin(), str.end(), ' ');
-    if(spaceCount != parameter-1 || (str.size() == 0 && parameter != 0)){
+
+    
+    int wordCount = 1;
+    for(int i=0; i<str.size(); i++){
+        if(str[i] == ' ' && str[i+1] != ' ') wordCount++;
+    }
+
+    if(wordCount != parameter || (str.size() == 0 && parameter != 0)){
         std::cout << "\tNumber of parameters mismatch for the command " << cmd << std::endl;
         return true;
     }
