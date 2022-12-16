@@ -11,7 +11,6 @@ class ScopeTable
     int bucketSize;
     int id;
     ScopeTable *parentScope;
-    std::ostream &out;
 
 
     // sdbm hash function
@@ -36,15 +35,13 @@ class ScopeTable
 public:
 
     // Constructors
-    ScopeTable(std::ostream &out = std::cout): out(out){}
-    ScopeTable(int bucketSize, int id,std::ostream &out = std::cout, ScopeTable *parentScope = nullptr): out(out){
+    ScopeTable(){}
+    ScopeTable(int bucketSize, int id, ScopeTable *parentScope = nullptr){
         this->bucketSize = bucketSize;
         this->id = id;
         this->parentScope = parentScope;
         symbolTable = new SymbolInfo*[bucketSize];
         for(int i = 0; i < bucketSize; i++) symbolTable[i] = nullptr;
-
-        //out<<"\tScopeTable# " << id << " created"<<std::endl;
     }
 
     // getters
@@ -53,7 +50,7 @@ public:
     ScopeTable* getParentScope(){ return parentScope; }
 
     // insert
-    bool insert(std::string &name, std::string &type){
+    bool insert(std::string &name, std::string &type, std::ostream &out = std::cout){
 
         if(lookup(name)!=nullptr){
             return false;
@@ -76,19 +73,21 @@ public:
 
             curr->setNext(symbol);
         }
-        //out << "\tInserted in ScopeTable# " << id << " at position "<< index+1 <<", "<< pos+1 <<std::endl;
+        // out << "\tInserted in ScopeTable# " << id << " at position "<< index+1 <<", "<< pos+1 <<std::endl;
         return true;
     }
 
     // lookup
-    SymbolInfo* lookup(std::string &name, bool printMessage = false){
+    SymbolInfo* lookup(std::string &name, bool printMessage = false, std::ostream &out = std::cout){
         int index = hash(name);
         int pos = 0;
 
         SymbolInfo* curr = symbolTable[index];
         while(curr != nullptr){
             if(name == curr->getName()){
-                if(printMessage) out << "\t'" << name << "'" << " found in ScopeTable# " << id << " at position "<< index+1 <<", "<< pos+1 <<std::endl;
+                if(printMessage) {
+                    out << "\t'" << name << "'" << " found in ScopeTable# " << id << " at position "<< index+1 <<", "<< pos+1 <<std::endl;
+                }
                 return curr;
             }
 
@@ -100,7 +99,7 @@ public:
     }
 
     // delete symbol
-    bool deleteSymbol(std::string &name, bool printMessage = false){
+    bool deleteSymbol(std::string &name, bool printMessage = false, std::ostream &out = std::cout){
 
         int index = hash(name);
         int pos = 0;
@@ -115,9 +114,9 @@ public:
                 else prev->setNext(curr->getNext());
 
                 delete curr;
-                if(printMessage)
+                if(printMessage){
                     out << "\t" << "Deleted '" << name <<"'" << " from ScopeTable# " << id << " at position "<< index+1 <<", "<< pos+1 <<std::endl;
-
+                }
                 return true;
             }
 
@@ -130,7 +129,7 @@ public:
     }
 
     //print
-    void print(){
+    void print(std::ostream &out = std::cout){
         out << "\tScopeTable# " << id << std::endl;
         for(int i = 0; i < bucketSize; i++){
             if(symbolTable[i] == nullptr) continue;
@@ -155,7 +154,6 @@ public:
             }
         }
         delete[] symbolTable;
-        // out << "\tScopeTable# " << id << " removed" << std::endl;
     }
 
 };

@@ -23,7 +23,8 @@ public:
 
     // create and enter a new scope
     void enterScope(){
-        current_scope = new ScopeTable(bucketSize, ++scope_id, out, current_scope);
+        current_scope = new ScopeTable(bucketSize, ++scope_id, current_scope);
+        // out<<"\tScopeTable# " << current_scope->getId() << " created"<<std::endl;
     }
 
     // delete the current scope
@@ -36,15 +37,17 @@ public:
 
         auto temp = current_scope;
         current_scope = current_scope->getParentScope();
+        int id = temp->getId();
         delete temp;
+        // out<<"\tScopeTable# " << id << " removed"<<std::endl;
     }
 
     // insert a symbol in the current scope
     bool insert(std::string name, std::string type){
         if(current_scope == nullptr) enterScope();
 
-        bool success = current_scope->insert(name, type);
-        if(!success) out<< "\t'"<<name<<"'"<<" already exists in the current ScopeTable"<<std::endl; 
+        bool success = current_scope->insert(name, type, out);
+        if(!success) out<< "\t"<<name<<" already exisits in the current ScopeTable"<<std::endl; 
         return success;
     }
 
@@ -56,7 +59,7 @@ public:
         SymbolInfo* symbol = nullptr;
 
         while(curr != nullptr){
-            symbol = curr->lookup(name, true);
+            symbol = curr->lookup(name, true, out);
             if(symbol != nullptr)
                 return symbol;
             curr = curr->getParentScope();
@@ -69,7 +72,7 @@ public:
     bool remove(std::string name){
         if(current_scope == nullptr) return false;
 
-        bool deleted = current_scope->deleteSymbol(name, true);
+        bool deleted = current_scope->deleteSymbol(name, true, out);
         if(!deleted) out<<"\tNot found in the current ScopeTable"<<std::endl;
         return deleted;
     }
@@ -77,14 +80,14 @@ public:
     // print the current scope
     void printCurrentScopeTable(){
         if(current_scope == nullptr) return;
-        current_scope->print();
+        current_scope->print(out);
     }
 
     // print all the scopes
     void printAllScopeTable(){
         ScopeTable* curr = current_scope;
         while(curr != nullptr){
-            curr->print();
+            curr->print(out);
             curr = curr->getParentScope();
         }
     }
@@ -95,7 +98,9 @@ public:
         while(curr != nullptr){
             auto temp = curr;
             curr = curr->getParentScope();
+            int id = temp->getId();
             delete temp;
+            // out << "\tScopeTable# " << id << " removed" << std::endl;
         }
     }
 

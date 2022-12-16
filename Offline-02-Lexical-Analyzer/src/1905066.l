@@ -24,7 +24,7 @@ std::string string_type;
 std::string string_token;
 std::string string_log;
 
-SymbolTable st(bucketSize, logout);
+SymbolTable symbolTable(bucketSize, logout);
 
 
 void printLog(std::string token, std::string lexeme){
@@ -55,6 +55,9 @@ DIGIT [0-9]
 ALPHANUMERIC [a-zA-Z0-9]
 NEWLINE (\r)?\n
 
+INTEGER {DIGIT}+
+FLOAT {DIGIT}*(\.{DIGIT}+)?(E[+-]?{DIGIT}+)?
+
 %%
 
 {WHITESPACE} { /* do nothing */ }
@@ -80,20 +83,35 @@ NEWLINE (\r)?\n
 "default"	{printFunc("DEFAULT",yytext);}
 "continue"	{printFunc("CONTINUE",yytext);}
 
- /* ===================== Numbers ===================== */
-
-{DIGIT}+	{printFunc("CONST_INT",yytext);}
-{DIGIT}*(\.{DIGIT}+)?([Ee][+-]?{DIGIT}+)?	{printFunc("CONST_FLOAT",yytext);}
-
 
  /* ===================== Identifiers ===================== */
 
 {LETTER}{ALPHANUMERIC}*		{
 								printFunc("ID",yytext);
-								//if(st.insert(yytext, "ID")) st.printAllScopeTable();
+								if(symbolTable.insert(yytext, "ID")) symbolTable.printAllScopeTable();
 							}
 
- 
+  /* ===================== Numbers ===================== */
+
+{INTEGER}	{printFunc("CONST_INT",yytext);}
+{FLOAT}		{printFunc("CONST_FLOAT",yytext);}
+
+
+
+{DIGIT}*\.[0-9E+-]*(\.[0-9E+-]*)+	{generateError("TOO_MANY_DECIMAL_POINTS",yytext);}
+
+ /* Jodi decimal point er por kono digit na thake OR
+	Jodi decimal point er por kono digit thake but E er por kono digit na thake OR
+	Jodi E er por abar E thake ba . thake taile error
+ */
+
+({DIGIT}+\.)|{DIGIT}*(\.{DIGIT}*)?E[+-]?[0-9]*[0-9\.Ee+-]* {generateError("ILLFORMED_NUMBER",yytext);}
+
+
+ /* Jodi identfier er samne number thake (PS. both identifier and number has matched above. so...)*/
+{DIGIT}*(\.{DIGIT}+)?(E[+-]?{DIGIT}+)?{LETTER}{ALPHANUMERIC}*	{generateError("INVALID_ID_SUFFIX_NUM_PREFIX",yytext);}
+
+
 
  /* ===================== operators ===================== */
 "+"|"-"						printFunc("ADDOP",yytext);
@@ -110,8 +128,8 @@ NEWLINE (\r)?\n
 
 "("		printFunc("LPAREN",yytext);
 ")"		printFunc("RPAREN",yytext);
-"{"		printFunc("LCURL",yytext); st.enterScope();
-"}"		printFunc("RCURL",yytext); st.exitScope();
+"{"		printFunc("LCURL",yytext); symbolTable.enterScope();
+"}"		printFunc("RCURL",yytext); symbolTable.exitScope();
 "["		printFunc("LSQUARE",yytext);
 "]"		printFunc("RSQUARE",yytext);
 ","		printFunc("COMMA",yytext);
@@ -120,24 +138,24 @@ NEWLINE (\r)?\n
 
 
  /* ===================== character literal ===================== */
- 
+
 "'"		{	
 			string_token = "";
 			string_log = "\'";
 			BEGIN CHARACTER_LITERAL;	
 		}
 
-<CHARACTER_LITERAL,STRING_LITERAL>\\\\		string_token += "\\"; string_log += "\\\\";
-<CHARACTER_LITERAL,STRING_LITERAL>\\\'		string_token += "\'"; string_log += "\\\'";
-<CHARACTER_LITERAL,STRING_LITERAL>\\\"		string_token += "\""; string_log += "\\\"";
-<CHARACTER_LITERAL,STRING_LITERAL>\\n		string_token += "\n"; string_log += "\\n";
-<CHARACTER_LITERAL,STRING_LITERAL>\\t      	string_token += "\t"; string_log += "\\t";
-<CHARACTER_LITERAL,STRING_LITERAL>\\a		string_token += "\a"; string_log += "\\a";
-<CHARACTER_LITERAL,STRING_LITERAL>\\b      	string_token += "\b"; string_log += "\\b";
-<CHARACTER_LITERAL,STRING_LITERAL>\\f      	string_token += "\f"; string_log += "\\f";
-<CHARACTER_LITERAL,STRING_LITERAL>\\r      	string_token += "\r"; string_log += "\\r";
-<CHARACTER_LITERAL,STRING_LITERAL>\\v      	string_token += "\v"; string_log += "\\v";
-<CHARACTER_LITERAL,STRING_LITERAL>\\0		string_token += "\0"; string_log += "\\0";
+<CHARACTER_LITERAL,STRING_LITERAL>\\\\		string_token += "\\"; string_log += yytext;
+<CHARACTER_LITERAL,STRING_LITERAL>\\\'		string_token += "\'"; string_log += yytext;
+<CHARACTER_LITERAL,STRING_LITERAL>\\\"		string_token += "\""; string_log += yytext;
+<CHARACTER_LITERAL,STRING_LITERAL>\\n		string_token += "\n"; string_log += yytext;
+<CHARACTER_LITERAL,STRING_LITERAL>\\t      	string_token += "\t"; string_log += yytext;
+<CHARACTER_LITERAL,STRING_LITERAL>\\a		string_token += "\a"; string_log += yytext;
+<CHARACTER_LITERAL,STRING_LITERAL>\\b      	string_token += "\b"; string_log += yytext;
+<CHARACTER_LITERAL,STRING_LITERAL>\\f      	string_token += "\f"; string_log += yytext;
+<CHARACTER_LITERAL,STRING_LITERAL>\\r      	string_token += "\r"; string_log += yytext;
+<CHARACTER_LITERAL,STRING_LITERAL>\\v      	string_token += "\v"; string_log += yytext;
+<CHARACTER_LITERAL,STRING_LITERAL>\\0		string_token += "\0"; string_log += yytext;
 
 
 <CHARACTER_LITERAL>{NEWLINE}	{
@@ -224,13 +242,13 @@ NEWLINE (\r)?\n
 									}
 
 <SINGLE_LINE_COMMENT>{NEWLINE}		{
-										printFunc("COMMENT",comment);
+										printLog("SINGLE LINE COMMENT",comment);
 										line_count += temp_line_count;
 										BEGIN INITIAL;
 									}
 
 <SINGLE_LINE_COMMENT><<EOF>>		{
-										printFunc("COMMENT",comment);
+										printLog("SINGLE LINE COMMENT",comment);
 										line_count += temp_line_count;
 										BEGIN INITIAL;
 									}
@@ -254,7 +272,7 @@ NEWLINE (\r)?\n
 
 <MULTI_LINE_COMMENT>"*/"		{
 									comment += "*/";
-									printFunc("COMMENT",comment);
+									printLog("MULTI LINE COMMENT",comment);
 									line_count += temp_line_count;
 									BEGIN INITIAL;
 								}
@@ -292,9 +310,14 @@ int main(int argc, char** argv) {
 	yyin= fin;
 	yylex();
 	fclose(yyin);
+
+	symbolTable.printAllScopeTable();
+	logout<<"Total lines: "<<line_count<<std::endl;
+	logout<<"Total errors: "<<error_count<<std::endl;
 	
     tokenout.close();
 	logout.close();
+
 	
     return 0;
 }
