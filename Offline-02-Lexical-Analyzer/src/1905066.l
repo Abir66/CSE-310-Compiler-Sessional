@@ -52,11 +52,11 @@ void generateError(std::string errorType, std::string errorLexem, int line_no = 
 WHITESPACE [ \t\f\r\v]+ 
 LETTER [a-zA-Z]
 DIGIT [0-9]
-ALPHANUMERIC [a-zA-Z0-9]
+ALPHANUMERIC [a-zA-Z0-9_]
 NEWLINE (\r)?\n
 
 INTEGER {DIGIT}+
-FLOAT {DIGIT}*(\.{DIGIT}+)?(E[+-]?{DIGIT}+)?
+FLOAT {DIGIT}*(\.{DIGIT}+)?([Ee][+-]?{DIGIT}+)?
 
 %%
 
@@ -98,18 +98,18 @@ FLOAT {DIGIT}*(\.{DIGIT}+)?(E[+-]?{DIGIT}+)?
 
 
 
-{DIGIT}*\.[0-9E+-]*(\.[0-9E+-]*)+	{generateError("TOO_MANY_DECIMAL_POINTS",yytext);}
+{DIGIT}*\.[0-9E+-]*(\.[0-9Ee+-]*)+	{generateError("TOO_MANY_DECIMAL_POINTS",yytext);}
 
  /* Jodi decimal point er por kono digit na thake OR
 	Jodi decimal point er por kono digit thake but E er por kono digit na thake OR
 	Jodi E er por abar E thake ba . thake taile error
  */
 
-({DIGIT}+\.)|{DIGIT}*(\.{DIGIT}*)?E[+-]?[0-9]*[0-9\.Ee+-]* {generateError("ILLFORMED_NUMBER",yytext);}
+({DIGIT}+\.)|{DIGIT}*(\.{DIGIT}*)?[Ee][+-]?[0-9]*[0-9\.Ee+-]* {generateError("ILLFORMED_NUMBER",yytext);}
 
 
  /* Jodi identfier er samne number thake (PS. both identifier and number has matched above. so...)*/
-{DIGIT}*(\.{DIGIT}+)?(E[+-]?{DIGIT}+)?{LETTER}{ALPHANUMERIC}*	{generateError("INVALID_ID_SUFFIX_NUM_PREFIX",yytext);}
+{DIGIT}*(\.{DIGIT}+)?([Ee][+-]?{DIGIT}+)?{LETTER}{ALPHANUMERIC}*	{generateError("INVALID_ID_SUFFIX_NUM_PREFIX",yytext);}
 
 
 

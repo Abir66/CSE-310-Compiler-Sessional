@@ -23,6 +23,7 @@ class ScopeTable
 	    for (i = 0; i < len; i++)
 	    {
 		    hash = (str[i]) + (hash << 6) + (hash << 16) - hash;
+            //hash = hash % bucketSize;
 	    }
 
 	    return hash;
