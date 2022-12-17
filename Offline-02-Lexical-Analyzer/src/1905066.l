@@ -54,9 +54,10 @@ LETTER [a-zA-Z]
 DIGIT [0-9]
 ALPHANUMERIC [a-zA-Z0-9_]
 NEWLINE (\r)?\n
-
+IDENTIFIER [a-zA-Z_]{ALPHANUMERIC}*
 INTEGER {DIGIT}+
-FLOAT {DIGIT}*(\.{DIGIT}+)?([Ee][+-]?{DIGIT}+)?
+FLOAT ({DIGIT}+(\.{DIGIT}+)?|(\.{DIGIT}+))([Ee][+-]?{DIGIT}+)?|{INTEGER}\.
+ /* cpp allows numbers like 123.  -.-*/
 
 %%
 
@@ -86,10 +87,10 @@ FLOAT {DIGIT}*(\.{DIGIT}+)?([Ee][+-]?{DIGIT}+)?
 
  /* ===================== Identifiers ===================== */
 
-{LETTER}{ALPHANUMERIC}*		{
-								printFunc("ID",yytext);
-								if(symbolTable.insert(yytext, "ID")) symbolTable.printAllScopeTable();
-							}
+{IDENTIFIER}	{
+					printFunc("ID",yytext);
+					if(symbolTable.insert(yytext, "ID")) symbolTable.printAllScopeTable();
+				}
 
   /* ===================== Numbers ===================== */
 
@@ -97,20 +98,25 @@ FLOAT {DIGIT}*(\.{DIGIT}+)?([Ee][+-]?{DIGIT}+)?
 {FLOAT}		{printFunc("CONST_FLOAT",yytext);}
 
 
+ /* Ambiguity. Specification and sample io was not clear enough. Did not cover all corner cases ¯\_(ツ)_/¯  */
+ /* 
+{DIGIT}+(\.{DIGIT}*([Ee][+-]?{DIGIT}+)?){2,} 					{generateError("TOO_MANY_DECIMAL_POINTS",yytext);}
+\.{DIGIT}+([Ee][+-]?{DIGIT}+)?(\.{DIGIT}*([Ee][+-]?{DIGIT}+)?)+	{generateError("TOO_MANY_DECIMAL_POINTS",yytext);}
 
-{DIGIT}*\.[0-9E+-]*(\.[0-9Ee+-]*)+	{generateError("TOO_MANY_DECIMAL_POINTS",yytext);}
+{DIGIT}*(\.{DIGIT}*)?[Ee][+-]?[0-9]*[0-9\.Ee+-]*{ALPHANUMERIC}* {generateError("ILLFORMED_NUMBER",yytext);}
 
- /* Jodi decimal point er por kono digit na thake OR
-	Jodi decimal point er por kono digit thake but E er por kono digit na thake OR
-	Jodi E er por abar E thake ba . thake taile error
+{DIGIT}*(\.{DIGIT}+)?([Ee][+-]?{DIGIT}+)?{IDENTIFIER}	{generateError("INVALID_ID_SUFFIX_NUM_PREFIX",yytext);}
  */
 
-({DIGIT}+\.)|{DIGIT}*(\.{DIGIT}*)?[Ee][+-]?[0-9]*[0-9\.Ee+-]* {generateError("ILLFORMED_NUMBER",yytext);}
 
+ /* ===================== TOO MANY DECIMAL POINTS ===================== */
+(({DIGIT}+\.{DIGIT}*)|(\.{DIGIT}+))+(\.{DIGIT}*)+((([Ee][+-]?)?[\.0-9]+)?{IDENTIFIER}?)*	{generateError("TOO_MANY_DECIMAL_POINTS",yytext);}
+ 
+ /* ===================== ILLFORMED_NUMBER ===================== */
+({INTEGER}|{FLOAT})[Ee][+-]?[0-9]*\.((([Ee][+-]?)?[\.0-9]+)?{IDENTIFIER}?)* {generateError("ILLFORMED_NUMBER",yytext);}
 
- /* Jodi identfier er samne number thake (PS. both identifier and number has matched above. so...)*/
-{DIGIT}*(\.{DIGIT}+)?([Ee][+-]?{DIGIT}+)?{LETTER}{ALPHANUMERIC}*	{generateError("INVALID_ID_SUFFIX_NUM_PREFIX",yytext);}
-
+ /* ===================== INVALID_ID_SUFFIX_NUM_PREFIX ===================== */
+{INTEGER}{IDENTIFIER}|{FLOAT}{IDENTIFIER}	{generateError("INVALID_ID_SUFFIX_NUM_PREFIX",yytext);}
 
 
  /* ===================== operators ===================== */
@@ -182,6 +188,24 @@ FLOAT {DIGIT}*(\.{DIGIT}+)?([Ee][+-]?{DIGIT}+)?
 	}
 
 	BEGIN INITIAL;
+}
+
+
+ /*	This is not standard c/c++ syntax
+	was not specified in the offline discription either
+	Having to add this for a io provided (input3) -.-*/
+
+<CHARACTER_LITERAL>;	{
+	if(string_token.length()==0){
+		string_token += yytext;
+		string_log += yytext;
+	}
+	
+	else {
+		generateError("UNFINISHED_CONST_CHAR", string_log);
+		printFunc("SEMICOLON",yytext);
+		BEGIN INITIAL;
+	}
 }
 
 <CHARACTER_LITERAL>.	string_token += yytext; string_log += yytext;
