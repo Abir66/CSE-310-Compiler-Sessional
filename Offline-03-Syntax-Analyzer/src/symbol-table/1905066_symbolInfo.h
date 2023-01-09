@@ -1,0 +1,54 @@
+#ifndef SYMBOLINFO_H
+#define SYMBOLINFO_H
+
+#include <iostream>
+#include <string>
+#include <vector>
+
+class SymbolInfo
+{
+    std::string name;
+    std::string type;
+    SymbolInfo *next;
+
+
+public:
+
+    // extra. will make these private and make methods later
+    bool isFunc = false;
+    int paramCount = 0;
+    std::vector<std::pair<std::string, std::string>> params;
+
+    bool isArr = false;
+
+
+
+    // Constructors
+    SymbolInfo() {}
+
+    SymbolInfo(std::string name, std::string type, SymbolInfo *next = nullptr)
+    {
+        this->name = name;
+        this->type = type;
+        this->next = next;
+    }
+
+    // setters
+    void setName(std::string name) { this->name = name; }
+    void setType(std::string type) { this->type = type; }
+    void setNext(SymbolInfo *next) { this->next = next; }
+
+    // getters
+    std::string getName() { return name; }
+    std::string getType() { return type; }
+    SymbolInfo *getNext() { return next; }
+
+    // print
+    friend std::ostream &operator<<(std::ostream &out, SymbolInfo &symbolInfo)
+    {
+        out << "<" << symbolInfo.name << "," << symbolInfo.type << ">";
+        return out;
+    }
+};
+
+#endif

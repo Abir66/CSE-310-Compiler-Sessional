@@ -8,43 +8,41 @@
 %{
 #include<bits/stdc++.h>
 #include "symbol-table/1905066_symbolTable.h"
+#include "y.tab.h"
 
+extern YYSTYPE yylval;
+extern SymbolTable *symbolTable;
 
+extern std::ofstream logout;
+extern std::ofstream errorout;
+extern int line_count=1;
+extern int error_count = 0;
 
-int line_count=1;
-int error_count = 0;
 int temp_line_count=0;
-int bucketSize=10;
 
-std::ofstream logout;
-std::ofstream tokenout;
 
 std::string comment;
 std::string string_type;
 std::string string_token;
 std::string string_log;
 
-SymbolTable symbolTable(bucketSize, logout);
 
 
-void printLog(std::string token, std::string lexeme){
-	logout<<"Line# "<<line_count<<": Token <"<<token<<"> Lexeme "<<lexeme<<" found"<<std::endl;
-}
-
-void printToken(std::string token, std::string lexeme){
-	tokenout<<"<"<<token<<", "<<lexeme<<">"<<std::endl;	
-}
+// void printLog(std::string token, std::string lexeme){
+// 	logout<<"Line# "<<line_count<<": Token <"<<token<<"> Lexeme "<<lexeme<<" found"<<std::endl;
+// }
 
 
-void printFunc(std::string token, std::string lexeme){
-	printLog(token,lexeme);
-	printToken(token,lexeme);
-}
+// void printFunc(std::string token, std::string lexeme){
+// 	printLog(token,lexeme);
+// 	//printToken(token,lexeme);
+// }
 
-void generateError(std::string errorType, std::string errorLexem, int line_no = line_count){
-	error_count++;
-	logout<<"Error at line# "<<line_no<<": "<<errorType<<" "<<errorLexem<<std::endl;
-}
+// void generateError(std::string errorType, std::string errorLexem, int line_no = line_count){
+// 	error_count++;
+// 	logout<<"Error at line# "<<line_no<<": "<<errorType<<" "<<errorLexem<<std::endl;
+// 	errorout<<"Error at line# "<<line_no<<": "<<errorType<<" "<<errorLexem<<std::endl;
+// }
 
 
 %}
@@ -57,7 +55,8 @@ NEWLINE (\r)?\n
 IDENTIFIER [a-zA-Z_]{ALPHANUMERIC}*
 INTEGER {DIGIT}+
 FLOAT ({DIGIT}+(\.{DIGIT}+)?|(\.{DIGIT}+))([Ee][+-]?{DIGIT}+)?|{INTEGER}\.
- /* cpp allows numbers like 123.  -.-*/
+
+/* cpp allows numbers like 123.  -.-*/
 
 %%
 
@@ -67,46 +66,34 @@ FLOAT ({DIGIT}+(\.{DIGIT}+)?|(\.{DIGIT}+))([Ee][+-]?{DIGIT}+)?|{INTEGER}\.
 
  /* ===================== Keywords ===================== */
 
-"if"		{printFunc("IF",yytext);}
-"else"		{printFunc("ELSE",yytext);}
-"for"		{printFunc("FOR",yytext);}
-"while"		{printFunc("WHILE",yytext);}
-"do"		{printFunc("DO",yytext);}
-"break"		{printFunc("BREAK",yytext);}
-"int"		{printFunc("INT",yytext);}
-"char"		{printFunc("CHAR",yytext);}
-"float"		{printFunc("FLOAT",yytext);}
-"double"	{printFunc("DOUBLE",yytext);}
-"void"		{printFunc("VOID",yytext);}
-"return"	{printFunc("RETURN",yytext);}
-"switch"	{printFunc("SWITCH",yytext);}
-"case"		{printFunc("CASE",yytext);}
-"default"	{printFunc("DEFAULT",yytext);}
-"continue"	{printFunc("CONTINUE",yytext);}
+"if"		{ return IF;}
+"else"		{ return ELSE;}
+"for"		{ return FOR;}
+"while"		{ return WHILE;}
+"do"		{ return DO;}
+"break"		{ return BREAK;}
+"int"		{ return INT;}
+"char"		{ return CHAR;}
+"float"		{ return FLOAT;}
+"double"	{ return DOUBLE;}
+"void"		{ return VOID;}
+"return"	{ return RETURN;}
+"switch"	{ return SWITCH;}
+"case"		{ return CASE;}
+"default"	{ return DEFAULT;}
+"continue"	{ return CONTINUE;}
+"printf"	{return PRINTLN;}
+
 
 
  /* ===================== Identifiers ===================== */
+{IDENTIFIER}	yylval.symbolInfo = new SymbolInfo(yytext, "ID"); return ID;
 
-{IDENTIFIER}	{
-					printFunc("ID",yytext);
-					if(symbolTable.insert(yytext, "ID")) symbolTable.printAllScopeTable();
-				}
-
-  /* ===================== Numbers ===================== */
-
-{INTEGER}	{printFunc("CONST_INT",yytext);}
-{FLOAT}		{printFunc("CONST_FLOAT",yytext);}
+ /* ===================== Numbers ===================== */
+{INTEGER}		yylval.symbolInfo = new SymbolInfo(yytext, "CONST_INT"); return CONST_INT;
+{FLOAT}			yylval.symbolInfo = new SymbolInfo(yytext, "CONST_FLOAT"); return CONST_FLOAT;
 
 
- /* Ambiguity. Specification and sample io was not clear enough. Did not cover all corner cases ¯\_(ツ)_/¯  */
- /* 
-{DIGIT}+(\.{DIGIT}*([Ee][+-]?{DIGIT}+)?){2,} 					{generateError("TOO_MANY_DECIMAL_POINTS",yytext);}
-\.{DIGIT}+([Ee][+-]?{DIGIT}+)?(\.{DIGIT}*([Ee][+-]?{DIGIT}+)?)+	{generateError("TOO_MANY_DECIMAL_POINTS",yytext);}
-
-{DIGIT}*(\.{DIGIT}*)?[Ee][+-]?[0-9]*[0-9\.Ee+-]*{ALPHANUMERIC}* {generateError("ILLFORMED_NUMBER",yytext);}
-
-{DIGIT}*(\.{DIGIT}+)?([Ee][+-]?{DIGIT}+)?{IDENTIFIER}	{generateError("INVALID_ID_SUFFIX_NUM_PREFIX",yytext);}
- */
 
 
  /* ===================== TOO MANY DECIMAL POINTS ===================== */
@@ -120,26 +107,27 @@ FLOAT ({DIGIT}+(\.{DIGIT}+)?|(\.{DIGIT}+))([Ee][+-]?{DIGIT}+)?|{INTEGER}\.
 
 
  /* ===================== operators ===================== */
-"+"|"-"						printFunc("ADDOP",yytext);
-"*"|"/"|"%"					printFunc("MULOP",yytext);
-"++"|"--"					printFunc("INCOP",yytext);
-"<"|"<="|">"|">="|"=="|"!="	printFunc("RELOP",yytext);
-"="							printFunc("ASSIGNOP",yytext);
-"&&"|"||"					printFunc("LOGICOP",yytext);
-"&"|"|"|"^"|"<<"|">>"		printFunc("BITOP",yytext);
-"!"							printFunc("NOT",yytext);
+"+"|"-"						yylval.symbolInfo = new SymbolInfo(yytext, "ADDOP"); return ADDOP;
+"*"|"/"|"%"					yylval.symbolInfo = new SymbolInfo(yytext, "MULOP"); return MULOP;
+"++"						return INCOP;
+"--"						return DECOP;
+"<"|"<="|">"|">="|"=="|"!="	yylval.symbolInfo = new SymbolInfo(yytext, "RELOP"); return RELOP;
+"="							return ASSIGNOP;
+"&&"|"||"					yylval.symbolInfo = new SymbolInfo(yytext, "LOGICOP"); return LOGICOP;
+"&"|"|"|"^"|"<<"|">>"		yylval.symbolInfo = new SymbolInfo(yytext, "BITOP"); return BITOP;
+"!"							return NOT;
 
 
  /*===================== punctuatuion ===================== */
 
-"("		printFunc("LPAREN",yytext);
-")"		printFunc("RPAREN",yytext);
-"{"		printFunc("LCURL",yytext); symbolTable.enterScope();
-"}"		printFunc("RCURL",yytext); symbolTable.exitScope();
-"["		printFunc("LSQUARE",yytext);
-"]"		printFunc("RSQUARE",yytext);
-","		printFunc("COMMA",yytext);
-";"		printFunc("SEMICOLON",yytext);
+"("		return LPAREN;
+")"		return RPAREN;
+"{"		return LCURL;
+"}"		return RCURL;
+"["		return LTHIRD;
+"]"		return RTHIRD;
+","		return COMMA;
+";"		return SEMICOLON;
 
 
 
@@ -165,26 +153,34 @@ FLOAT ({DIGIT}+(\.{DIGIT}+)?|(\.{DIGIT}+))([Ee][+-]?{DIGIT}+)?|{INTEGER}\.
 
 
 <CHARACTER_LITERAL>{NEWLINE}	{
-	generateError("UNFINISHED_CONST_CHAR", string_log);
+	//generateError("UNFINISHED_CONST_CHAR", string_log);
 	line_count++;
 	BEGIN INITIAL;
 }
 
 <CHARACTER_LITERAL><<EOF>>	{
-	generateError("UNFINISHED_CONST_CHAR", string_log);
+	//generateError("UNFINISHED_CONST_CHAR", string_log);
 	BEGIN INITIAL;
 }
 
 <CHARACTER_LITERAL>\'	{
 	string_log += "'";
 
-	if(string_token.length() == 1) printFunc("CONST_CHAR",string_token);
+	if(string_token.length() == 1) {
+		//printFunc("CONST_CHAR",string_token);
+	}
 	
-	else if(string_token.length()>1) generateError("MULTICHAR_CONST_CHAR", string_log);
+	else if(string_token.length()>1) {
+		//generateError("MULTICHAR_CONST_CHAR", string_log);
+	}
 	
 	else if(string_token.length() == 0){
-		if(string_log == "\\0") printFunc("CONST_CHAR",string_token);
-		else generateError("EMPTY_CONST_CHAR", string_log);
+		if(string_log == "\\0") {
+			//printFunc("CONST_CHAR",string_token);
+		}
+		else {
+			//generateError("EMPTY_CONST_CHAR", string_log);
+		}
 	}
 
 	BEGIN INITIAL;
@@ -202,8 +198,8 @@ FLOAT ({DIGIT}+(\.{DIGIT}+)?|(\.{DIGIT}+))([Ee][+-]?{DIGIT}+)?|{INTEGER}\.
 	}
 
 	else {
-		generateError("UNFINISHED_CONST_CHAR", string_log);
-		printFunc("SEMICOLON",yytext);
+		//generateError("UNFINISHED_CONST_CHAR", string_log);
+		//printFunc("SEMICOLON",yytext);
 		BEGIN INITIAL;
 	}
 }
@@ -230,13 +226,13 @@ FLOAT ({DIGIT}+(\.{DIGIT}+)?|(\.{DIGIT}+))([Ee][+-]?{DIGIT}+)?|{INTEGER}\.
 							}
 
 <STRING_LITERAL><<EOF>>		{
-								generateError("UNFINISHED_STRING", string_log);
+								//generateError("UNFINISHED_STRING", string_log);
 								line_count += temp_line_count;
 								BEGIN INITIAL;
 							}
 
 <STRING_LITERAL>{NEWLINE}	{
-								generateError("UNFINISHED_STRING", string_log, line_count+temp_line_count);
+								//generateError("UNFINISHED_STRING", string_log, line_count+temp_line_count);
 								temp_line_count++;
 								line_count += temp_line_count;
 								BEGIN INITIAL;
@@ -244,8 +240,8 @@ FLOAT ({DIGIT}+(\.{DIGIT}+)?|(\.{DIGIT}+))([Ee][+-]?{DIGIT}+)?|{INTEGER}\.
 
 <STRING_LITERAL>\"	{
 						string_log += "\"";
-						printLog(string_type, string_log);
-						printToken(string_type, string_token);
+						//printLog(string_type, string_log);
+						//printToken(string_type, string_token);
 						line_count += temp_line_count;
 						BEGIN INITIAL;
 					}
@@ -266,13 +262,13 @@ FLOAT ({DIGIT}+(\.{DIGIT}+)?|(\.{DIGIT}+))([Ee][+-]?{DIGIT}+)?|{INTEGER}\.
 									}
 
 <SINGLE_LINE_COMMENT>{NEWLINE}		{
-										printLog("SINGLE LINE COMMENT",comment);
+										//printLog("SINGLE LINE COMMENT",comment);
 										line_count += temp_line_count;
 										BEGIN INITIAL;
 									}
 
 <SINGLE_LINE_COMMENT><<EOF>>		{
-										printLog("SINGLE LINE COMMENT",comment);
+										//printLog("SINGLE LINE COMMENT",comment);
 										line_count += temp_line_count;
 										BEGIN INITIAL;
 									}
@@ -296,7 +292,7 @@ FLOAT ({DIGIT}+(\.{DIGIT}+)?|(\.{DIGIT}+))([Ee][+-]?{DIGIT}+)?|{INTEGER}\.
 
 <MULTI_LINE_COMMENT>"*/"		{
 									comment += "*/";
-									printLog("MULTI LINE COMMENT",comment);
+									//printLog("MULTI LINE COMMENT",comment);
 									line_count += temp_line_count;
 									BEGIN INITIAL;
 								}
@@ -305,43 +301,16 @@ FLOAT ({DIGIT}+(\.{DIGIT}+)?|(\.{DIGIT}+))([Ee][+-]?{DIGIT}+)?|{INTEGER}\.
 
 <MULTI_LINE_COMMENT><<EOF>>		{	
 									line_count += temp_line_count;
-									generateError("UNFINISHED_COMMENT", comment);
+									//generateError("UNFINISHED_COMMENT", comment);
 									BEGIN INITIAL;
 								}
 
 <MULTI_LINE_COMMENT>.	{ comment += yytext; }
 
+<<EOF>>	return 0;
+
+
 .	{ generateError("UNRECOGNIZED_CHAR",yytext); }
 
 %%
 
-int main(int argc, char** argv) {
-	if(argc!=2){
-		printf("Please provide input file name and try again\n");
-		return 0;
-	}
-	
-	FILE *fin=fopen(argv[1],"r");
-	if(fin==NULL){
-		printf("Cannot open specified file\n");
-		return 0;
-	}
-	
-	tokenout.open("../io/1905066_token.txt");
-	logout.open("../io/1905066_log.txt");
-
-	
-	yyin= fin;
-	yylex();
-	fclose(yyin);
-
-	symbolTable.printAllScopeTable();
-	logout<<"Total lines: "<<line_count<<std::endl;
-	logout<<"Total errors: "<<error_count<<std::endl;
-	
-    tokenout.close();
-	logout.close();
-
-	
-    return 0;
-}
