@@ -14,6 +14,7 @@
 extern SymbolTable *symbolTable;
 
 extern std::ofstream logout;
+extern std::ofstream tokenout;
 extern std::ofstream errorout;
 extern int line_count=1;
 extern int error_count = 0;
@@ -28,20 +29,23 @@ std::string string_log;
 
 
 
-// void printLog(std::string token, std::string lexeme){
-// 	logout<<"Line# "<<line_count<<": Token <"<<token<<"> Lexeme "<<lexeme<<" found"<<std::endl;
-// }
+void printLog(std::string token, std::string lexeme){
+	logout<<"Line# "<<line_count<<": Token <"<<token<<"> Lexeme "<<lexeme<<" found"<<std::endl;
+}
+
+void printToken(std::string token, std::string lexeme){
+	//tokenout<<"<"<<token<<", "<<lexeme<<">"<<std::endl;	
+}
 
 
-// void printFunc(std::string token, std::string lexeme){
-// 	printLog(token,lexeme);
-// 	//printToken(token,lexeme);
-// }
+void printFunc(std::string token, std::string lexeme){
+	printLog(token,lexeme);
+	//printToken(token,lexeme);
+}
 
 void generateError(std::string errorType, std::string errorLexem, int line_no = line_count){
 	error_count++;
-	// logout<<"Error at line# "<<line_no<<": "<<errorType<<" "<<errorLexem<<std::endl;
-	// errorout<<"Error at line# "<<line_no<<": "<<errorType<<" "<<errorLexem<<std::endl;
+	logout<<"Error at line# "<<line_no<<": "<<errorType<<" "<<errorLexem<<std::endl;
 }
 
 
@@ -66,32 +70,32 @@ FLOAT ({DIGIT}+(\.{DIGIT}+)?|(\.{DIGIT}+))([Ee][+-]?{DIGIT}+)?|{INTEGER}\.
 
  /* ===================== Keywords ===================== */
 
-"if"		{ return IF;}
-"else"		{ return ELSE;}
-"for"		{ return FOR;}
-"while"		{ return WHILE;}
-"do"		{ return DO;}
-"break"		{ return BREAK;}
-"int"		{ return INT;}
-"char"		{ return CHAR;}
-"float"		{ return FLOAT;}
-"double"	{ return DOUBLE;}
-"void"		{ return VOID;}
-"return"	{ return RETURN;}
-"switch"	{ return SWITCH;}
-"case"		{ return CASE;}
-"default"	{ return DEFAULT;}
-"continue"	{ return CONTINUE;}
-"printf"	{return PRINTLN;}
+"if"		{ yylval.symbolInfo = new SymbolInfo(yytext, "IF", line_count, line_count); printFunc("IF",yytext);  return IF;}
+"else"		{ yylval.symbolInfo = new SymbolInfo(yytext, "ELSE", line_count, line_count); printFunc("ELSE",yytext);  return ELSE;}
+"for"		{ yylval.symbolInfo = new SymbolInfo(yytext, "FOR", line_count, line_count); printFunc("FOR",yytext);  return FOR;}
+"while"		{ yylval.symbolInfo = new SymbolInfo(yytext, "WHILE", line_count, line_count); printFunc("WHILE",yytext);  return WHILE;}
+"do"		{ yylval.symbolInfo = new SymbolInfo(yytext, "DO", line_count, line_count); printFunc("DO",yytext);  return DO;}
+"break"		{ yylval.symbolInfo = new SymbolInfo(yytext, "BREAK", line_count, line_count); printFunc("BREAK",yytext);  return BREAK;}
+"int"		{ yylval.symbolInfo = new SymbolInfo(yytext, "INT", line_count, line_count); printFunc("INT",yytext);  return INT;}
+"char"		{ yylval.symbolInfo = new SymbolInfo(yytext, "CHAR", line_count, line_count); printFunc("CHAR",yytext);  return CHAR;}
+"float"		{ yylval.symbolInfo = new SymbolInfo(yytext, "FLOAT", line_count, line_count); printFunc("FLOAT",yytext);  return FLOAT;}
+"double"	{ yylval.symbolInfo = new SymbolInfo(yytext, "DOUBLE", line_count, line_count); printFunc("DOUBLE",yytext);  return DOUBLE;}
+"void"		{ yylval.symbolInfo = new SymbolInfo(yytext, "VOID", line_count, line_count); printFunc("VOID",yytext);  return VOID;}
+"return"	{ yylval.symbolInfo = new SymbolInfo(yytext, "RETURN", line_count, line_count); printFunc("RETURN",yytext);  return RETURN;}
+"switch"	{ yylval.symbolInfo = new SymbolInfo(yytext, "SWITCH", line_count, line_count); printFunc("SWITCH",yytext);  return SWITCH;}
+"case"		{ yylval.symbolInfo = new SymbolInfo(yytext, "CASE", line_count, line_count); printFunc("CASE",yytext);  return CASE;}
+"default"	{ yylval.symbolInfo = new SymbolInfo(yytext, "DEFAULT", line_count, line_count); printFunc("DEFAULT",yytext);  return DEFAULT;}
+"continue"	{ yylval.symbolInfo = new SymbolInfo(yytext, "CONTINUE", line_count, line_count); printFunc("CONTINUE",yytext);  return CONTINUE;}
+"printf"	{ yylval.symbolInfo = new SymbolInfo(yytext, "PRINTLN", line_count, line_count); printFunc("PRINTLN",yytext); return PRINTLN;}
 
 
 
  /* ===================== Identifiers ===================== */
-{IDENTIFIER}	yylval.symbolInfo = new SymbolInfo(yytext, "ID"); return ID;
+{IDENTIFIER}	{printFunc("ID",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "ID", line_count, line_count); return ID;}
 
  /* ===================== Numbers ===================== */
-{INTEGER}		yylval.symbolInfo = new SymbolInfo(yytext, "CONST_INT"); return CONST_INT;
-{FLOAT}			yylval.symbolInfo = new SymbolInfo(yytext, "CONST_FLOAT"); return CONST_FLOAT;
+{INTEGER}		{printFunc("CONST_INT",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "CONST_INT", line_count, line_count); return CONST_INT;}
+{FLOAT}			{printFunc("CONST_FLOAT",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "CONST_FLOAT", line_count, line_count); return CONST_FLOAT;}
 
 
 
@@ -107,27 +111,27 @@ FLOAT ({DIGIT}+(\.{DIGIT}+)?|(\.{DIGIT}+))([Ee][+-]?{DIGIT}+)?|{INTEGER}\.
 
 
  /* ===================== operators ===================== */
-"+"|"-"						yylval.symbolInfo = new SymbolInfo(yytext, "ADDOP"); return ADDOP;
-"*"|"/"|"%"					yylval.symbolInfo = new SymbolInfo(yytext, "MULOP"); return MULOP;
-"++"						return INCOP;
-"--"						return DECOP;
-"<"|"<="|">"|">="|"=="|"!="	yylval.symbolInfo = new SymbolInfo(yytext, "RELOP"); return RELOP;
-"="							return ASSIGNOP;
-"&&"|"||"					yylval.symbolInfo = new SymbolInfo(yytext, "LOGICOP"); return LOGICOP;
-"&"|"|"|"^"|"<<"|">>"		yylval.symbolInfo = new SymbolInfo(yytext, "BITOP"); return BITOP;
-"!"							return NOT;
+"+"|"-"						printFunc("ADDOP",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "ADDOP", line_count, line_count); return ADDOP;
+"*"|"/"|"%"					printFunc("MULOP",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "MULOP", line_count, line_count); return MULOP;
+"++"						printFunc("INCOP",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "INCOP", line_count, line_count); return INCOP;
+"--"						printFunc("DECOP",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "DECOP", line_count, line_count); return DECOP;
+"<"|"<="|">"|">="|"=="|"!="	printFunc("RELOP",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "RELOP", line_count, line_count); return RELOP;
+"="							printFunc("ASSIGNOP",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "ASSIGNOP", line_count, line_count); return ASSIGNOP;
+"&&"|"||"					printFunc("LOGICOP",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "LOGICOP", line_count, line_count); return LOGICOP;
+"&"|"|"|"^"|"<<"|">>"		printFunc("BITOP",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "BITOP", line_count, line_count); return BITOP;
+"!"							printFunc("NOT",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "NOT", line_count, line_count); return NOT;
 
 
  /*===================== punctuatuion ===================== */
 
-"("		return LPAREN;
-")"		return RPAREN;
-"{"		return LCURL;
-"}"		return RCURL;
-"["		return LTHIRD;
-"]"		return RTHIRD;
-","		return COMMA;
-";"		return SEMICOLON;
+"("		printFunc("LPREN",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "LPAREN", line_count, line_count); return LPAREN;
+")"		printFunc("RPREN",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "RPAREN", line_count, line_count); return RPAREN;
+"{"		printFunc("LCURL",yytext);  yylval.symbolInfo = new SymbolInfo(yytext, "LCURL", line_count, line_count); return LCURL;
+"}"		printFunc("RCURL",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "RCURL", line_count, line_count); return RCURL;
+"["		printFunc("LSQUARE",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "LSQUARE", line_count, line_count); return LTHIRD;
+"]"		printFunc("RSQUARE",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "RSQUARE", line_count, line_count); return RTHIRD;
+","		printFunc("COMMA",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "COMMA", line_count, line_count); return COMMA;
+";"		printFunc("SEMICOLON",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "SEMICOLON", line_count, line_count); return SEMICOLON;
 
 
 
