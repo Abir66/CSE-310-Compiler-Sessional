@@ -11,26 +11,27 @@ class SymbolInfo
 {
     std::string name;
     std::string type;
+    std::string dataType;
     SymbolInfo *next;
 
     // for parse tree
     bool isTerminal = true;
-    int startLine = 0, endLine = 0;
+    int startLine = 0;
+    int endLine = 0;
     std::vector<SymbolInfo *> children;
 
     // array
     bool isSymbolArray = false;
     int arraySize = 0;
 
+    // for function
+    bool funcDeclared = false;
+    bool funcDefined = false;
+    std::vector<SymbolInfo *> params;
+
 public:
-    // extra. will make these private and make methods later
-    bool isFunc = false;
-    int paramCount = 0;
-    std::vector<std::pair<std::string, std::string>> params;
 
-    bool isArr = false;
-
-    // Constructors
+    // ====================== Constructors ======================
     SymbolInfo() {}
 
     SymbolInfo(std::string name, std::string type, int startLine = 0, int endLine = 0, SymbolInfo *next = nullptr)
@@ -42,29 +43,84 @@ public:
         this->next = next;
     }
 
-    // setters
+    SymbolInfo(std::string name, std::string type, std::string dataType, int startLine = 0, int endLine = 0, SymbolInfo *next = nullptr)
+    {
+        this->name = name;
+        this->type = type;
+        this->startLine = startLine;
+        this->endLine = endLine;
+        this->next = next;
+        this->dataType = dataType;
+    }
+
+    SymbolInfo(SymbolInfo *symbolInfo){
+        this->name = symbolInfo->name;
+        this->type = symbolInfo->type;
+        this->next = symbolInfo->next;
+        this->dataType = symbolInfo->dataType;
+
+        this->startLine = symbolInfo->startLine;
+        this->endLine = symbolInfo->endLine;
+        this->isTerminal = symbolInfo->isTerminal;
+        this->children = symbolInfo->children;
+
+        this->funcDeclared = symbolInfo->funcDeclared;
+        this->funcDefined = symbolInfo->funcDefined;
+        this->params = symbolInfo->params;
+
+        this->isSymbolArray = symbolInfo->isSymbolArray;
+        this->arraySize = symbolInfo->arraySize;
+        
+    }
+
+    // ====================== Setters and Getters ======================
     void setName(std::string name) { this->name = name; }
     void setType(std::string type) { this->type = type; }
     void setNext(SymbolInfo *next) { this->next = next; }
-    void setArray(bool isArray = true, int arraySize = 0)
+    void setStartLine(int startLine) { this->startLine = startLine; }
+    void setEndLine(int endLine) { this->endLine = endLine; }
+    void setDataType(std::string dataType) { this->dataType = dataType; }
+    
+    std::string getName() { return name; }
+    std::string getType() { return type; }
+    SymbolInfo *getNext() { return next; }
+    int getStartLine() { return startLine; }
+    int getEndLine() { return endLine; }
+    std::string getDataType() { return dataType; }
+    
+    
+
+    // ====================== For Array ======================
+    void setArray(bool isSymbolArray = true, int arraySize = 0)
     {
         this->isSymbolArray = isSymbolArray;
         this->arraySize = arraySize;
     }
     void setArraySize(int arraySize) { this->arraySize = arraySize; }
-
-    // getters
-    std::string getName() { return name; }
-    std::string getType() { return type; }
-    SymbolInfo *getNext() { return next; }
     bool isArray() { return isSymbolArray; }
     int getArraySize() { return arraySize; }
-    int getStartLine() { return startLine; }
-    int getEndLine() { return endLine; }
+    
+
+
+    // ====================== For Function ======================
+    void setFuncDeclared() { this->funcDeclared = true; }
+    void setFuncDefined() { this->funcDefined = true; this->funcDeclared = true; }
+    bool isFunction() { return funcDeclared; }
+    bool isFuncDeclared() { return funcDeclared; }
+    bool isFuncDefined() { return funcDefined; }
+    void addParam(SymbolInfo *param) { params.push_back(param); }
+    void addParams(const std::vector<SymbolInfo *> &params) { this->params.insert(this->params.end(), params.begin(), params.end()); }
+    void setParams(const std::vector<SymbolInfo *> &params) { this->params = params; }
+    std::vector<SymbolInfo *> getParams() { return params; }
+    int getParamCount() { return params.size(); }
+
+
+
+    // ====================== For Parse Tree ======================
+    std::vector<SymbolInfo *> getChildren() { return children; }
+
     int getChildrenSize() { return children.size(); }
 
-
-    // parse tree
     void addChildren(SymbolInfo *child) { 
         children.push_back(child); 
         startLine = child->startLine;
@@ -94,12 +150,22 @@ public:
         out<<"\t"<<"<Line: "<<startLine<<"-"<<endLine<<">"<<std::endl;
     }
 
-    std::vector<SymbolInfo *> getChildren() { return children; }
 
-    // print
+
+    // ====================== Overloaded Operators ======================
     friend std::ostream &operator<<(std::ostream &out, SymbolInfo &symbolInfo)
     {
-        out << "<" << symbolInfo.name << "," << symbolInfo.type << ">";
+        if (symbolInfo.isArray()) out << "<" << symbolInfo.name << ", ARRAY, " << symbolInfo.dataType << ">";
+        else if(symbolInfo.isFunction()) {
+            out << "<" << symbolInfo.name << ", FUNCTION, " << symbolInfo.dataType << ">";
+            // print params
+            out << " (";
+            for (auto param : symbolInfo.params) {
+                out << param->name << " ";
+            }
+            out << ")";
+        }
+        else out << "<" << symbolInfo.name << ", " << symbolInfo.dataType << ">";
         return out;
     }
 };

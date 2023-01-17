@@ -29,36 +29,12 @@ class ScopeTable
 	    return hash;
     }
 
-    inline int hash(std::string &str){
+    inline int hash(std::string str){
         return SDBMHash(str) % bucketSize;
     }
 
-public:
-
-    // Constructors
-    ScopeTable(){}
-    ScopeTable(int bucketSize, int id, ScopeTable *parentScope = nullptr){
-        this->bucketSize = bucketSize;
-        this->id = id;
-        this->parentScope = parentScope;
-        symbolTable = new SymbolInfo*[bucketSize];
-        for(int i = 0; i < bucketSize; i++) symbolTable[i] = nullptr;
-    }
-
-    // getters
-    int getBucketSize(){ return bucketSize; }
-    int getId(){ return id; }
-    ScopeTable* getParentScope(){ return parentScope; }
-
-    // insert
-    bool insert(std::string &name, std::string &type, std::ostream &out = std::cout){
-
-        if(lookup(name)!=nullptr){
-            return false;
-        }
-
-        SymbolInfo* symbol = new SymbolInfo(name, type);
-        int index = hash(name);
+    void insertIntoTable(SymbolInfo *symbol, std::ostream &out = std::cout){
+        int index = hash(symbol->getName());
         int pos = 0;
         SymbolInfo *curr = symbolTable[index];
 
@@ -75,10 +51,50 @@ public:
             curr->setNext(symbol);
         }
         // out << "\tInserted in ScopeTable# " << id << " at position "<< index+1 <<", "<< pos+1 <<std::endl;
+    }
+
+public:
+
+    // Constructors
+    ScopeTable(){}
+    ScopeTable(int bucketSize, int id, ScopeTable *parentScope = nullptr){
+        this->bucketSize = bucketSize;
+        this->id = id;
+        this->parentScope = parentScope;
+        symbolTable = new SymbolInfo*[bucketSize];
+        for(int i = 0; i < bucketSize; i++) symbolTable[i] = nullptr;
+    }
+
+
+    // ----------------------getters----------------------
+    int getBucketSize(){ return bucketSize; }
+    int getId(){ return id; }
+    ScopeTable* getParentScope(){ return parentScope; }
+
+
+    // ----------------------insert----------------------
+    bool insert(std::string &name, std::string &type, std::ostream &out = std::cout){
+        if(lookup(name)!=nullptr) return false;
+        SymbolInfo* symbol = new SymbolInfo(name, type);
+        insertIntoTable(symbol, out);
         return true;
     }
 
-    // lookup
+
+    // ----------------------insert overloaded----------------------
+    bool insert(SymbolInfo* symbol, std::ostream &out = std::cout){
+        std::string name = symbol->getName();
+        if(lookup(name)!=nullptr) return false;
+
+        // make a copy of symbol so that we can destructor does not delete the original symbol
+        symbol = new SymbolInfo(symbol);
+
+        insertIntoTable(symbol, out);
+        return true;
+    }
+
+
+    // ----------------------lookup----------------------
     SymbolInfo* lookup(std::string &name, bool printMessage = false, std::ostream &out = std::cout){
         int index = hash(name);
         int pos = 0;
@@ -99,7 +115,8 @@ public:
         return nullptr;
     }
 
-    // delete symbol
+
+    // ----------------------delete symbol----------------------
     bool deleteSymbol(std::string &name, bool printMessage = false, std::ostream &out = std::cout){
 
         int index = hash(name);
@@ -129,7 +146,8 @@ public:
         return false;
     }
 
-    //print
+
+    // ----------------------print----------------------
     void print(std::ostream &out = std::cout){
         out << "\tScopeTable# " << id << std::endl;
         for(int i = 0; i < bucketSize; i++){
@@ -144,7 +162,8 @@ public:
         }
     }
 
-    // destructor
+
+    // ----------------------destructor----------------------
     ~ScopeTable(){
         for(int i = 0; i < bucketSize; i++){
             SymbolInfo* curr = symbolTable[i];

@@ -23,9 +23,9 @@ std::ofstream errorOut;
 std::ofstream parseTreeOut;
 
 
-SymbolTable *symbolTable = new SymbolTable(10, logout);
+SymbolTable *symbolTable = new SymbolTable(11, logout);
 
-std::vector<SymbolInfo*> vars;
+std::vector<SymbolInfo*> vars, params;
 
 
 void yyerror(char *s)
@@ -40,11 +40,11 @@ void printLog(std::string str){
 
 
 inline void safeDelete(SymbolInfo* pointer){
-	//if (pointer != NULL) delete pointer;
+	if (pointer != NULL) delete pointer;
 }
 
 inline void safeDelete(std::vector<SymbolInfo*> pointers){
-	//for(auto pointer : pointers) if (pointer != NULL) delete pointer;
+	for(auto pointer : pointers) if (pointer != NULL) delete pointer;
 }
 
 void generateError(std::string logoutError, std::string erroroutError){
@@ -63,6 +63,67 @@ void printParseTree(SymbolInfo* symbol, int indent){
 
 	// delete the symbol
 	safeDelete(symbol);
+}
+
+void setVarsDataType(std::string dataType){
+	for(auto var : vars)
+		var->setDataType(dataType);
+}
+
+
+void addFunction(SymbolInfo* function, std::string returnType, bool define = false){
+	
+	function->setDataType(returnType);
+	function->addParams(params);
+	function->setFuncDeclared();
+	if(define) function->setFuncDefined();
+	
+	params.clear();
+	
+	bool success = symbolTable->insert(function);
+	if(success) return;
+
+	SymbolInfo* existingFunction = symbolTable->lookup(function->getName());
+
+	if(!existingFunction->isFunction()){
+		// error
+		return;
+	}
+
+	else if(existingFunction->isFuncDefined()){
+		// function already defined error
+	}
+
+	else if(existingFunction->isFuncDeclared() && !define) {
+		// multiple declaration error
+	}
+
+	else if(existingFunction->isFuncDeclared() && define){
+		
+
+		if(existingFunction->getDataType() != returnType){
+			// return type mismatch error
+		}
+
+		else if(existingFunction->getParamCount() != function->getParamCount()){
+			// parameter mismatch error
+		}
+
+		else {
+
+			auto existingParams = existingFunction->getParams();
+			auto newParams = function->getParams();
+
+			for(int i = 0; i < existingParams.size(); i++){
+				if(existingParams[i]->getDataType() != newParams[i]->getDataType()){
+					// parameter type mismatch error
+				}
+			}
+
+			//existingFunction->setDefined();
+			existingFunction->setParams(newParams);
+		}
+	}
 }
 
 
@@ -135,47 +196,71 @@ unit : var_declaration {
 
 func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON {
 		printLog("func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON");
-		$$ = new SymbolInfo("func_declaration", $1->getType());
+		$$ = new SymbolInfo("func_declaration", "non-terminal");
+		$$->setDataType($1->getDataType());
+
+		addFunction($2, $1->getDataType());
+
 		$$->addChildren({$1, $2, $3, $4, $5, $6});
 	}
 	| type_specifier ID LPAREN RPAREN SEMICOLON {
 		printLog("func_declaration : type_specifier");
 		$$ = new SymbolInfo("func_declaration", $1->getType());
+		$$->setDataType($1->getDataType());
+
+		addFunction($2, $1->getDataType());
 		$$->addChildren({$1, $2, $3, $4, $5});
 	}
 	;
 
-func_definition : type_specifier ID LPAREN parameter_list RPAREN compound_statement {
+func_definition : type_specifier ID LPAREN parameter_list RPAREN { addFunction($2, $1->getDataType(), true); } compound_statement {
 		printLog("func_definition : type_specifier ID LPAREN parameter_list RPAREN compound_statement");
-		$$ = new SymbolInfo("func_definition", $1->getType());
-		$$->addChildren({$1, $2, $3, $4, $5, $6});
+		$$ = new SymbolInfo("func_definition", "non-terminal");
+
+		$$->addChildren({$1, $2, $3, $4, $5, $7});
 	}
-	| type_specifier ID LPAREN RPAREN compound_statement {
+	| type_specifier ID LPAREN RPAREN { addFunction($2, $1->getDataType(), true); } compound_statement {
 		printLog("func_definition : type_specifier ID LPAREN RPAREN compound_statement");
-		$$ = new SymbolInfo("func_definition", $1->getType());
-		$$->addChildren({$1, $2, $3, $4, $5});
+		$$ = new SymbolInfo("func_definition", "non-terminal");
+		$$->addChildren({$1, $2, $3, $4, $6});
 	}
 	;
 
 parameter_list : parameter_list COMMA type_specifier ID {
 		printLog("parameter_list : parameter_list COMMA type_specifier ID");
 		$$ = new SymbolInfo("parameter_list", $1->getType());
+
+		$4->setDataType($3->getDataType());
+		params.push_back($4);
+
 		$$->addChildren({$1, $2, $3, $4});
 
 	}
 	| parameter_list COMMA type_specifier {
 		printLog("parameter_list : parameter_list COMMA type_specifier");
 		$$ = new SymbolInfo("parameter_list", $1->getType());
+
+		SymbolInfo* id = new SymbolInfo("", "ID", $3->getDataType());
+		params.push_back(id);
+
 		$$->addChildren({$1, $2, $3});
 	}
 	| type_specifier ID {
 		printLog("parameter_list : type_specifier ID");
-		$$ = new SymbolInfo("parameter_list", $1->getType());
+		$$ = new SymbolInfo("parameter_list", "non-terminal");
+
+		$2->setDataType($1->getDataType());
+		params.push_back($2);
+
 		$$->addChildren({$1, $2});
 	}
 	| type_specifier {
 		printLog("parameter_list : type_specifier");
-		$$ = new SymbolInfo("parameter_list", $1->getType());
+		$$ = new SymbolInfo("parameter_list", "non-terminal");
+
+		SymbolInfo* id = new SymbolInfo("", "ID", $1->getDataType());
+		params.push_back(id);
+
 		$$->addChildren($1);
 	}
 	;
@@ -197,41 +282,51 @@ compound_statement : LCURL statements RCURL {
 
 var_declaration : type_specifier declaration_list SEMICOLON {
 		printLog("var_declaration : type_specifier declaration_list SEMICOLON");
-		$$ = new SymbolInfo("var_declaration", $1->getType());
+		$$ = new SymbolInfo("var_declaration", "non-terminal");
+		setVarsDataType($1->getDataType());
 		$$->addChildren({$1, $2, $3});
+
+		// insert in symbol table
+		for(auto var : vars){
+			bool success = symbolTable->insert(var);
+			if(!success){
+				// error_count++;
+				// logout<<"Error at line "<<line_count<<": Redeclaration of variable "<<var->getName()<<std::endl;
+			}
+		}
 	}
 	;
 
 type_specifier : INT {
 		printLog("type_specifier : INT");
-		$$ = new SymbolInfo("type_specifier", "INT");
+		$$ = new SymbolInfo("type_specifier", "INT", $1->getDataType());
 		$$->addChildren($1);
 		
 	}
 	| FLOAT {
 		printLog("type_specifier : FLOAT");
-		$$ = new SymbolInfo("type_specifier", "FLOAT");
+		$$ = new SymbolInfo("type_specifier", "FLOAT", $1->getDataType());
 		$$->addChildren($1);
 		
 	}
 	| VOID {
 		printLog("type_specifier : VOID");
-		$$ = new SymbolInfo("type_specifier", "VOID");
+		$$ = new SymbolInfo("type_specifier", "VOID", $1->getDataType());
 		$$->addChildren($1);
 		
 	}
 	;
 
 declaration_list : declaration_list COMMA ID {
-		printLog("declaration_list : declaration_list");
-		$$ = new SymbolInfo("declaration_list", $1->getType());
+		printLog("declaration_list : declaration_list COMMA ID");
+		$$ = new SymbolInfo("declaration_list", "non-terminal");
 		vars.push_back($3);
 
 		$$->addChildren({$1,$2,$3});
 	}
 	| declaration_list COMMA ID LTHIRD CONST_INT RTHIRD {
 		printLog("declaration_list : declaration_list COMMA ID LTHIRD CONST_INT RTHIRD");
-		$$ = new SymbolInfo("declaration_list", $1->getType());
+		$$ = new SymbolInfo("declaration_list", "non-terminal");
 		$3->setArray(true, std::stoi($5->getName()));
 		vars.push_back($3);
 
@@ -240,7 +335,7 @@ declaration_list : declaration_list COMMA ID {
 	| ID {
 		printLog("declaration_list : ID");
 		vars.clear();
-		$$ = new SymbolInfo("declaration_list", $1->getType());
+		$$ = new SymbolInfo("declaration_list", "non-terminal");
 		vars.push_back($1);
 		$$->addChildren($1);
 		
@@ -248,7 +343,7 @@ declaration_list : declaration_list COMMA ID {
 	| ID LTHIRD CONST_INT RTHIRD {
 		printLog("declaration_list : ID LTHIRD CONST_INT RTHIRD");
 		vars.clear();
-		$$ = new SymbolInfo("declaration_list", $1->getType());
+		$$ = new SymbolInfo("declaration_list", "non-terminal");
 		$1->setArray(true, std::stoi($3->getName()));
 		vars.push_back($1);
 

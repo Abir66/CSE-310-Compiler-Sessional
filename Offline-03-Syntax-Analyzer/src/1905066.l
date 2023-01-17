@@ -27,7 +27,6 @@ std::string string_token;
 std::string string_log;
 
 
-
 // void printLog(std::string token, std::string lexeme){
 // 	logout<<"Line# "<<line_count<<": Token <"<<token<<"> Lexeme "<<lexeme<<" found"<<std::endl;
 // }

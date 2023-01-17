@@ -70,32 +70,44 @@ FLOAT ({DIGIT}+(\.{DIGIT}+)?|(\.{DIGIT}+))([Ee][+-]?{DIGIT}+)?|{INTEGER}\.
 
  /* ===================== Keywords ===================== */
 
-"if"		{ yylval.symbolInfo = new SymbolInfo(yytext, "IF", line_count, line_count); printFunc("IF",yytext);  return IF;}
-"else"		{ yylval.symbolInfo = new SymbolInfo(yytext, "ELSE", line_count, line_count); printFunc("ELSE",yytext);  return ELSE;}
-"for"		{ yylval.symbolInfo = new SymbolInfo(yytext, "FOR", line_count, line_count); printFunc("FOR",yytext);  return FOR;}
-"while"		{ yylval.symbolInfo = new SymbolInfo(yytext, "WHILE", line_count, line_count); printFunc("WHILE",yytext);  return WHILE;}
-"do"		{ yylval.symbolInfo = new SymbolInfo(yytext, "DO", line_count, line_count); printFunc("DO",yytext);  return DO;}
-"break"		{ yylval.symbolInfo = new SymbolInfo(yytext, "BREAK", line_count, line_count); printFunc("BREAK",yytext);  return BREAK;}
-"int"		{ yylval.symbolInfo = new SymbolInfo(yytext, "INT", line_count, line_count); printFunc("INT",yytext);  return INT;}
-"char"		{ yylval.symbolInfo = new SymbolInfo(yytext, "CHAR", line_count, line_count); printFunc("CHAR",yytext);  return CHAR;}
-"float"		{ yylval.symbolInfo = new SymbolInfo(yytext, "FLOAT", line_count, line_count); printFunc("FLOAT",yytext);  return FLOAT;}
-"double"	{ yylval.symbolInfo = new SymbolInfo(yytext, "DOUBLE", line_count, line_count); printFunc("DOUBLE",yytext);  return DOUBLE;}
-"void"		{ yylval.symbolInfo = new SymbolInfo(yytext, "VOID", line_count, line_count); printFunc("VOID",yytext);  return VOID;}
-"return"	{ yylval.symbolInfo = new SymbolInfo(yytext, "RETURN", line_count, line_count); printFunc("RETURN",yytext);  return RETURN;}
-"switch"	{ yylval.symbolInfo = new SymbolInfo(yytext, "SWITCH", line_count, line_count); printFunc("SWITCH",yytext);  return SWITCH;}
-"case"		{ yylval.symbolInfo = new SymbolInfo(yytext, "CASE", line_count, line_count); printFunc("CASE",yytext);  return CASE;}
-"default"	{ yylval.symbolInfo = new SymbolInfo(yytext, "DEFAULT", line_count, line_count); printFunc("DEFAULT",yytext);  return DEFAULT;}
-"continue"	{ yylval.symbolInfo = new SymbolInfo(yytext, "CONTINUE", line_count, line_count); printFunc("CONTINUE",yytext);  return CONTINUE;}
-"printf"	{ yylval.symbolInfo = new SymbolInfo(yytext, "PRINTLN", line_count, line_count); printFunc("PRINTLN",yytext); return PRINTLN;}
+"if"		{ yylval.symbolInfo = new SymbolInfo(yytext, "IF", line_count, line_count); 				printFunc("IF",yytext);  		return IF;}
+"else"		{ yylval.symbolInfo = new SymbolInfo(yytext, "ELSE", line_count, line_count); 				printFunc("ELSE",yytext);  		return ELSE;}
+"for"		{ yylval.symbolInfo = new SymbolInfo(yytext, "FOR", line_count, line_count); 				printFunc("FOR",yytext);  		return FOR;}
+"while"		{ yylval.symbolInfo = new SymbolInfo(yytext, "WHILE", line_count, line_count); 				printFunc("WHILE",yytext);  	return WHILE;}
+"do"		{ yylval.symbolInfo = new SymbolInfo(yytext, "DO", line_count, line_count); 				printFunc("DO",yytext);  		return DO;}
+"break"		{ yylval.symbolInfo = new SymbolInfo(yytext, "BREAK", line_count, line_count); 				printFunc("BREAK",yytext);  	return BREAK;}
+"int"		{ yylval.symbolInfo = new SymbolInfo(yytext, "INT", "INT", line_count, line_count); 		printFunc("INT",yytext);  		return INT;}
+"char"		{ yylval.symbolInfo = new SymbolInfo(yytext, "CHAR", "CHAR", line_count, line_count); 		printFunc("CHAR",yytext);  		return CHAR;}
+"float"		{ yylval.symbolInfo = new SymbolInfo(yytext, "FLOAT", "FLOAT", line_count, line_count); 	printFunc("FLOAT",yytext);  	return FLOAT;}
+"double"	{ yylval.symbolInfo = new SymbolInfo(yytext, "DOUBLE", "DOUBLE", line_count, line_count); 	printFunc("DOUBLE",yytext);  	return DOUBLE;}
+"void"		{ yylval.symbolInfo = new SymbolInfo(yytext, "VOID", "VOID", line_count, line_count); 		printFunc("VOID",yytext);  		return VOID;}
+"return"	{ yylval.symbolInfo = new SymbolInfo(yytext, "RETURN", line_count, line_count); 			printFunc("RETURN",yytext);  	return RETURN;}
+"switch"	{ yylval.symbolInfo = new SymbolInfo(yytext, "SWITCH", line_count, line_count); 			printFunc("SWITCH",yytext);  	return SWITCH;}
+"case"		{ yylval.symbolInfo = new SymbolInfo(yytext, "CASE", line_count, line_count); 				printFunc("CASE",yytext);  		return CASE;}
+"default"	{ yylval.symbolInfo = new SymbolInfo(yytext, "DEFAULT", line_count, line_count); 			printFunc("DEFAULT",yytext);  	return DEFAULT;}
+"continue"	{ yylval.symbolInfo = new SymbolInfo(yytext, "CONTINUE", line_count, line_count); 			printFunc("CONTINUE",yytext);  	return CONTINUE;}
+"printf"	{ yylval.symbolInfo = new SymbolInfo(yytext, "PRINTLN", line_count, line_count); 			printFunc("PRINTLN",yytext); 	return PRINTLN;}
 
 
 
  /* ===================== Identifiers ===================== */
-{IDENTIFIER}	{printFunc("ID",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "ID", line_count, line_count); return ID;}
+{IDENTIFIER} {
+	printFunc("ID",yytext); 
+	yylval.symbolInfo = new SymbolInfo(yytext, "ID", line_count, line_count); 
+	return ID;
+}
 
  /* ===================== Numbers ===================== */
-{INTEGER}		{printFunc("CONST_INT",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "CONST_INT", line_count, line_count); return CONST_INT;}
-{FLOAT}			{printFunc("CONST_FLOAT",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "CONST_FLOAT", line_count, line_count); return CONST_FLOAT;}
+{INTEGER} {
+	printFunc("CONST_INT",yytext);
+	yylval.symbolInfo = new SymbolInfo(yytext, "CONST_INT", "INT", line_count, line_count);
+	return CONST_INT;
+}
+{FLOAT}	{
+	printFunc("CONST_FLOAT",yytext); 
+	yylval.symbolInfo = new SymbolInfo(yytext, "CONST_FLOAT", "FLOAT", line_count, line_count);
+	return CONST_FLOAT;
+}
 
 
 

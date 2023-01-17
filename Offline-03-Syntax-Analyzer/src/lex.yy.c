@@ -953,214 +953,226 @@ YY_RULE_SETUP
 case 3:
 YY_RULE_SETUP
 #line 73 "1905066_2.l"
-{ yylval.symbolInfo = new SymbolInfo(yytext, "IF", line_count, line_count); printFunc("IF",yytext);  return IF;}
+{ yylval.symbolInfo = new SymbolInfo(yytext, "IF", line_count, line_count); 				printFunc("IF",yytext);  		return IF;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
 #line 74 "1905066_2.l"
-{ yylval.symbolInfo = new SymbolInfo(yytext, "ELSE", line_count, line_count); printFunc("ELSE",yytext);  return ELSE;}
+{ yylval.symbolInfo = new SymbolInfo(yytext, "ELSE", line_count, line_count); 				printFunc("ELSE",yytext);  		return ELSE;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
 #line 75 "1905066_2.l"
-{ yylval.symbolInfo = new SymbolInfo(yytext, "FOR", line_count, line_count); printFunc("FOR",yytext);  return FOR;}
+{ yylval.symbolInfo = new SymbolInfo(yytext, "FOR", line_count, line_count); 				printFunc("FOR",yytext);  		return FOR;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
 #line 76 "1905066_2.l"
-{ yylval.symbolInfo = new SymbolInfo(yytext, "WHILE", line_count, line_count); printFunc("WHILE",yytext);  return WHILE;}
+{ yylval.symbolInfo = new SymbolInfo(yytext, "WHILE", line_count, line_count); 				printFunc("WHILE",yytext);  	return WHILE;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
 #line 77 "1905066_2.l"
-{ yylval.symbolInfo = new SymbolInfo(yytext, "DO", line_count, line_count); printFunc("DO",yytext);  return DO;}
+{ yylval.symbolInfo = new SymbolInfo(yytext, "DO", line_count, line_count); 				printFunc("DO",yytext);  		return DO;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
 #line 78 "1905066_2.l"
-{ yylval.symbolInfo = new SymbolInfo(yytext, "BREAK", line_count, line_count); printFunc("BREAK",yytext);  return BREAK;}
+{ yylval.symbolInfo = new SymbolInfo(yytext, "BREAK", line_count, line_count); 				printFunc("BREAK",yytext);  	return BREAK;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 79 "1905066_2.l"
-{ yylval.symbolInfo = new SymbolInfo(yytext, "INT", line_count, line_count); printFunc("INT",yytext);  return INT;}
+{ yylval.symbolInfo = new SymbolInfo(yytext, "INT", "INT", line_count, line_count); 		printFunc("INT",yytext);  		return INT;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 80 "1905066_2.l"
-{ yylval.symbolInfo = new SymbolInfo(yytext, "CHAR", line_count, line_count); printFunc("CHAR",yytext);  return CHAR;}
+{ yylval.symbolInfo = new SymbolInfo(yytext, "CHAR", "CHAR", line_count, line_count); 		printFunc("CHAR",yytext);  		return CHAR;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
 #line 81 "1905066_2.l"
-{ yylval.symbolInfo = new SymbolInfo(yytext, "FLOAT", line_count, line_count); printFunc("FLOAT",yytext);  return FLOAT;}
+{ yylval.symbolInfo = new SymbolInfo(yytext, "FLOAT", "FLOAT", line_count, line_count); 	printFunc("FLOAT",yytext);  	return FLOAT;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 82 "1905066_2.l"
-{ yylval.symbolInfo = new SymbolInfo(yytext, "DOUBLE", line_count, line_count); printFunc("DOUBLE",yytext);  return DOUBLE;}
+{ yylval.symbolInfo = new SymbolInfo(yytext, "DOUBLE", "DOUBLE", line_count, line_count); 	printFunc("DOUBLE",yytext);  	return DOUBLE;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
 #line 83 "1905066_2.l"
-{ yylval.symbolInfo = new SymbolInfo(yytext, "VOID", line_count, line_count); printFunc("VOID",yytext);  return VOID;}
+{ yylval.symbolInfo = new SymbolInfo(yytext, "VOID", "VOID", line_count, line_count); 		printFunc("VOID",yytext);  		return VOID;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 84 "1905066_2.l"
-{ yylval.symbolInfo = new SymbolInfo(yytext, "RETURN", line_count, line_count); printFunc("RETURN",yytext);  return RETURN;}
+{ yylval.symbolInfo = new SymbolInfo(yytext, "RETURN", line_count, line_count); 			printFunc("RETURN",yytext);  	return RETURN;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 85 "1905066_2.l"
-{ yylval.symbolInfo = new SymbolInfo(yytext, "SWITCH", line_count, line_count); printFunc("SWITCH",yytext);  return SWITCH;}
+{ yylval.symbolInfo = new SymbolInfo(yytext, "SWITCH", line_count, line_count); 			printFunc("SWITCH",yytext);  	return SWITCH;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 86 "1905066_2.l"
-{ yylval.symbolInfo = new SymbolInfo(yytext, "CASE", line_count, line_count); printFunc("CASE",yytext);  return CASE;}
+{ yylval.symbolInfo = new SymbolInfo(yytext, "CASE", line_count, line_count); 				printFunc("CASE",yytext);  		return CASE;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 87 "1905066_2.l"
-{ yylval.symbolInfo = new SymbolInfo(yytext, "DEFAULT", line_count, line_count); printFunc("DEFAULT",yytext);  return DEFAULT;}
+{ yylval.symbolInfo = new SymbolInfo(yytext, "DEFAULT", line_count, line_count); 			printFunc("DEFAULT",yytext);  	return DEFAULT;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 88 "1905066_2.l"
-{ yylval.symbolInfo = new SymbolInfo(yytext, "CONTINUE", line_count, line_count); printFunc("CONTINUE",yytext);  return CONTINUE;}
+{ yylval.symbolInfo = new SymbolInfo(yytext, "CONTINUE", line_count, line_count); 			printFunc("CONTINUE",yytext);  	return CONTINUE;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
 #line 89 "1905066_2.l"
-{ yylval.symbolInfo = new SymbolInfo(yytext, "PRINTLN", line_count, line_count); printFunc("PRINTLN",yytext); return PRINTLN;}
+{ yylval.symbolInfo = new SymbolInfo(yytext, "PRINTLN", line_count, line_count); 			printFunc("PRINTLN",yytext); 	return PRINTLN;}
 	YY_BREAK
 /* ===================== Identifiers ===================== */
 case 20:
 YY_RULE_SETUP
 #line 94 "1905066_2.l"
-{printFunc("ID",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "ID", line_count, line_count); return ID;}
+{
+	printFunc("ID",yytext); 
+	yylval.symbolInfo = new SymbolInfo(yytext, "ID", line_count, line_count); 
+	return ID;
+}
 	YY_BREAK
 /* ===================== Numbers ===================== */
 case 21:
 YY_RULE_SETUP
-#line 97 "1905066_2.l"
-{printFunc("CONST_INT",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "CONST_INT", line_count, line_count); return CONST_INT;}
+#line 101 "1905066_2.l"
+{
+	printFunc("CONST_INT",yytext);
+	yylval.symbolInfo = new SymbolInfo(yytext, "CONST_INT", "INT", line_count, line_count);
+	return CONST_INT;
+}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 98 "1905066_2.l"
-{printFunc("CONST_FLOAT",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "CONST_FLOAT", line_count, line_count); return CONST_FLOAT;}
+#line 106 "1905066_2.l"
+{
+	printFunc("CONST_FLOAT",yytext); 
+	yylval.symbolInfo = new SymbolInfo(yytext, "CONST_FLOAT", "FLOAT", line_count, line_count);
+	return CONST_FLOAT;
+}
 	YY_BREAK
 /* ===================== TOO MANY DECIMAL POINTS ===================== */
 case 23:
 YY_RULE_SETUP
-#line 104 "1905066_2.l"
+#line 116 "1905066_2.l"
 {generateError("TOO_MANY_DECIMAL_POINTS",yytext);}
 	YY_BREAK
 /* ===================== ILLFORMED_NUMBER ===================== */
 case 24:
 YY_RULE_SETUP
-#line 107 "1905066_2.l"
+#line 119 "1905066_2.l"
 {generateError("ILLFORMED_NUMBER",yytext);}
 	YY_BREAK
 /* ===================== INVALID_ID_SUFFIX_NUM_PREFIX ===================== */
 case 25:
 YY_RULE_SETUP
-#line 110 "1905066_2.l"
+#line 122 "1905066_2.l"
 {generateError("INVALID_ID_SUFFIX_NUM_PREFIX",yytext);}
 	YY_BREAK
 /* ===================== operators ===================== */
 case 26:
 YY_RULE_SETUP
-#line 114 "1905066_2.l"
+#line 126 "1905066_2.l"
 printFunc("ADDOP",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "ADDOP", line_count, line_count); return ADDOP;
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 115 "1905066_2.l"
+#line 127 "1905066_2.l"
 printFunc("MULOP",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "MULOP", line_count, line_count); return MULOP;
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 116 "1905066_2.l"
+#line 128 "1905066_2.l"
 printFunc("INCOP",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "INCOP", line_count, line_count); return INCOP;
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 117 "1905066_2.l"
+#line 129 "1905066_2.l"
 printFunc("DECOP",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "DECOP", line_count, line_count); return DECOP;
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 118 "1905066_2.l"
+#line 130 "1905066_2.l"
 printFunc("RELOP",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "RELOP", line_count, line_count); return RELOP;
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 119 "1905066_2.l"
+#line 131 "1905066_2.l"
 printFunc("ASSIGNOP",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "ASSIGNOP", line_count, line_count); return ASSIGNOP;
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 120 "1905066_2.l"
+#line 132 "1905066_2.l"
 printFunc("LOGICOP",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "LOGICOP", line_count, line_count); return LOGICOP;
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 121 "1905066_2.l"
+#line 133 "1905066_2.l"
 printFunc("BITOP",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "BITOP", line_count, line_count); return BITOP;
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 122 "1905066_2.l"
+#line 134 "1905066_2.l"
 printFunc("NOT",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "NOT", line_count, line_count); return NOT;
 	YY_BREAK
 /*===================== punctuatuion ===================== */
 case 35:
 YY_RULE_SETUP
-#line 127 "1905066_2.l"
+#line 139 "1905066_2.l"
 printFunc("LPREN",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "LPAREN", line_count, line_count); return LPAREN;
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 128 "1905066_2.l"
+#line 140 "1905066_2.l"
 printFunc("RPREN",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "RPAREN", line_count, line_count); return RPAREN;
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 129 "1905066_2.l"
+#line 141 "1905066_2.l"
 printFunc("LCURL",yytext);  yylval.symbolInfo = new SymbolInfo(yytext, "LCURL", line_count, line_count); return LCURL;
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 130 "1905066_2.l"
+#line 142 "1905066_2.l"
 printFunc("RCURL",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "RCURL", line_count, line_count); return RCURL;
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 131 "1905066_2.l"
+#line 143 "1905066_2.l"
 printFunc("LSQUARE",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "LSQUARE", line_count, line_count); return LTHIRD;
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 132 "1905066_2.l"
+#line 144 "1905066_2.l"
 printFunc("RSQUARE",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "RSQUARE", line_count, line_count); return RTHIRD;
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 133 "1905066_2.l"
+#line 145 "1905066_2.l"
 printFunc("COMMA",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "COMMA", line_count, line_count); return COMMA;
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 134 "1905066_2.l"
+#line 146 "1905066_2.l"
 printFunc("SEMICOLON",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "SEMICOLON", line_count, line_count); return SEMICOLON;
 	YY_BREAK
 /* ===================== character literal ===================== */
 case 43:
 YY_RULE_SETUP
-#line 140 "1905066_2.l"
+#line 152 "1905066_2.l"
 {	
 			string_token = "";
 			string_log = "\'";
@@ -1169,63 +1181,63 @@ YY_RULE_SETUP
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 146 "1905066_2.l"
+#line 158 "1905066_2.l"
 string_token += "\\"; string_log += yytext;
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 147 "1905066_2.l"
+#line 159 "1905066_2.l"
 string_token += "\'"; string_log += yytext;
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 148 "1905066_2.l"
+#line 160 "1905066_2.l"
 string_token += "\""; string_log += yytext;
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 149 "1905066_2.l"
+#line 161 "1905066_2.l"
 string_token += "\n"; string_log += yytext;
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 150 "1905066_2.l"
+#line 162 "1905066_2.l"
 string_token += "\t"; string_log += yytext;
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 151 "1905066_2.l"
+#line 163 "1905066_2.l"
 string_token += "\a"; string_log += yytext;
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 152 "1905066_2.l"
+#line 164 "1905066_2.l"
 string_token += "\b"; string_log += yytext;
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 153 "1905066_2.l"
+#line 165 "1905066_2.l"
 string_token += "\f"; string_log += yytext;
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 154 "1905066_2.l"
+#line 166 "1905066_2.l"
 string_token += "\r"; string_log += yytext;
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 155 "1905066_2.l"
+#line 167 "1905066_2.l"
 string_token += "\v"; string_log += yytext;
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 156 "1905066_2.l"
+#line 168 "1905066_2.l"
 string_token += "\0"; string_log += yytext;
 	YY_BREAK
 case 55:
 /* rule 55 can match eol */
 YY_RULE_SETUP
-#line 159 "1905066_2.l"
+#line 171 "1905066_2.l"
 {
 	//generateError("UNFINISHED_CONST_CHAR", string_log);
 	line_count++;
@@ -1233,7 +1245,7 @@ YY_RULE_SETUP
 }
 	YY_BREAK
 case YY_STATE_EOF(CHARACTER_LITERAL):
-#line 165 "1905066_2.l"
+#line 177 "1905066_2.l"
 {
 	//generateError("UNFINISHED_CONST_CHAR", string_log);
 	BEGIN INITIAL;
@@ -1241,7 +1253,7 @@ case YY_STATE_EOF(CHARACTER_LITERAL):
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 170 "1905066_2.l"
+#line 182 "1905066_2.l"
 {
 	string_log += "'";
 
@@ -1270,7 +1282,7 @@ YY_RULE_SETUP
 	Having to add this for a io provided (input3) -.-*/
 case 57:
 YY_RULE_SETUP
-#line 198 "1905066_2.l"
+#line 210 "1905066_2.l"
 {
 	if(string_token.length()==0){
 		string_token += yytext;
@@ -1286,13 +1298,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 211 "1905066_2.l"
+#line 223 "1905066_2.l"
 string_token += yytext; string_log += yytext;
 	YY_BREAK
 /* ===================== string literal ===================== */
 case 59:
 YY_RULE_SETUP
-#line 217 "1905066_2.l"
+#line 229 "1905066_2.l"
 {	
 			string_log = "\"";
 			string_token = "";
@@ -1304,7 +1316,7 @@ YY_RULE_SETUP
 case 60:
 /* rule 60 can match eol */
 YY_RULE_SETUP
-#line 226 "1905066_2.l"
+#line 238 "1905066_2.l"
 {
 								temp_line_count++;
 								string_log += "\\\n";
@@ -1312,7 +1324,7 @@ YY_RULE_SETUP
 							}
 	YY_BREAK
 case YY_STATE_EOF(STRING_LITERAL):
-#line 232 "1905066_2.l"
+#line 244 "1905066_2.l"
 {
 								//generateError("UNFINISHED_STRING", string_log);
 								line_count += temp_line_count;
@@ -1322,7 +1334,7 @@ case YY_STATE_EOF(STRING_LITERAL):
 case 61:
 /* rule 61 can match eol */
 YY_RULE_SETUP
-#line 238 "1905066_2.l"
+#line 250 "1905066_2.l"
 {
 								//generateError("UNFINISHED_STRING", string_log, line_count+temp_line_count);
 								temp_line_count++;
@@ -1332,7 +1344,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 245 "1905066_2.l"
+#line 257 "1905066_2.l"
 {
 						string_log += "\"";
 						//printLog(string_type, string_log);
@@ -1343,13 +1355,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 254 "1905066_2.l"
+#line 266 "1905066_2.l"
 {string_log += yytext; string_token += yytext;}
 	YY_BREAK
 /* ===================== Single line comment ===================== */
 case 64:
 YY_RULE_SETUP
-#line 257 "1905066_2.l"
+#line 269 "1905066_2.l"
 {	
 			comment = "//";
 			temp_line_count = 1;
@@ -1359,7 +1371,7 @@ YY_RULE_SETUP
 case 65:
 /* rule 65 can match eol */
 YY_RULE_SETUP
-#line 263 "1905066_2.l"
+#line 275 "1905066_2.l"
 {
 										comment += "\\\n";
 										temp_line_count++;
@@ -1368,7 +1380,7 @@ YY_RULE_SETUP
 case 66:
 /* rule 66 can match eol */
 YY_RULE_SETUP
-#line 268 "1905066_2.l"
+#line 280 "1905066_2.l"
 {
 										//printLog("SINGLE LINE COMMENT",comment);
 										line_count += temp_line_count;
@@ -1376,7 +1388,7 @@ YY_RULE_SETUP
 									}
 	YY_BREAK
 case YY_STATE_EOF(SINGLE_LINE_COMMENT):
-#line 274 "1905066_2.l"
+#line 286 "1905066_2.l"
 {
 										//printLog("SINGLE LINE COMMENT",comment);
 										line_count += temp_line_count;
@@ -1385,13 +1397,13 @@ case YY_STATE_EOF(SINGLE_LINE_COMMENT):
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 281 "1905066_2.l"
+#line 293 "1905066_2.l"
 { comment += yytext; }
 	YY_BREAK
 /* ===================== Multi line comment ===================== */
 case 68:
 YY_RULE_SETUP
-#line 286 "1905066_2.l"
+#line 298 "1905066_2.l"
 {	
 			comment = "/*";
 			temp_line_count = 0;
@@ -1401,7 +1413,7 @@ YY_RULE_SETUP
 case 69:
 /* rule 69 can match eol */
 YY_RULE_SETUP
-#line 292 "1905066_2.l"
+#line 304 "1905066_2.l"
 {
 									comment += "\n";
 									temp_line_count++;
@@ -1409,7 +1421,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 297 "1905066_2.l"
+#line 309 "1905066_2.l"
 {
 									comment += "*/";
 									//printLog("MULTI LINE COMMENT",comment);
@@ -1418,7 +1430,7 @@ YY_RULE_SETUP
 								}
 	YY_BREAK
 case YY_STATE_EOF(MULTI_LINE_COMMENT):
-#line 306 "1905066_2.l"
+#line 318 "1905066_2.l"
 {	
 									line_count += temp_line_count;
 									//generateError("UNFINISHED_COMMENT", comment);
@@ -1427,24 +1439,24 @@ case YY_STATE_EOF(MULTI_LINE_COMMENT):
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 312 "1905066_2.l"
+#line 324 "1905066_2.l"
 { comment += yytext; }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 314 "1905066_2.l"
+#line 326 "1905066_2.l"
 return 0;
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 317 "1905066_2.l"
+#line 329 "1905066_2.l"
 { generateError("UNRECOGNIZED_CHAR",yytext); }
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 319 "1905066_2.l"
+#line 331 "1905066_2.l"
 ECHO;
 	YY_BREAK
-#line 1448 "lex.yy.c"
+#line 1460 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2447,7 +2459,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 319 "1905066_2.l"
+#line 331 "1905066_2.l"
 
 
 

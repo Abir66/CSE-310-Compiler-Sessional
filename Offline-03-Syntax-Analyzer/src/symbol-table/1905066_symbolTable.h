@@ -51,6 +51,14 @@ public:
         return success;
     }
 
+    bool insert(SymbolInfo* symbol){
+        if(current_scope == nullptr) enterScope();
+
+        bool success = current_scope->insert(symbol, out);
+        if(!success) out<< "\t"<<symbol->getName()<<" already exisits in the current ScopeTable"<<std::endl; 
+        return success;
+    }
+
     // look up a symbol in the current scope and all the parent scopes
     SymbolInfo* lookup(std::string name){
         if(current_scope == nullptr) return nullptr;
