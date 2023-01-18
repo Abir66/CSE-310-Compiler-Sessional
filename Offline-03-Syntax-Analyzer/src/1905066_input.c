@@ -12,6 +12,7 @@ void foo(){
 }
 
 int main(){
+	o = 5;
 	int a[2],c,i,j ; float d;
 	int k;
 	a[0];

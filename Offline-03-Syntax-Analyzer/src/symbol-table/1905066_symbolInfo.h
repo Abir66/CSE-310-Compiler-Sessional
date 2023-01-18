@@ -27,6 +27,7 @@ class SymbolInfo
     // for function
     bool funcDeclared = false;
     bool funcDefined = false;
+    int definedLine = 0;
     std::vector<SymbolInfo *> params;
 
 public:
@@ -104,7 +105,10 @@ public:
 
     // ====================== For Function ======================
     void setFuncDeclared() { this->funcDeclared = true; }
-    void setFuncDefined() { this->funcDefined = true; this->funcDeclared = true; }
+    void setFuncDefined(int definedLine = 0 ) {
+        this->funcDefined = true; this->funcDeclared = true;
+        if(definedLine != 0) this->definedLine = definedLine;
+    }
     bool isFunction() { return funcDeclared; }
     bool isFuncDeclared() { return funcDeclared; }
     bool isFuncDefined() { return funcDefined; }
@@ -113,6 +117,8 @@ public:
     void setParams(const std::vector<SymbolInfo *> &params) { this->params = params; }
     std::vector<SymbolInfo *> getParams() { return params; }
     int getParamCount() { return params.size(); }
+    void setDefinedLine(int definedLine) { this->definedLine = definedLine; }
+    int getDefinedLine() { return definedLine; }
 
 
 

@@ -26,6 +26,7 @@ std::ofstream parseTreeOut;
 SymbolTable *symbolTable = new SymbolTable(11, logout);
 
 std::vector<SymbolInfo*> vars, params;
+SymbolInfo* currentFunction = NULL;
 
 
 void yyerror(char *s)
@@ -36,6 +37,11 @@ void yyerror(char *s)
 
 void printLog(std::string str){
 	logout<<str<<std::endl;
+}
+
+void semanticError(int lineno, std::string error_text){
+	errorOut<<"Line# "<<lineno<<": "<<error_text<<std::endl;
+	error_count++;
 }
 
 
@@ -72,26 +78,45 @@ void setVarsDataType(std::string dataType){
 
 
 void addFunction(SymbolInfo* function, std::string returnType, bool define = false){
-	
+
 	function->setDataType(returnType);
 	function->addParams(params);
 	function->setFuncDeclared();
-	if(define) function->setFuncDefined();
+
+	if(define){
+		
+		function->setFuncDefined(function->getStartLine());
+		
+		for(auto param : params){
+			if(param->getName() == ""){
+				// unnamed parameter error
+			}
+		}
+	}
 	
 	params.clear();
 	
 	bool success = symbolTable->insert(function);
-	if(success) return;
+
+	if(success) {
+		currentFunction = function;
+		return;
+	} 
+	
 
 	SymbolInfo* existingFunction = symbolTable->lookup(function->getName());
 
+
 	if(!existingFunction->isFunction()){
 		// error
+		
 		return;
 	}
 
 	else if(existingFunction->isFuncDefined()){
 		// function already defined error
+		std::string error = "Function '" + function->getName() + "' already defined at line " + std::to_string(existingFunction->getDefinedLine());
+		semanticError(function->getStartLine(), error);
 	}
 
 	else if(existingFunction->isFuncDeclared() && !define) {
@@ -117,16 +142,46 @@ void addFunction(SymbolInfo* function, std::string returnType, bool define = fal
 			for(int i = 0; i < existingParams.size(); i++){
 				if(existingParams[i]->getDataType() != newParams[i]->getDataType()){
 					// parameter type mismatch error
+					
 				}
 			}
 
 			//existingFunction->setDefined();
 			existingFunction->setParams(newParams);
+			currentFunction = function;
 		}
 	}
+
+	if(define && existingFunction->isFunction()) existingFunction->setFuncDefined(function->getStartLine());
+
 }
 
+void addParamsToScope(){
+	if(currentFunction == NULL) return;
+	for(auto param : currentFunction->getParams()) symbolTable->insert(param);
+	currentFunction = NULL;
+}
 
+void checkValidVar(SymbolInfo* id, bool isArray = false){
+	
+	auto var = symbolTable->lookup(id->getName());
+
+	if(!var){
+		std::cout<<"undclared var"<<std::endl;
+	}
+
+	else if(isArray && !var->isArray()){
+		// array 
+	}
+
+	else if(!isArray && var->isArray()){
+		// array 
+	}
+
+	else if(var->isFunction()){
+		// function call error
+	}
+}
 
 
 
@@ -265,17 +320,17 @@ parameter_list : parameter_list COMMA type_specifier ID {
 	}
 	;
 
-compound_statement : LCURL statements RCURL {
+compound_statement : LCURL {symbolTable->enterScope(); addParamsToScope(); } statements RCURL {
 		printLog("compound_statement : LCURL statements RCURL");
 		$$ = new SymbolInfo("compound_statement", "non-terminal");
-		$$->addChildren({$1, $2, $3});
+		$$->addChildren({$1, $3, $4});
 		symbolTable->printAllScopeTable();
 		symbolTable->exitScope();
 	}
-	| LCURL RCURL {
+	| LCURL {symbolTable->enterScope(); addParamsToScope();} RCURL {
 		printLog("compound_statement : LCURL RCURL");
 		$$ = new SymbolInfo("compound_statement", "non-terminal");
-		$$->addChildren({$1, $2});
+		$$->addChildren({$1, $3});
 		symbolTable->printAllScopeTable();
 		symbolTable->exitScope();}
 	;
@@ -424,14 +479,31 @@ expression_statement : SEMICOLON {
 
 variable : ID {
 		printLog("varibale : ID");
-		$$ = new SymbolInfo("variable", $1->getType());
+
+		$$ = new SymbolInfo($1);
+		$$->setName("variable");
+		$$->setType("non-terminal");
+
+		checkValidVar($1);
+
+		
 		$$->addChildren($1);
 	}
 	| ID LTHIRD expression RTHIRD {
 		printLog("variable : ID LTHIRD expression RTHIRD");
-		$$ = new SymbolInfo("variable", $1->getType());
 		$1->setArray();
-		$$->setArray(); // do i need to?
+		
+		$$ = new SymbolInfo($1);
+		$$->setName("variable");
+		$$->setType("non-terminal");
+
+		checkValidVar($1, true);
+		
+		if($3->getType() != "INT"){
+			// index must be integer
+		}
+
+		
 		$$->addChildren({$1, $2, $3, $4});
 	}
 	;
