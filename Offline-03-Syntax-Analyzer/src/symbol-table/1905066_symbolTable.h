@@ -72,7 +72,7 @@ public:
                 return symbol;
             curr = curr->getParentScope();
         }
-        out << "\t'" << name << "'" << " not found in any of the ScopeTables" << std::endl;
+        //out << "\t'" << name << "'" << " not found in any of the ScopeTables" << std::endl;
         return nullptr;
     }
 

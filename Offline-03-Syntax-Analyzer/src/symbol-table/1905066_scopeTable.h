@@ -103,7 +103,7 @@ public:
         while(curr != nullptr){
             if(name == curr->getName()){
                 if(printMessage) {
-                    out << "\t'" << name << "'" << " found in ScopeTable# " << id << " at position "<< index+1 <<", "<< pos+1 <<std::endl;
+                    //out << "\t'" << name << "'" << " found in ScopeTable# " << id << " at position "<< index+1 <<", "<< pos+1 <<std::endl;
                 }
                 return curr;
             }

@@ -1,0 +1,7 @@
+Line# 24: Return type mismatch  line with function declaration at line 5
+Line# 28: Variable 'z' already declared at line 1
+Line# 32: Parameter count mismatch with function declaration at line 3
+Line# 49: Parameter size mismatch in function correct_foo at line 11
+Line# 50: Parameter size mismatch in function correct_foo at line 11
+Line# 63: Undeclared function foo5
+Line# 68: Undeclared function printf

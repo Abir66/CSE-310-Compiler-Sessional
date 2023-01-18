@@ -86,7 +86,7 @@ FLOAT ({DIGIT}+(\.{DIGIT}+)?|(\.{DIGIT}+))([Ee][+-]?{DIGIT}+)?|{INTEGER}\.
 "case"		{ yylval.symbolInfo = new SymbolInfo(yytext, "CASE", line_count, line_count); 				printFunc("CASE",yytext);  		return CASE;}
 "default"	{ yylval.symbolInfo = new SymbolInfo(yytext, "DEFAULT", line_count, line_count); 			printFunc("DEFAULT",yytext);  	return DEFAULT;}
 "continue"	{ yylval.symbolInfo = new SymbolInfo(yytext, "CONTINUE", line_count, line_count); 			printFunc("CONTINUE",yytext);  	return CONTINUE;}
-"printf"	{ yylval.symbolInfo = new SymbolInfo(yytext, "PRINTLN", line_count, line_count); 			printFunc("PRINTLN",yytext); 	return PRINTLN;}
+"println"	{ yylval.symbolInfo = new SymbolInfo(yytext, "PRINTLN", line_count, line_count); 			printFunc("PRINTLN",yytext); 	return PRINTLN;}
 
 
 
@@ -136,8 +136,8 @@ FLOAT ({DIGIT}+(\.{DIGIT}+)?|(\.{DIGIT}+))([Ee][+-]?{DIGIT}+)?|{INTEGER}\.
 
  /*===================== punctuatuion ===================== */
 
-"("		printFunc("LPREN",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "LPAREN", line_count, line_count); return LPAREN;
-")"		printFunc("RPREN",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "RPAREN", line_count, line_count); return RPAREN;
+"("		printFunc("LPAREN",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "LPAREN", line_count, line_count); return LPAREN;
+")"		printFunc("RPAREN",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "RPAREN", line_count, line_count); return RPAREN;
 "{"		printFunc("LCURL",yytext);  yylval.symbolInfo = new SymbolInfo(yytext, "LCURL", line_count, line_count); return LCURL;
 "}"		printFunc("RCURL",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "RCURL", line_count, line_count); return RCURL;
 "["		printFunc("LSQUARE",yytext); yylval.symbolInfo = new SymbolInfo(yytext, "LSQUARE", line_count, line_count); return LTHIRD;

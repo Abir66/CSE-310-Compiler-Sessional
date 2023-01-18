@@ -45,18 +45,6 @@ void semanticError(int lineno, std::string error_text){
 }
 
 
-inline void safeDelete(SymbolInfo* pointer){
-	if (pointer != NULL) delete pointer;
-}
-
-inline void safeDelete(std::vector<SymbolInfo*> pointers){
-	for(auto pointer : pointers) if (pointer != NULL) delete pointer;
-}
-
-void generateError(std::string logoutError, std::string erroroutError){
-
-}
-
 void printParseTree(SymbolInfo* symbol, int indent){
 	// print indent number of spaces
 	for(int i = 0; i < indent; i++) parseTreeOut<<" ";
@@ -68,12 +56,11 @@ void printParseTree(SymbolInfo* symbol, int indent){
 	for(auto child : symbol->getChildren()) printParseTree(child, indent + 1);
 
 	// delete the symbol
-	safeDelete(symbol);
+	if(symbol) delete symbol;
 }
 
 void setVarsDataType(std::string dataType){
-	for(auto var : vars)
-		var->setDataType(dataType);
+	for(auto var : vars) var->setDataType(dataType);
 }
 
 
@@ -90,6 +77,8 @@ void addFunction(SymbolInfo* function, std::string returnType, bool define = fal
 		for(auto param : params){
 			if(param->getName() == ""){
 				// unnamed parameter error
+				std::string error = "Unnamed parameter at line " + std::to_string(param->getStartLine());
+				semanticError(param->getStartLine(), error);
 			}
 		}
 	}
@@ -108,7 +97,9 @@ void addFunction(SymbolInfo* function, std::string returnType, bool define = fal
 
 
 	if(!existingFunction->isFunction()){
-		// error
+		// already a declared variable error
+		std::string error = "Variable '" + function->getName() + "' already declared at line " + std::to_string(existingFunction->getStartLine());
+		semanticError(function->getStartLine(), error);
 		
 		return;
 	}
@@ -121,6 +112,8 @@ void addFunction(SymbolInfo* function, std::string returnType, bool define = fal
 
 	else if(existingFunction->isFuncDeclared() && !define) {
 		// multiple declaration error
+		std::string error = "Function '" + function->getName() + "' already declared at line " + std::to_string(existingFunction->getStartLine());
+		semanticError(function->getStartLine(), error);
 	}
 
 	else if(existingFunction->isFuncDeclared() && define){
@@ -128,10 +121,14 @@ void addFunction(SymbolInfo* function, std::string returnType, bool define = fal
 
 		if(existingFunction->getDataType() != returnType){
 			// return type mismatch error
+			std::string error = "Return type mismatch  line with function declaration at line " + std::to_string(existingFunction->getStartLine());
+			semanticError(function->getStartLine(), error);
 		}
 
 		else if(existingFunction->getParamCount() != function->getParamCount()){
-			// parameter mismatch error
+			// parameter count mismatch error
+			std::string error = "Parameter count mismatch with function declaration at line " + std::to_string(existingFunction->getStartLine());
+			semanticError(function->getStartLine(), error);
 		}
 
 		else {
@@ -142,7 +139,8 @@ void addFunction(SymbolInfo* function, std::string returnType, bool define = fal
 			for(int i = 0; i < existingParams.size(); i++){
 				if(existingParams[i]->getDataType() != newParams[i]->getDataType()){
 					// parameter type mismatch error
-					
+					std::string error = "Parameter type mismatch (for parameter : " + existingParams[i]->getName() + ") with function declaration at line " + std::to_string(existingFunction->getStartLine());
+					semanticError(function->getStartLine(), error);
 				}
 			}
 
@@ -183,6 +181,13 @@ void checkValidVar(SymbolInfo* id, bool isArray = false){
 	}
 }
 
+std::string typecast(SymbolInfo *left_symbol, SymbolInfo *right_symbol){
+	if(left_symbol->getDataType() == "VOID" || right_symbol->getDataType() == "VOID") return "VOID"; // error
+	else if(left_symbol->getDataType() == "DOUBLE" || right_symbol->getDataType() == "DOUBLE") return "DOUBLE";
+	else if(left_symbol->getDataType() == "FLOAT" || right_symbol->getDataType() == "FLOAT") return "FLOAT";
+	else return "INT";
+}
+
 
 
 %}
@@ -216,6 +221,7 @@ start : program {
 		$$ = new SymbolInfo("start", "non-terminal");
 		$$->addChildren($1);
 		printParseTree($$, 0);
+		delete symbolTable;
 	};
 
 program : program unit {
@@ -412,7 +418,7 @@ statements : statement {
 		$$->addChildren($1);
 	}
 	| statements statement {
-		printLog("statements statement");
+		printLog("statements : statements statement");
 		$$ = new SymbolInfo("statements", "non-terminal");
 		$$->addChildren({$1, $2});
 	}
@@ -456,6 +462,10 @@ statement : var_declaration {
 	| PRINTLN LPAREN ID RPAREN SEMICOLON {
 		printLog("statement : PRINTLN LPAREN ID RPAREN SEMICOLON");
 		$$ = new SymbolInfo("statement", "non-terminal");
+
+		// check if ID declared
+		SymbolInfo *symbol = symbolTable->lookup($3->getName());
+
 		$$->addChildren({$1, $2, $3, $4, $5});
 	}
 	| RETURN expression SEMICOLON {
@@ -485,7 +495,7 @@ variable : ID {
 		$$->setType("non-terminal");
 
 		checkValidVar($1);
-
+		$$->setDataType($1->getDataType());
 		
 		$$->addChildren($1);
 	}
@@ -498,11 +508,11 @@ variable : ID {
 		$$->setType("non-terminal");
 
 		checkValidVar($1, true);
+		$$->setDataType($1->getDataType());
 		
 		if($3->getType() != "INT"){
 			// index must be integer
 		}
-
 		
 		$$->addChildren({$1, $2, $3, $4});
 	}
@@ -510,113 +520,237 @@ variable : ID {
 
 expression : logic_expression {
 		printLog("expression : logic_expression");
-		$$ = new SymbolInfo("expression", "INT");
+		$$ = new SymbolInfo("expression", "non-terminal");
+		$$->setDataType($1->getDataType());
 		$$->addChildren($1);
 	}
-	| variable ASSIGNOP logic_expression {printLog("expression : variable ASSIGNOP logic_expression");
-		$$ = new SymbolInfo("expression", "INT");
+	| variable ASSIGNOP logic_expression {
+		printLog("expression : variable ASSIGNOP logic_expression");
+		$$ = new SymbolInfo("expression", "non-terminal");
+		$$->setDataType($1->getDataType());
+
+		if($3->getDataType() == "VOID"){
+			// can't assign  void
+			$$->setDataType("VOID");
+		}
+
+		else if($1->getDataType() == "VOID"){
+			// can't assign to  void
+			$$->setDataType("VOID");
+		}
+
 		$$->addChildren({$1, $2, $3});
 	}
 	;
 
 logic_expression : rel_expression {
 		printLog("logic_expression : rel_expression");
-		$$ = new SymbolInfo("logic_expression", "INT");
+		$$ = new SymbolInfo("logic_expression", "non-terminal");
+		$$->setDataType($1->getDataType());
 		$$->addChildren($1);
 	}
 	| rel_expression LOGICOP rel_expression {
 		printLog("logic_expression : rel_expression LOGICOP rel_expression");
-		$$ = new SymbolInfo("logic_expression", "INT");
+		$$ = new SymbolInfo("logic_expression", "non-terminal");
+		$$->setDataType("INT");
+
+		if($1->getDataType() == "VOID" || $3->getDataType() == "VOID"){
+			// can't compare void
+			$$->setDataType("VOID");
+		}
+
 		$$->addChildren({$1, $2, $3});
 	}
 	;
 
 rel_expression : simple_expression {
 		printLog("rel_expression : simple_expression");
-		$$ = new SymbolInfo("rel_expression", "INT");
+		$$ = new SymbolInfo("rel_expression", "non-terminal");
+		$$->setDataType($1->getDataType());
 		$$->addChildren($1);
 	}
 	| simple_expression RELOP simple_expression {
 		printLog("rel_expression : simple_expression RELOP simple_expression");
-		$$ = new SymbolInfo("rel_expression", "INT");
+		$$ = new SymbolInfo("rel_expression", "non-terminal");
+		$$->setDataType("INT");
+
+		if($1->getDataType() == "VOID" || $3->getDataType() == "VOID"){
+			// can't compare void
+			$$->setDataType("VOID");
+		}
+
+
 		$$->addChildren({$1, $2, $3});
 	}
 	;
 
 simple_expression : term {
 		printLog("simple_expression : term");
-		$$ = new SymbolInfo("simple_expression", "INT");
+		$$ = new SymbolInfo("simple_expression", "non-terminal");
+		$$->setDataType($1->getDataType());
 		$$->addChildren($1);
 	}
 	| simple_expression ADDOP term {
 		printLog("simple_expression : simple_expression ADDOP term");
-		$$ = new SymbolInfo("simple_expression", "INT");
+		$$ = new SymbolInfo("simple_expression", "non-terminal");
+		$$->setDataType(typecast($1, $3));
+
+		if($3->getDataType() == "VOID"){
+			// term can't be void
+		}
+
 		$$->addChildren({$1, $2, $3});
 	}
 	;
 
 term : unary_expression {
 		printLog("term : unary_expression");
-		$$ = new SymbolInfo("term", "INT");
+		$$ = new SymbolInfo("term", "non-terminal");
+		$$->setDataType($1->getDataType());
 		$$->addChildren($1);
 	}
 	| term MULOP unary_expression {
 		printLog("term : term MULOP unary_expression");
-		$$ = new SymbolInfo("term", "INT");
+		$$ = new SymbolInfo("term", "non-terminal");
+		$$->setDataType(typecast($1, $3));
+
+		if($3->getDataType() == "VOID"){
+			// unary expression can't be void
+		}
+
+		if($2->getName() == "%" && ($1->getDataType() != "INT" || $3->getDataType() != "INT")){
+			// not int in modulus
+		}
+
 		$$->addChildren({$1, $2, $3});
 	}
 	;
 
 unary_expression : ADDOP unary_expression {
 		printLog("unary_expression : ADDOP unary_expression");
-		$$ = new SymbolInfo("unary_expression", "INT");
+		$$ = new SymbolInfo("unary_expression", "non-terminal");
+		$$->setDataType($2->getDataType());
+
+		if($2->getDataType() == "VOID"){
+			// unary expression can't be void
+			$$->setDataType("VOID");
+		}
+
 		$$->addChildren({$1, $2});
 	}
 	| NOT unary_expression {
 		printLog("unary_expression : NOT unary_expression");
-		$$ = new SymbolInfo("unary_expression", "INT");
+		$$ = new SymbolInfo("unary_expression", "non-terminal");
+		$$->setDataType("INT");
+
+		if($2->getDataType() == "VOID"){
+			// unary expression can't be void
+			$$->setDataType("VOID");
+		}
 		$$->addChildren({$1, $2});
 	}
 	| factor {
 		printLog("unary_expression : factor");
-		$$ = new SymbolInfo("unary_expression", "INT");
+		$$ = new SymbolInfo("unary_expression", "non-terminal");
+		$$->setDataType($1->getDataType());
 		$$->addChildren($1);
 	}
 	;
 
 factor : variable {
 		printLog("factor: variable");
-		$$ = new SymbolInfo("factor", "INT");
+		$$ = new SymbolInfo("factor", "non-terminal");
+		$$->setDataType($1->getDataType());
+		$$->setArray($1->isArray());
 		$$->addChildren($1);
 	}
 	| ID LPAREN argument_list RPAREN {
 		printLog("factor: ID LPAREN argument_list RPAREN");
-		$$ = new SymbolInfo("factor", "INT");
+		$$ = new SymbolInfo("factor", "non-terminal");
+		$$->setDataType($1->getDataType());
+
+		SymbolInfo *symbol= symbolTable->lookup($1->getName());
+
+		if(!symbol){
+			std::string error_message = "Undeclared function " + $1->getName();
+			semanticError($1->getStartLine(), error_message);
+		}
+		
+		else{
+			
+			// if not function
+			if(!symbol->isFunction()){
+				std::string error_message = $1->getName() + " is not a function";
+				semanticError($1->getStartLine(), error_message);
+			}
+
+			// else if paramater size not equal
+			else if(symbol->getParamCount() != $3->getParamCount()){
+				std::string error_message = "Parameter size mismatch in function " + $1->getName() + " at line " + std::to_string(symbol->getStartLine());
+				semanticError($1->getStartLine(), error_message);
+			}
+
+			// else if parameter type mismatch
+			else{
+				vector<SymbolInfo*> params = symbol->getParams();
+				vector<SymbolInfo*> args = $3->getParams();
+
+				for(int i=0; i<params.size(); i++){
+
+					if(params[i]->getDataType() != args[i]->getDataType()){
+						
+						// typecast?
+						if(!(params[i]->getDataType() == "INT" || params[i]->getDataType() == "FLOAT") && (args[i]->getDataType() == "INT" || args[i]->getDataType() == "FLOAT"))
+						{
+							std::string error_message = "Parameter type mismatch ( For " + std::to_string(i+1) +"th parameter ) in function " + symbol->getName() + " at line " + std::to_string(symbol->getStartLine());
+							semanticError($1->getStartLine(), error_message);
+						}
+					}
+				}
+			} 
+		}
+
+		
 		$$->addChildren({$1, $2, $3, $4});
 	}
 	| LPAREN expression RPAREN {
 		printLog("factor: LPAREN expression RPAREN");
-		$$ = new SymbolInfo("factor", "INT");
+		$$ = new SymbolInfo("factor", "non-terminal");
+		$$->setDataType($2->getDataType());
 		$$->addChildren({$1, $2, $3});
 	}
 	| CONST_INT {
 		printLog("factor: CONST_INT");
-		$$ = new SymbolInfo("factor", "INT");
+		$$ = new SymbolInfo("factor", "non-terminal");
+		$$->setDataType("INT");
 		$$->addChildren($1);
 	}
 	| CONST_FLOAT {
 		printLog("factor: CONST_FLOAT");
-		$$ = new SymbolInfo("factor", "INT");
+		$$ = new SymbolInfo("factor", "non-terminal");
+		$$->setDataType("FLOAT");
 		$$->addChildren($1);
 	}
 	| variable INCOP {
 		printLog("factor: variable INCOP");
-		$$ = new SymbolInfo("factor", "INT");
+		$$ = new SymbolInfo("factor", "non-terminal");
+
+		if($1->isArray()){
+			// array can't be incremented
+		}
+
+		$$->setDataType($1->getDataType());
 		$$->addChildren($1);
 	}
 	| variable DECOP {
 		printLog("factor: variable DECOP");
-		$$ = new SymbolInfo("factor", "INT");
+		$$ = new SymbolInfo("factor", "non-terminal");
+
+		if($1->isArray()){
+			// array can't be decremented
+		}
+
+		$$->setDataType($1->getDataType());
 		$$->addChildren($1);
 	}
 	;
@@ -624,9 +758,10 @@ factor : variable {
 argument_list : arguments {
 		printLog("argument_list : arguments");
 		$$ = new SymbolInfo("argument_list", "non-terminal");
+		$$->setParams($1->getParams());
 		$$->addChildren($1);
 	}
-	| %empty {
+	| {
 		printLog("argument_list : ");
 		$$ = new SymbolInfo("argument_list", "non-terminal");
 	}
@@ -635,11 +770,14 @@ argument_list : arguments {
 arguments : arguments COMMA logic_expression {
 		printLog("arguments : arguments COMMA logic_expression");
 		$$ = new SymbolInfo("arguments", "non-terminal");
+		$$->setParams($1->getParams());
+		$$->addParam($3);					 
 		$$->addChildren({$1, $2, $3});
 	}
 	| logic_expression {
 		printLog("arguments : logic_expression");
 		$$ = new SymbolInfo("arguments", "non-terminal");
+		$$->addParam($1);
 		$$->addChildren($1);
 	}
 	;
@@ -668,7 +806,7 @@ int main(int argc,char *argv[])
 	errorOut.open("1905066_error.txt");
 	logout.open("1905066_log.txt");
 	parseTreeOut.open("1905066_parseTree.txt");
-	std::cout<<"okay"<<std::endl;
+	/* std::cout<<"okay"<<std::endl; */
 	yyparse();
 	
 	errorOut.close();

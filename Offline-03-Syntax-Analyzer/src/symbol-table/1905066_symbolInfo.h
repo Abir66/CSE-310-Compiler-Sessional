@@ -165,11 +165,11 @@ public:
         else if(symbolInfo.isFunction()) {
             out << "<" << symbolInfo.name << ", FUNCTION, " << symbolInfo.dataType << ">";
             // print params
-            out << " (";
-            for (auto param : symbolInfo.params) {
-                out << param->name << " ";
-            }
-            out << ")";
+            // out << " (";
+            // for (auto param : symbolInfo.params) {
+            //     out << param->name << " ";
+            // }
+            // out << ")";
         }
         else out << "<" << symbolInfo.name << ", " << symbolInfo.dataType << ">";
         return out;

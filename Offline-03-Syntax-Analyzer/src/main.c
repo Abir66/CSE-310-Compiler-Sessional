@@ -1,15 +1,12 @@
 #include<stdio.h>
 
-int a(int a, int b){
-    return a(5,6)+b;
-}
 
-int f(int a, int b){
-    return a+b;
+void f(){
+
 }
 
 int main(){
 
-    k = 5;
+    int x = f();
     return 0;
 }
