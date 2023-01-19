@@ -31,7 +31,8 @@ SymbolInfo* currentFunction = NULL;
 
 void yyerror(char *s)
 {
-	//write your code
+	logout<<"Error at line no "<<yylineno<<": "<<s<<endl;
+	error_count++;
 }
 
 
@@ -86,6 +87,7 @@ void addFunction(SymbolInfo* function, std::string returnType, bool define = fal
 	params.clear();
 	
 	bool success = symbolTable->insert(function);
+	//addParamsToScope();
 
 	if(success) {
 		currentFunction = function;
@@ -98,9 +100,8 @@ void addFunction(SymbolInfo* function, std::string returnType, bool define = fal
 
 	if(!existingFunction->isFunction()){
 		// already a declared variable error
-		std::string error = "Variable '" + function->getName() + "' already declared at line " + std::to_string(existingFunction->getStartLine());
+		std::string error = "'" + function->getName() + "' redeclared as different kind of symbol (" + std::to_string(existingFunction->getStartLine()) + ")";
 		semanticError(function->getStartLine(), error);
-		
 		return;
 	}
 
@@ -121,7 +122,7 @@ void addFunction(SymbolInfo* function, std::string returnType, bool define = fal
 
 		if(existingFunction->getDataType() != returnType){
 			// return type mismatch error
-			std::string error = "Return type mismatch  line with function declaration at line " + std::to_string(existingFunction->getStartLine());
+			std::string error = "Return type mismatch with function declaration at line " + std::to_string(existingFunction->getStartLine());
 			semanticError(function->getStartLine(), error);
 		}
 
@@ -154,6 +155,18 @@ void addFunction(SymbolInfo* function, std::string returnType, bool define = fal
 
 }
 
+bool checkParamRedeclaration(SymbolInfo* newParam){
+	for(auto param : params){
+		if(param->getName() == newParam->getName()){
+			// parameter redeclaration error
+			std::string error = "Redefinition of parameter '" + newParam->getName() + "'";
+			semanticError(newParam->getStartLine(), error);
+			return true;
+		}
+	}
+	return false;
+}
+
 void addParamsToScope(){
 	if(currentFunction == NULL) return;
 	for(auto param : currentFunction->getParams()) symbolTable->insert(param);
@@ -165,19 +178,27 @@ void checkValidVar(SymbolInfo* id, bool isArray = false){
 	auto var = symbolTable->lookup(id->getName());
 
 	if(!var){
-		std::cout<<"undclared var"<<std::endl;
+		// undeclared variable error
+		std::string error = "Undeclared variable '" + id->getName() + "'";
+		semanticError(id->getStartLine(), error);
 	}
 
 	else if(isArray && !var->isArray()){
-		// array 
+		// array
+		std::string error = "'" + id->getName() + "' is not an array";
+		semanticError(id->getStartLine(), error);
 	}
 
 	else if(!isArray && var->isArray()){
-		// array 
+		// array
+		std::string error = "Array '" + id->getName() + "' used as a variable at line " + std::to_string(id->getStartLine());
+		semanticError(id->getStartLine(), error); 
 	}
 
 	else if(var->isFunction()){
 		// function call error
+		std::string error = "Function '" + id->getName() + "' used as a variable at line " + std::to_string(id->getStartLine());
+		semanticError(id->getStartLine(), error);
 	}
 }
 
@@ -274,7 +295,7 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON {
 	}
 	;
 
-func_definition : type_specifier ID LPAREN parameter_list RPAREN { addFunction($2, $1->getDataType(), true); } compound_statement {
+func_definition : type_specifier ID LPAREN parameter_list RPAREN { addFunction($2, $1->getDataType(), true); addParamsToScope();} compound_statement {
 		printLog("func_definition : type_specifier ID LPAREN parameter_list RPAREN compound_statement");
 		$$ = new SymbolInfo("func_definition", "non-terminal");
 
@@ -292,8 +313,9 @@ parameter_list : parameter_list COMMA type_specifier ID {
 		$$ = new SymbolInfo("parameter_list", $1->getType());
 
 		$4->setDataType($3->getDataType());
-		params.push_back($4);
 
+		if(!checkParamRedeclaration($4)) params.push_back($4);
+		
 		$$->addChildren({$1, $2, $3, $4});
 
 	}
@@ -311,7 +333,7 @@ parameter_list : parameter_list COMMA type_specifier ID {
 		$$ = new SymbolInfo("parameter_list", "non-terminal");
 
 		$2->setDataType($1->getDataType());
-		params.push_back($2);
+		if(!checkParamRedeclaration($2)) params.push_back($2);
 
 		$$->addChildren({$1, $2});
 	}
@@ -326,14 +348,14 @@ parameter_list : parameter_list COMMA type_specifier ID {
 	}
 	;
 
-compound_statement : LCURL {symbolTable->enterScope(); addParamsToScope(); } statements RCURL {
+compound_statement : LCURL {symbolTable->enterScope();} statements RCURL {
 		printLog("compound_statement : LCURL statements RCURL");
 		$$ = new SymbolInfo("compound_statement", "non-terminal");
 		$$->addChildren({$1, $3, $4});
 		symbolTable->printAllScopeTable();
 		symbolTable->exitScope();
 	}
-	| LCURL {symbolTable->enterScope(); addParamsToScope();} RCURL {
+	| LCURL {symbolTable->enterScope();} RCURL {
 		printLog("compound_statement : LCURL RCURL");
 		$$ = new SymbolInfo("compound_statement", "non-terminal");
 		$$->addChildren({$1, $3});
@@ -351,8 +373,13 @@ var_declaration : type_specifier declaration_list SEMICOLON {
 		for(auto var : vars){
 			bool success = symbolTable->insert(var);
 			if(!success){
-				// error_count++;
-				// logout<<"Error at line "<<line_count<<": Redeclaration of variable "<<var->getName()<<std::endl;
+				std::string error_message = "Redeclaration of variable " + var->getName() + " in line " + std::to_string(var->getStartLine());
+				semanticError(var->getStartLine(), error_message);
+			}
+
+			if($1->getDataType() == "VOID"){
+				std::string error_message = "Variable or field '" + var->getName() + "' declared void";
+				semanticError(var->getStartLine(), error_message);
 			}
 		}
 	}
@@ -465,6 +492,10 @@ statement : var_declaration {
 
 		// check if ID declared
 		SymbolInfo *symbol = symbolTable->lookup($3->getName());
+		if(symbol) {
+			std::string error_message = "Undeclared variable " + $3->getName() + " in line " + std::to_string($3->getStartLine());
+			semanticError($3->getStartLine(), error_message);
+		}
 
 		$$->addChildren({$1, $2, $3, $4, $5});
 	}
@@ -510,8 +541,10 @@ variable : ID {
 		checkValidVar($1, true);
 		$$->setDataType($1->getDataType());
 		
-		if($3->getType() != "INT"){
+		if($3->getDataType() != "INT"){
 			// index must be integer
+			std::string error_message = "Array subscript is not an integer";
+			semanticError($3->getStartLine(), error_message);
 		}
 		
 		$$->addChildren({$1, $2, $3, $4});
@@ -532,11 +565,15 @@ expression : logic_expression {
 		if($3->getDataType() == "VOID"){
 			// can't assign  void
 			$$->setDataType("VOID");
+			std::string error_message = "Void cannot be used in expression";
+			semanticError($3->getStartLine(), error_message);
 		}
 
 		else if($1->getDataType() == "VOID"){
 			// can't assign to  void
 			$$->setDataType("VOID");
+			std::string error_message = "Void cannot be used in expression";
+			semanticError($1->getStartLine(), error_message);
 		}
 
 		$$->addChildren({$1, $2, $3});
@@ -555,8 +592,9 @@ logic_expression : rel_expression {
 		$$->setDataType("INT");
 
 		if($1->getDataType() == "VOID" || $3->getDataType() == "VOID"){
-			// can't compare void
 			$$->setDataType("VOID");
+			// std::string error_message = "Can't do logic operations void";
+			// semanticError($3->getStartLine(), error_message);
 		}
 
 		$$->addChildren({$1, $2, $3});
@@ -577,6 +615,8 @@ rel_expression : simple_expression {
 		if($1->getDataType() == "VOID" || $3->getDataType() == "VOID"){
 			// can't compare void
 			$$->setDataType("VOID");
+			// std::string error_message = "Can't compare void";
+			// semanticError($3->getStartLine(), error_message);
 		}
 
 
@@ -596,7 +636,10 @@ simple_expression : term {
 		$$->setDataType(typecast($1, $3));
 
 		if($3->getDataType() == "VOID"){
-			// term can't be void
+			// std::string error_message = "Can't add void";
+			// semanticError($3->getStartLine(), error_message);
+			$$->setDataType("VOID");
+
 		}
 
 		$$->addChildren({$1, $2, $3});
@@ -616,10 +659,16 @@ term : unary_expression {
 
 		if($3->getDataType() == "VOID"){
 			// unary expression can't be void
+			$$->setDataType("VOID");
+			// std::string error_message = "unary expression can't be void";
+			// semanticError($3->getStartLine(), error_message);
 		}
 
 		if($2->getName() == "%" && ($1->getDataType() != "INT" || $3->getDataType() != "INT")){
 			// not int in modulus
+			$$->setDataType("ERROR");
+			std::string error_message = "Operands of modulus must be integers";
+			semanticError($3->getStartLine(), error_message);
 		}
 
 		$$->addChildren({$1, $2, $3});
@@ -634,6 +683,8 @@ unary_expression : ADDOP unary_expression {
 		if($2->getDataType() == "VOID"){
 			// unary expression can't be void
 			$$->setDataType("VOID");
+			// std::string error_message = "unary expression can't be void";
+			// semanticError($2->getStartLine(), error_message);
 		}
 
 		$$->addChildren({$1, $2});
@@ -646,6 +697,8 @@ unary_expression : ADDOP unary_expression {
 		if($2->getDataType() == "VOID"){
 			// unary expression can't be void
 			$$->setDataType("VOID");
+			// std::string error_message = "unary expression can't be void";
+			// semanticError($2->getStartLine(), error_message);
 		}
 		$$->addChildren({$1, $2});
 	}
@@ -667,17 +720,18 @@ factor : variable {
 	| ID LPAREN argument_list RPAREN {
 		printLog("factor: ID LPAREN argument_list RPAREN");
 		$$ = new SymbolInfo("factor", "non-terminal");
-		$$->setDataType($1->getDataType());
+		$$->setDataType("");
 
 		SymbolInfo *symbol= symbolTable->lookup($1->getName());
 
 		if(!symbol){
-			std::string error_message = "Undeclared function " + $1->getName();
+			std::string error_message = "Undeclared function '" + $1->getName() + "'";
 			semanticError($1->getStartLine(), error_message);
 		}
 		
 		else{
 			
+			$$->setDataType(symbol->getDataType());
 			// if not function
 			if(!symbol->isFunction()){
 				std::string error_message = $1->getName() + " is not a function";
@@ -685,8 +739,13 @@ factor : variable {
 			}
 
 			// else if paramater size not equal
-			else if(symbol->getParamCount() != $3->getParamCount()){
-				std::string error_message = "Parameter size mismatch in function " + $1->getName() + " at line " + std::to_string(symbol->getStartLine());
+			else if(symbol->getParamCount() > $3->getParamCount()){
+				std::string error_message = "Too few arguments to function '" + $1->getName() + "'";
+				semanticError($1->getStartLine(), error_message);
+			}
+
+			else if(symbol->getParamCount() < $3->getParamCount()){
+				std::string error_message = "Too many arguments to function '" + $1->getName() + "'";
 				semanticError($1->getStartLine(), error_message);
 			}
 
@@ -733,14 +792,19 @@ factor : variable {
 	}
 	| variable INCOP {
 		printLog("factor: variable INCOP");
+		std::cout<<"variable INCOP"<<std::endl;
+		std::cout<<$1->getName()<<std::endl;
+		std::cout<<$1->getStartLine()<<std::endl;
 		$$ = new SymbolInfo("factor", "non-terminal");
 
 		if($1->isArray()){
 			// array can't be incremented
+			std::string error_message = "Array can't be incremented";
+			semanticError($1->getStartLine(), error_message);
 		}
 
 		$$->setDataType($1->getDataType());
-		$$->addChildren($1);
+		$$->addChildren({$1, $2});
 	}
 	| variable DECOP {
 		printLog("factor: variable DECOP");
@@ -748,10 +812,12 @@ factor : variable {
 
 		if($1->isArray()){
 			// array can't be decremented
+			std::string error_message = "Array can't be decremented";
+			semanticError($1->getStartLine(), error_message);
 		}
 
 		$$->setDataType($1->getDataType());
-		$$->addChildren($1);
+		$$->addChildren({$1,$2});
 	}
 	;
 

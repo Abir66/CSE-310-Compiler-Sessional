@@ -1,7 +1,19 @@
-Line# 24: Return type mismatch  line with function declaration at line 5
-Line# 28: Variable 'z' already declared at line 1
+Line# 20: Redefinition of parameter 'a'
+Line# 24: Return type mismatch with function declaration at line 5
+Line# 28: 'z' redeclared as different kind of symbol (1)
 Line# 32: Parameter count mismatch with function declaration at line 3
-Line# 49: Parameter size mismatch in function correct_foo at line 11
-Line# 50: Parameter size mismatch in function correct_foo at line 11
-Line# 63: Undeclared function foo5
-Line# 68: Undeclared function printf
+Line# 42: Variable or field 'e' declared void
+Line# 43: Redeclaration of variable a in line 43
+Line# 43: Redeclaration of variable c in line 43
+Line# 48: Array 'c' used as a variable at line 48
+Line# 49: Too few arguments to function 'correct_foo'
+Line# 50: Too many arguments to function 'correct_foo'
+Line# 52: Undeclared variable 'k'
+Line# 53: 'b' is not an array
+Line# 54: Array subscript is not an integer
+Line# 55: Void cannot be used in expression
+Line# 58: Void cannot be used in expression
+Line# 61: Operands of modulus must be integers
+Line# 63: Undeclared function 'foo5'
+Line# 68: Undeclared variable 'h'
+Line# 68: Undeclared function 'printf'
