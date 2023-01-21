@@ -13,6 +13,7 @@ class SymbolInfo
     std::string type;
     std::string dataType;
     SymbolInfo *next;
+    std::string value;
 
     // for parse tree
     bool isTerminal = true;
@@ -81,6 +82,7 @@ public:
     void setStartLine(int startLine) { this->startLine = startLine; }
     void setEndLine(int endLine) { this->endLine = endLine; }
     void setDataType(std::string dataType) { this->dataType = dataType; }
+    void setValue(std::string value) { this->value = value; }
     
     std::string getName() { return name; }
     std::string getType() { return type; }
@@ -88,6 +90,7 @@ public:
     int getStartLine() { return startLine; }
     int getEndLine() { return endLine; }
     std::string getDataType() { return dataType; }
+    std::string getValue() { return value; }
     
     
 

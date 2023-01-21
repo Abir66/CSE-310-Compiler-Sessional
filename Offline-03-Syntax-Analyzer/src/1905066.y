@@ -693,6 +693,12 @@ term : unary_expression {
 			semanticError($3->getStartLine(), error_message);
 		}
 
+		else if(($2->getName() == "/" || $2->getName() == "%") && $3->getValue() == "0"){
+			// division by zero
+			std::string error_message = "Warning: division by zero";
+			semanticError($3->getStartLine(), error_message);
+		}
+
 		$$->addChildren({$1, $2, $3});
 	}
 	;
@@ -728,6 +734,7 @@ unary_expression : ADDOP unary_expression {
 		printLog("unary_expression : factor");
 		$$ = new SymbolInfo("unary_expression", "non-terminal");
 		$$->setDataType($1->getDataType());
+		$$->setValue($1->getValue());
 		$$->addChildren($1);
 	}
 	;
@@ -805,12 +812,14 @@ factor : variable {
 		printLog("factor : CONST_INT");
 		$$ = new SymbolInfo("factor", "non-terminal");
 		$$->setDataType("INT");
+		$$->setValue($1->getName());
 		$$->addChildren($1);
 	}
 	| CONST_FLOAT {
 		printLog("factor : CONST_FLOAT");
 		$$ = new SymbolInfo("factor", "non-terminal");
 		$$->setDataType("FLOAT");
+		$$->setValue($1->getName());
 		$$->addChildren($1);
 	}
 	| variable INCOP {
