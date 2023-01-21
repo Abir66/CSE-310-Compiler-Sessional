@@ -16,6 +16,8 @@ extern int yylineno;
 extern int line_count;
 extern int error_count;
 
+int yylex_destroy(void);
+
 
 //io
 std::ofstream logout;
@@ -71,6 +73,8 @@ void addFunction(SymbolInfo* function, std::string returnType, bool define = fal
 	function->addParams(params);
 	function->setFuncDeclared();
 
+	currentFunction = function;
+
 	if(define){
 		
 		function->setFuncDefined(function->getStartLine());
@@ -100,7 +104,7 @@ void addFunction(SymbolInfo* function, std::string returnType, bool define = fal
 
 	if(!existingFunction->isFunction()){
 		// already a declared variable error
-		std::string error = "'" + function->getName() + "' redeclared as different kind of symbol (" + std::to_string(existingFunction->getStartLine()) + ")";
+		std::string error = "'" + function->getName() + "' redeclared as different kind of symbol";
 		semanticError(function->getStartLine(), error);
 		return;
 	}
@@ -169,11 +173,16 @@ bool checkParamRedeclaration(SymbolInfo* newParam){
 
 void addParamsToScope(){
 	if(currentFunction == NULL) return;
-	for(auto param : currentFunction->getParams()) symbolTable->insert(param);
+	//std::cout<<currentFunction->getName()<<std::endl;
+	for(auto param : currentFunction->getParams()){
+		if(param->getName() != ""){
+			symbolTable->insert(param);symbolTable->insert(param);
+		}
+	} 
 	currentFunction = NULL;
 }
 
-void checkValidVar(SymbolInfo* id, bool isArray = false){
+SymbolInfo* checkValidVar(SymbolInfo* id, bool isArray = false){
 	
 	auto var = symbolTable->lookup(id->getName());
 
@@ -200,6 +209,8 @@ void checkValidVar(SymbolInfo* id, bool isArray = false){
 		std::string error = "Function '" + id->getName() + "' used as a variable at line " + std::to_string(id->getStartLine());
 		semanticError(id->getStartLine(), error);
 	}
+
+	return var;
 }
 
 std::string typecast(SymbolInfo *left_symbol, SymbolInfo *right_symbol){
@@ -286,7 +297,7 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON {
 		$$->addChildren({$1, $2, $3, $4, $5, $6});
 	}
 	| type_specifier ID LPAREN RPAREN SEMICOLON {
-		printLog("func_declaration : type_specifier");
+		printLog("func_declaration : type_specifier ID LPAREN RPAREN SEMICOLON");
 		$$ = new SymbolInfo("func_declaration", $1->getType());
 		$$->setDataType($1->getDataType());
 
@@ -295,7 +306,7 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON {
 	}
 	;
 
-func_definition : type_specifier ID LPAREN parameter_list RPAREN { addFunction($2, $1->getDataType(), true); addParamsToScope();} compound_statement {
+func_definition : type_specifier ID LPAREN parameter_list RPAREN { addFunction($2, $1->getDataType(), true);} compound_statement {
 		printLog("func_definition : type_specifier ID LPAREN parameter_list RPAREN compound_statement");
 		$$ = new SymbolInfo("func_definition", "non-terminal");
 
@@ -348,14 +359,14 @@ parameter_list : parameter_list COMMA type_specifier ID {
 	}
 	;
 
-compound_statement : LCURL {symbolTable->enterScope();} statements RCURL {
+compound_statement : LCURL {symbolTable->enterScope(); addParamsToScope();} statements RCURL {
 		printLog("compound_statement : LCURL statements RCURL");
 		$$ = new SymbolInfo("compound_statement", "non-terminal");
 		$$->addChildren({$1, $3, $4});
 		symbolTable->printAllScopeTable();
 		symbolTable->exitScope();
 	}
-	| LCURL {symbolTable->enterScope();} RCURL {
+	| LCURL {symbolTable->enterScope(); addParamsToScope();} RCURL {
 		printLog("compound_statement : LCURL RCURL");
 		$$ = new SymbolInfo("compound_statement", "non-terminal");
 		$$->addChildren({$1, $3});
@@ -373,7 +384,7 @@ var_declaration : type_specifier declaration_list SEMICOLON {
 		for(auto var : vars){
 			bool success = symbolTable->insert(var);
 			if(!success){
-				std::string error_message = "Redeclaration of variable " + var->getName() + " in line " + std::to_string(var->getStartLine());
+				std::string error_message = "Redeclaration of variable '" + var->getName() + "'";
 				semanticError(var->getStartLine(), error_message);
 			}
 
@@ -475,6 +486,7 @@ statement : var_declaration {
 		printLog("statement : IF LPAREN expression RPAREN statement");
 		$$ = new SymbolInfo("statement", "non-terminal");
 		$$->addChildren({$1, $2, $3, $4, $5});
+		
 	}
 	| IF LPAREN expression RPAREN statement ELSE statement {
 		printLog("statement : IF LPAREN expression RPAREN statement ELSE statement");
@@ -492,7 +504,7 @@ statement : var_declaration {
 
 		// check if ID declared
 		SymbolInfo *symbol = symbolTable->lookup($3->getName());
-		if(symbol) {
+		if(!symbol) {
 			std::string error_message = "Undeclared variable " + $3->getName() + " in line " + std::to_string($3->getStartLine());
 			semanticError($3->getStartLine(), error_message);
 		}
@@ -519,14 +531,16 @@ expression_statement : SEMICOLON {
 	;
 
 variable : ID {
-		printLog("varibale : ID");
-
+		printLog("variable : ID");
 		$$ = new SymbolInfo($1);
 		$$->setName("variable");
 		$$->setType("non-terminal");
 
-		checkValidVar($1);
-		$$->setDataType($1->getDataType());
+		auto symbol = checkValidVar($1);
+		if(symbol) $$->setDataType(symbol->getDataType());
+		else $$->setDataType("ERROR");
+		
+		//$$->setDataType($1->getDataType());
 		
 		$$->addChildren($1);
 	}
@@ -538,8 +552,9 @@ variable : ID {
 		$$->setName("variable");
 		$$->setType("non-terminal");
 
-		checkValidVar($1, true);
-		$$->setDataType($1->getDataType());
+		auto symbol = checkValidVar($1, true);
+		if(symbol) $$->setDataType(symbol->getDataType());
+		else $$->setDataType("ERROR");
 		
 		if($3->getDataType() != "INT"){
 			// index must be integer
@@ -565,14 +580,21 @@ expression : logic_expression {
 		if($3->getDataType() == "VOID"){
 			// can't assign  void
 			$$->setDataType("VOID");
-			std::string error_message = "Void cannot be used in expression";
+			std::string error_message = "Void cannot be used in expression ";
 			semanticError($3->getStartLine(), error_message);
 		}
 
 		else if($1->getDataType() == "VOID"){
 			// can't assign to  void
 			$$->setDataType("VOID");
-			std::string error_message = "Void cannot be used in expression";
+			std::string error_message = "Void cannot be used in expression ";
+			semanticError($1->getStartLine(), error_message);
+		}
+
+		//std::cout<<$1->getStartLine()<<" "<<$1->getDataType()<<" "<<$3->getDataType()<<std::endl;
+
+		if($1->getDataType() == "INT" && $3->getDataType() == "FLOAT"){
+			std::string error_message = "Warning: possible loss of data in assignment of FLOAT to INT";
 			semanticError($1->getStartLine(), error_message);
 		}
 
@@ -666,8 +688,8 @@ term : unary_expression {
 
 		if($2->getName() == "%" && ($1->getDataType() != "INT" || $3->getDataType() != "INT")){
 			// not int in modulus
-			$$->setDataType("ERROR");
-			std::string error_message = "Operands of modulus must be integers";
+			$$->setDataType("INT");
+			std::string error_message = "Operands of modulus must be integers ";
 			semanticError($3->getStartLine(), error_message);
 		}
 
@@ -711,14 +733,14 @@ unary_expression : ADDOP unary_expression {
 	;
 
 factor : variable {
-		printLog("factor: variable");
+		printLog("factor : variable");
 		$$ = new SymbolInfo("factor", "non-terminal");
 		$$->setDataType($1->getDataType());
 		$$->setArray($1->isArray());
 		$$->addChildren($1);
 	}
 	| ID LPAREN argument_list RPAREN {
-		printLog("factor: ID LPAREN argument_list RPAREN");
+		printLog("factor : ID LPAREN argument_list RPAREN");
 		$$ = new SymbolInfo("factor", "non-terminal");
 		$$->setDataType("");
 
@@ -727,6 +749,7 @@ factor : variable {
 		if(!symbol){
 			std::string error_message = "Undeclared function '" + $1->getName() + "'";
 			semanticError($1->getStartLine(), error_message);
+			$$->setDataType("ERROR");
 		}
 		
 		else{
@@ -773,28 +796,25 @@ factor : variable {
 		$$->addChildren({$1, $2, $3, $4});
 	}
 	| LPAREN expression RPAREN {
-		printLog("factor: LPAREN expression RPAREN");
+		printLog("factor : LPAREN expression RPAREN");
 		$$ = new SymbolInfo("factor", "non-terminal");
 		$$->setDataType($2->getDataType());
 		$$->addChildren({$1, $2, $3});
 	}
 	| CONST_INT {
-		printLog("factor: CONST_INT");
+		printLog("factor : CONST_INT");
 		$$ = new SymbolInfo("factor", "non-terminal");
 		$$->setDataType("INT");
 		$$->addChildren($1);
 	}
 	| CONST_FLOAT {
-		printLog("factor: CONST_FLOAT");
+		printLog("factor : CONST_FLOAT");
 		$$ = new SymbolInfo("factor", "non-terminal");
 		$$->setDataType("FLOAT");
 		$$->addChildren($1);
 	}
 	| variable INCOP {
 		printLog("factor: variable INCOP");
-		std::cout<<"variable INCOP"<<std::endl;
-		std::cout<<$1->getName()<<std::endl;
-		std::cout<<$1->getStartLine()<<std::endl;
 		$$ = new SymbolInfo("factor", "non-terminal");
 
 		if($1->isArray()){
@@ -808,6 +828,7 @@ factor : variable {
 	}
 	| variable DECOP {
 		printLog("factor: variable DECOP");
+		
 		$$ = new SymbolInfo("factor", "non-terminal");
 
 		if($1->isArray()){
@@ -851,7 +872,7 @@ arguments : arguments COMMA logic_expression {
 %%
 int main(int argc,char *argv[])
 {
-	FILE* fp, fp2, fp3;
+	FILE* fp;
 
 	if((fp=fopen(argv[1],"r"))==NULL)
 	{
@@ -872,8 +893,8 @@ int main(int argc,char *argv[])
 	errorOut.open("1905066_error.txt");
 	logout.open("1905066_log.txt");
 	parseTreeOut.open("1905066_parseTree.txt");
-	/* std::cout<<"okay"<<std::endl; */
 	yyparse();
+	yylex_destroy();
 	
 	errorOut.close();
 	logout.close();

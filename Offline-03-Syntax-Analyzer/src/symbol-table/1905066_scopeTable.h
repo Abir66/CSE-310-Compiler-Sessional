@@ -165,14 +165,14 @@ public:
 
     // ----------------------destructor----------------------
     ~ScopeTable(){
-        // for(int i = 0; i < bucketSize; i++){
-        //     SymbolInfo* curr = symbolTable[i];
-        //     while(curr != nullptr){
-        //         SymbolInfo* temp = curr;
-        //         curr = curr->getNext();
-        //         delete temp;
-        //     }
-        // }
+        for(int i = 0; i < bucketSize; i++){
+            SymbolInfo* curr = symbolTable[i];
+            while(curr != nullptr){
+                SymbolInfo* temp = curr;
+                curr = curr->getNext();
+                delete temp;
+            }
+        }
         delete[] symbolTable;
     }
 

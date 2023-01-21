@@ -47,7 +47,7 @@ public:
         if(current_scope == nullptr) enterScope();
 
         bool success = current_scope->insert(name, type, out);
-        if(!success) out<< "\t"<<name<<" already exisits in the current ScopeTable"<<std::endl; 
+        //if(!success) out<< "\t"<<name<<" already exisits in the current ScopeTable"<<std::endl; 
         return success;
     }
 
@@ -55,7 +55,7 @@ public:
         if(current_scope == nullptr) enterScope();
 
         bool success = current_scope->insert(symbol, out);
-        if(!success) out<< "\t"<<symbol->getName()<<" already exisits in the current ScopeTable"<<std::endl; 
+        //if(!success) out<< "\t"<<symbol->getName()<<" already exisits in the current ScopeTable"<<std::endl; 
         return success;
     }
 
