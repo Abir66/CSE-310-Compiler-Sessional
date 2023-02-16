@@ -7,7 +7,100 @@ main PROC
 	SUB SP, 2
 	SUB SP, 20
 	SUB SP, 2
-	MOV AX, 5
+	PUSH 5
+	POP AX
+	MOV [BP-2], AX
+	PUSH AX
+	POP AX
+	MOV AX, [BP-2]
+	PUSH AX
+	INC AX
+	MOV [BP-2], AX
+	POP AX
+	MOV [BP-4], AX
+	PUSH AX
+	POP AX
+	MOV AX, [BP-2]
+	CALL print_output
+	CALL new_line
+	MOV AX, [BP-4]
+	CALL print_output
+	CALL new_line
+	MOV AX, [BP-4]
+	PUSH AX
+	DEC AX
+	MOV [BP-4], AX
+	POP AX
+	MOV AX, [BP-4]
+	CALL print_output
+	CALL new_line
+	PUSH 5
+	POP AX
+	MOV [BP-2], AX
+	PUSH AX
+	POP AX
+	PUSH 6
+	POP AX
+	MOV [BP-4], AX
+	PUSH AX
+	POP AX
+	MOV AX, [BP-2]
+	PUSH AX
+	MOV AX, [BP-4]
+	PUSH AX
+	POP BX
+	POP AX
+	CMP AX, BX
+	JL L0
+	PUSH 0
+	JMP L1
+L0:
+	PUSH 1
+L1:
+	POP AX
+	MOV [BP-26], AX
+	PUSH AX
+	POP AX
+	MOV AX, [BP-26]
+	CALL print_output
+	CALL new_line
+	MOV AX, [BP-2]
+	PUSH AX
+	MOV AX, [BP-4]
+	PUSH AX
+	POP BX
+	POP AX
+	CMP AX, BX
+	JG L2
+	PUSH 0
+	JMP L3
+L2:
+	PUSH 1
+L3:
+	POP AX
+	MOV [BP-26], AX
+	PUSH AX
+	POP AX
+	MOV AX, [BP-26]
+	CALL print_output
+	CALL new_line
+	PUSH 5
+	PUSH 6
+	POP BX
+	POP AX
+	XOR DX, DX
+	IMUL BX
+	PUSH AX
+	PUSH 2
+	PUSH 3
+	POP BX
+	POP AX
+	XOR DX, DX
+	IMUL BX
+	PUSH AX
+	POP BX
+	POP AX
+	SUB AX, BX
 	PUSH AX
 	POP AX
 	MOV [BP-2], AX
@@ -16,10 +109,29 @@ main PROC
 	MOV AX, [BP-2]
 	CALL print_output
 	CALL new_line
-	MOV AX, 2
-	PUSH AX
 	MOV AX, [BP-2]
 	PUSH AX
+	PUSH 2
+	POP BX
+	POP AX
+	XOR DX, DX
+	IDIV BX
+	PUSH AX
+	POP AX
+	MOV [BP-4], AX
+	PUSH AX
+	POP AX
+	MOV AX, [BP-4]
+	CALL print_output
+	CALL new_line
+	PUSH 1
+	POP AX
+	MOV [BP-26], AX
+	PUSH AX
+	POP AX
+	MOV AX, [BP-26]
+	PUSH AX
+	PUSH 2
 	POP BX
 	POP AX
 	ADD AX, BX
@@ -29,23 +141,43 @@ main PROC
 	LEA BX, [BP-6]
 	SUB BX, AX
 	PUSH BX
-	MOV AX, 9
+	MOV AX, [BP-2]
+	PUSH AX
+	PUSH 3
+	POP BX
+	POP AX
+	XOR DX, DX
+	IDIV BX
+	PUSH AX
+	PUSH 5
+	PUSH 2
+	POP BX
+	POP AX
+	XOR DX, DX
+	IMUL BX
+	PUSH AX
+	POP BX
+	POP AX
+	ADD AX, BX
+	PUSH AX
+	PUSH 1
+	POP BX
+	POP AX
+	ADD AX, BX
 	PUSH AX
 	POP AX
+	POP BX
 	MOV [BX], AX
-	POP BX
 	PUSH AX
 	POP AX
-	MOV AX, 1
-	PUSH AX
-	MOV AX, [BP-2]
+	PUSH 1
+	MOV AX, [BP-26]
 	PUSH AX
 	POP BX
 	POP AX
 	ADD AX, BX
 	PUSH AX
-	MOV AX, 1
-	PUSH AX
+	PUSH 1
 	POP BX
 	POP AX
 	ADD AX, BX
@@ -55,14 +187,8 @@ main PROC
 	LEA BX, [BP-6]
 	SUB BX, AX
 	PUSH BX
+	POP BX
 	MOV AX, [BX]
-	POP BX
-	PUSH AX
-	MOV AX, 5
-	PUSH AX
-	POP BX
-	POP AX
-	ADD AX, BX
 	PUSH AX
 	POP AX
 	MOV [BP-26], AX
@@ -71,8 +197,37 @@ main PROC
 	MOV AX, [BP-26]
 	CALL print_output
 	CALL new_line
-	MOV AX, 0
+	MOV AX, [BP-26]
 	PUSH AX
+	PUSH 3
+	POP BX
+	POP AX
+	XOR DX, DX
+	IDIV BX
+	PUSH DX
+	POP AX
+	MOV [BP-26], AX
+	PUSH AX
+	POP AX
+	MOV AX, [BP-26]
+	CALL print_output
+	CALL new_line
+	MOV AX, [BP-26]
+	PUSH AX
+	PUSH 3
+	POP BX
+	POP AX
+	XOR DX, DX
+	IDIV BX
+	PUSH DX
+	POP AX
+	MOV [BP-26], AX
+	PUSH AX
+	POP AX
+	MOV AX, [BP-26]
+	CALL print_output
+	CALL new_line
+	PUSH 0
 	ADD SP, 26
 	POP BP
 	MOV AX, 4CH

@@ -6,6 +6,7 @@
 #include<sstream>
 #include<string>
 #include"1905066_parser_helper.h"
+#include"symbol-table/1905066_symbolTable.h"
 
 using namespace std;
 
@@ -53,6 +54,16 @@ void genVarDeclarationCode(){
 void getVarAddress(){
     
 }
+
+void genINC_DEC(SymbolInfo* var, string op){
+    op = op == "++" ? "INC" : "DEC";
+    if(var->isArray() && !var->isGlobalVar()) codeOut<<"\tPOP BX"<<endl;
+    codeOut << "\tMOV AX, " << var->getAsmName() << endl;
+    codeOut << "\tPUSH AX" << endl;
+    codeOut << "\t" << op << " AX" << endl;
+    codeOut << "\tMOV " << var->getAsmName() << ", AX" << endl;
+}
+
 
 
 void genFunctioninitCode(string func_name){

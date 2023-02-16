@@ -701,8 +701,8 @@ static const yytype_int16 yyrline[] =
      163,   163,   171,   196,   202,   208,   216,   223,   231,   239,
      250,   255,   262,   267,   274,   279,   284,   290,   295,   300,
      318,   325,   330,   337,   356,   390,   396,   430,   436,   451,
-     457,   474,   480,   502,   508,   537,   551,   564,   573,   586,
-     642,   648,   659,   666,   679,   695,   701,   707,   714
+     457,   496,   502,   524,   530,   583,   604,   630,   639,   652,
+     708,   714,   726,   733,   749,   768,   774,   780,   787
 };
 #endif
 
@@ -1935,8 +1935,8 @@ yyreduce:
 
 		// ------------------code generation------------------
 		genCode("\tPOP AX");
-		genCode("\tMOV " + (yyvsp[-2].symbolInfo)->getAsmName() + ", AX");
 		if((yyvsp[-2].symbolInfo)->isArray() && !(yyvsp[-2].symbolInfo)->isGlobalVar()) genCode("\tPOP BX");
+		genCode("\tMOV " + (yyvsp[-2].symbolInfo)->getAsmName() + ", AX");
 		genCode("\tPUSH AX");
 	}
 #line 1943 "y.tab.c"
@@ -1998,23 +1998,45 @@ yyreduce:
 
 
 		(yyval.symbolInfo)->addChildren({(yyvsp[-2].symbolInfo), (yyvsp[-1].symbolInfo), (yyvsp[0].symbolInfo)});
+
+		// ------------------code generation------------------
+		string l1 = new_label();
+		string l2 = new_label();
+		string op = (yyvsp[-1].symbolInfo)->getName();
+
+		genCode("\tPOP BX");
+		genCode("\tPOP AX");
+		genCode("\tCMP AX, BX");
+
+		if(op == "<") genCode("\tJL " + l1);
+		else if(op == ">") genCode("\tJG " + l1);
+		else if(op == "<=") genCode("\tJLE " + l1);
+		else if(op == ">=") genCode("\tJGE " + l1);
+		else if(op == "==") genCode("\tJE " + l1);
+		else if(op == "!=") genCode("\tJNE " + l1);
+
+		genCode("\tPUSH 0");
+		genCode("\tJMP " + l2);
+		genCode(l1 + ":");
+		genCode("\tPUSH 1");
+		genCode(l2 + ":");
 	}
-#line 2003 "y.tab.c"
+#line 2025 "y.tab.c"
     break;
 
   case 51: /* simple_expression: term  */
-#line 474 "1905066.y"
+#line 496 "1905066.y"
                          {
 		printLog("simple_expression : term");
 		(yyval.symbolInfo) = new SymbolInfo("simple_expression", "non-terminal");
 		(yyval.symbolInfo)->setDataType((yyvsp[0].symbolInfo)->getDataType());
 		(yyval.symbolInfo)->addChildren((yyvsp[0].symbolInfo));
 	}
-#line 2014 "y.tab.c"
+#line 2036 "y.tab.c"
     break;
 
   case 52: /* simple_expression: simple_expression ADDOP term  */
-#line 480 "1905066.y"
+#line 502 "1905066.y"
                                        {
 		printLog("simple_expression : simple_expression ADDOP term");
 		(yyval.symbolInfo) = new SymbolInfo("simple_expression", "non-terminal");
@@ -2035,22 +2057,22 @@ yyreduce:
 		else genCode("\tSUB AX, BX");
 		genCode("\tPUSH AX");
 	}
-#line 2039 "y.tab.c"
+#line 2061 "y.tab.c"
     break;
 
   case 53: /* term: unary_expression  */
-#line 502 "1905066.y"
+#line 524 "1905066.y"
                         {
 		printLog("term : unary_expression");
 		(yyval.symbolInfo) = new SymbolInfo("term", "non-terminal");
 		(yyval.symbolInfo)->setDataType((yyvsp[0].symbolInfo)->getDataType());
 		(yyval.symbolInfo)->addChildren((yyvsp[0].symbolInfo));
 	}
-#line 2050 "y.tab.c"
+#line 2072 "y.tab.c"
     break;
 
   case 54: /* term: term MULOP unary_expression  */
-#line 508 "1905066.y"
+#line 530 "1905066.y"
                                       {
 		printLog("term : term MULOP unary_expression");
 		(yyval.symbolInfo) = new SymbolInfo("term", "non-terminal");
@@ -2077,12 +2099,36 @@ yyreduce:
 		}
 
 		(yyval.symbolInfo)->addChildren({(yyvsp[-2].symbolInfo), (yyvsp[-1].symbolInfo), (yyvsp[0].symbolInfo)});
+
+		// ---------------------Code generation---------------------
+		genCode("\tPOP BX");
+		genCode("\tPOP AX");
+		genCode("\tXOR DX, DX");
+		if((yyvsp[-1].symbolInfo)->getName() == "*") genCode("\tIMUL BX");
+		else genCode("\tIDIV BX");
+
+		if((yyvsp[-1].symbolInfo)->getName() != "%") genCode("\tPUSH AX");
+		else genCode("\tPUSH DX");
+
+		/*	multiply A x B
+			code : IMUL source
+				A: source
+				B: ax
+				Product (ms 16 bits): dx 
+				Product (ls 16 bits): ax
+
+			division
+			code : IDIV source
+				Divisor: source; Dividend: dx:ax 
+				Quotient: ax; Remainder: dx
+		*/
+		
 	}
-#line 2082 "y.tab.c"
+#line 2128 "y.tab.c"
     break;
 
   case 55: /* unary_expression: ADDOP unary_expression  */
-#line 537 "1905066.y"
+#line 583 "1905066.y"
                                           {
 		printLog("unary_expression : ADDOP unary_expression");
 		(yyval.symbolInfo) = new SymbolInfo("unary_expression", "non-terminal");
@@ -2096,12 +2142,19 @@ yyreduce:
 		}
 
 		(yyval.symbolInfo)->addChildren({(yyvsp[-1].symbolInfo), (yyvsp[0].symbolInfo)});
+
+		// ---------------------Code generation---------------------
+		if((yyvsp[-1].symbolInfo)->getName() == "-"){
+			genCode("\tPOP AX");
+			genCode("\tNEG AX");
+			genCode("\tPUSH AX");
+		}
 	}
-#line 2101 "y.tab.c"
+#line 2154 "y.tab.c"
     break;
 
   case 56: /* unary_expression: NOT unary_expression  */
-#line 551 "1905066.y"
+#line 604 "1905066.y"
                                {
 		printLog("unary_expression : NOT unary_expression");
 		(yyval.symbolInfo) = new SymbolInfo("unary_expression", "non-terminal");
@@ -2114,12 +2167,25 @@ yyreduce:
 			// semanticError($2->getStartLine(), error_message);
 		}
 		(yyval.symbolInfo)->addChildren({(yyvsp[-1].symbolInfo), (yyvsp[0].symbolInfo)});
+
+		// ---------------------Code generation---------------------
+		string label1 = new_label();
+		string label2 = new_label();
+		genCode("\tPOP AX");
+		genCode("\tCMP AX, 0");
+		genCode("\tJNE " + label1);
+		genCode("\tPUSH 1");
+		genCode("\tJMP " + label2);
+		genCode(label1 + ":");
+		genCode("\tPUSH 0");
+		genCode(label2 + ":");
+
 	}
-#line 2119 "y.tab.c"
+#line 2185 "y.tab.c"
     break;
 
   case 57: /* unary_expression: factor  */
-#line 564 "1905066.y"
+#line 630 "1905066.y"
                  {
 		printLog("unary_expression : factor");
 		(yyval.symbolInfo) = new SymbolInfo("unary_expression", "non-terminal");
@@ -2127,11 +2193,11 @@ yyreduce:
 		(yyval.symbolInfo)->setValue((yyvsp[0].symbolInfo)->getValue());
 		(yyval.symbolInfo)->addChildren((yyvsp[0].symbolInfo));
 	}
-#line 2131 "y.tab.c"
+#line 2197 "y.tab.c"
     break;
 
   case 58: /* factor: variable  */
-#line 573 "1905066.y"
+#line 639 "1905066.y"
                   {
 		printLog("factor : variable");
 		(yyval.symbolInfo) = new SymbolInfo("factor", "non-terminal");
@@ -2140,16 +2206,16 @@ yyreduce:
 		(yyval.symbolInfo)->addChildren((yyvsp[0].symbolInfo));
 
 		// ---------------------Code generation---------------------
-		genCode("\tMOV AX, " + (yyvsp[0].symbolInfo)->getAsmName());
 		if((yyvsp[0].symbolInfo)->isArray() && !(yyvsp[0].symbolInfo)->isGlobalVar()) genCode("\tPOP BX");
+		genCode("\tMOV AX, " + (yyvsp[0].symbolInfo)->getAsmName());
 		genCode("\tPUSH AX");
 
 	}
-#line 2149 "y.tab.c"
+#line 2215 "y.tab.c"
     break;
 
   case 59: /* factor: ID LPAREN argument_list RPAREN  */
-#line 586 "1905066.y"
+#line 652 "1905066.y"
                                          {
 		printLog("factor : ID LPAREN argument_list RPAREN");
 		(yyval.symbolInfo) = new SymbolInfo("factor", "non-terminal");
@@ -2206,22 +2272,22 @@ yyreduce:
 		if((yyvsp[-1].symbolInfo)->getChildrenSize() == 0) (yyval.symbolInfo)->addChildren({(yyvsp[-3].symbolInfo), (yyvsp[-2].symbolInfo), (yyvsp[0].symbolInfo)});
 		else (yyval.symbolInfo)->addChildren({(yyvsp[-3].symbolInfo), (yyvsp[-2].symbolInfo), (yyvsp[-1].symbolInfo), (yyvsp[0].symbolInfo)});
 	}
-#line 2210 "y.tab.c"
+#line 2276 "y.tab.c"
     break;
 
   case 60: /* factor: LPAREN expression RPAREN  */
-#line 642 "1905066.y"
+#line 708 "1905066.y"
                                    {
 		printLog("factor : LPAREN expression RPAREN");
 		(yyval.symbolInfo) = new SymbolInfo("factor", "non-terminal");
 		(yyval.symbolInfo)->setDataType((yyvsp[-1].symbolInfo)->getDataType());
 		(yyval.symbolInfo)->addChildren({(yyvsp[-2].symbolInfo), (yyvsp[-1].symbolInfo), (yyvsp[0].symbolInfo)});
 	}
-#line 2221 "y.tab.c"
+#line 2287 "y.tab.c"
     break;
 
   case 61: /* factor: CONST_INT  */
-#line 648 "1905066.y"
+#line 714 "1905066.y"
                     {
 		printLog("factor : CONST_INT");
 		(yyval.symbolInfo) = new SymbolInfo("factor", "non-terminal");
@@ -2230,14 +2296,15 @@ yyreduce:
 		(yyval.symbolInfo)->addChildren((yyvsp[0].symbolInfo));
 
 		// ---------------------Code generation---------------------
-		genCode("\tMOV AX, " + (yyvsp[0].symbolInfo)->getName());
-		genCode("\tPUSH AX");
+		// genCode("\tMOV AX, " + $1->getName());
+		// genCode("\tPUSH AX");
+		genCode("\tPUSH " + (yyvsp[0].symbolInfo)->getName());
 	}
-#line 2237 "y.tab.c"
+#line 2304 "y.tab.c"
     break;
 
   case 62: /* factor: CONST_FLOAT  */
-#line 659 "1905066.y"
+#line 726 "1905066.y"
                       {
 		printLog("factor : CONST_FLOAT");
 		(yyval.symbolInfo) = new SymbolInfo("factor", "non-terminal");
@@ -2245,11 +2312,11 @@ yyreduce:
 		(yyval.symbolInfo)->setValue((yyvsp[0].symbolInfo)->getName());
 		(yyval.symbolInfo)->addChildren((yyvsp[0].symbolInfo));
 	}
-#line 2249 "y.tab.c"
+#line 2316 "y.tab.c"
     break;
 
   case 63: /* factor: variable INCOP  */
-#line 666 "1905066.y"
+#line 733 "1905066.y"
                          {
 		printLog("factor: variable INCOP");
 		(yyval.symbolInfo) = new SymbolInfo("factor", "non-terminal");
@@ -2262,12 +2329,15 @@ yyreduce:
 
 		(yyval.symbolInfo)->setDataType((yyvsp[-1].symbolInfo)->getDataType());
 		(yyval.symbolInfo)->addChildren({(yyvsp[-1].symbolInfo), (yyvsp[0].symbolInfo)});
+
+		// ---------------------Code generation---------------------
+		genINC_DEC((yyvsp[-1].symbolInfo), "++");
 	}
-#line 2267 "y.tab.c"
+#line 2337 "y.tab.c"
     break;
 
   case 64: /* factor: variable DECOP  */
-#line 679 "1905066.y"
+#line 749 "1905066.y"
                          {
 		printLog("factor: variable DECOP");
 		
@@ -2281,32 +2351,35 @@ yyreduce:
 
 		(yyval.symbolInfo)->setDataType((yyvsp[-1].symbolInfo)->getDataType());
 		(yyval.symbolInfo)->addChildren({(yyvsp[-1].symbolInfo),(yyvsp[0].symbolInfo)});
+
+		// ---------------------Code generation---------------------
+		genINC_DEC((yyvsp[-1].symbolInfo), "--");
 	}
-#line 2286 "y.tab.c"
+#line 2359 "y.tab.c"
     break;
 
   case 65: /* argument_list: arguments  */
-#line 695 "1905066.y"
+#line 768 "1905066.y"
                           {
 		printLog("argument_list : arguments");
 		(yyval.symbolInfo) = new SymbolInfo("argument_list", "non-terminal");
 		(yyval.symbolInfo)->setParams((yyvsp[0].symbolInfo)->getParams());
 		(yyval.symbolInfo)->addChildren((yyvsp[0].symbolInfo));
 	}
-#line 2297 "y.tab.c"
+#line 2370 "y.tab.c"
     break;
 
   case 66: /* argument_list: %empty  */
-#line 701 "1905066.y"
+#line 774 "1905066.y"
           {
 		printLog("argument_list : ");
 		(yyval.symbolInfo) = new SymbolInfo("argument_list", "non-terminal");
 	}
-#line 2306 "y.tab.c"
+#line 2379 "y.tab.c"
     break;
 
   case 67: /* arguments: arguments COMMA logic_expression  */
-#line 707 "1905066.y"
+#line 780 "1905066.y"
                                              {
 		printLog("arguments : arguments COMMA logic_expression");
 		(yyval.symbolInfo) = new SymbolInfo("arguments", "non-terminal");
@@ -2314,22 +2387,22 @@ yyreduce:
 		(yyval.symbolInfo)->addParam((yyvsp[0].symbolInfo));					 
 		(yyval.symbolInfo)->addChildren({(yyvsp[-2].symbolInfo), (yyvsp[-1].symbolInfo), (yyvsp[0].symbolInfo)});
 	}
-#line 2318 "y.tab.c"
+#line 2391 "y.tab.c"
     break;
 
   case 68: /* arguments: logic_expression  */
-#line 714 "1905066.y"
+#line 787 "1905066.y"
                            {
 		printLog("arguments : logic_expression");
 		(yyval.symbolInfo) = new SymbolInfo("arguments", "non-terminal");
 		(yyval.symbolInfo)->addParam((yyvsp[0].symbolInfo));
 		(yyval.symbolInfo)->addChildren((yyvsp[0].symbolInfo));
 	}
-#line 2329 "y.tab.c"
+#line 2402 "y.tab.c"
     break;
 
 
-#line 2333 "y.tab.c"
+#line 2406 "y.tab.c"
 
       default: break;
     }
@@ -2522,7 +2595,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 722 "1905066.y"
+#line 795 "1905066.y"
 
 int main(int argc,char *argv[])
 {

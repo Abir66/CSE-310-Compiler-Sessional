@@ -421,8 +421,8 @@ expression : logic_expression {
 
 		// ------------------code generation------------------
 		genCode("\tPOP AX");
-		genCode("\tMOV " + $1->getAsmName() + ", AX");
 		if($1->isArray() && !$1->isGlobalVar()) genCode("\tPOP BX");
+		genCode("\tMOV " + $1->getAsmName() + ", AX");
 		genCode("\tPUSH AX");
 	}
 	;
@@ -468,6 +468,28 @@ rel_expression : simple_expression {
 
 
 		$$->addChildren({$1, $2, $3});
+
+		// ------------------code generation------------------
+		string l1 = new_label();
+		string l2 = new_label();
+		string op = $2->getName();
+
+		genCode("\tPOP BX");
+		genCode("\tPOP AX");
+		genCode("\tCMP AX, BX");
+
+		if(op == "<") genCode("\tJL " + l1);
+		else if(op == ">") genCode("\tJG " + l1);
+		else if(op == "<=") genCode("\tJLE " + l1);
+		else if(op == ">=") genCode("\tJGE " + l1);
+		else if(op == "==") genCode("\tJE " + l1);
+		else if(op == "!=") genCode("\tJNE " + l1);
+
+		genCode("\tPUSH 0");
+		genCode("\tJMP " + l2);
+		genCode(l1 + ":");
+		genCode("\tPUSH 1");
+		genCode(l2 + ":");
 	}
 	;
 
@@ -531,6 +553,30 @@ term : unary_expression {
 		}
 
 		$$->addChildren({$1, $2, $3});
+
+		// ---------------------Code generation---------------------
+		genCode("\tPOP BX");
+		genCode("\tPOP AX");
+		genCode("\tXOR DX, DX");
+		if($2->getName() == "*") genCode("\tIMUL BX");
+		else genCode("\tIDIV BX");
+
+		if($2->getName() != "%") genCode("\tPUSH AX");
+		else genCode("\tPUSH DX");
+
+		/*	multiply A x B
+			code : IMUL source
+				A: source
+				B: ax
+				Product (ms 16 bits): dx 
+				Product (ls 16 bits): ax
+
+			division
+			code : IDIV source
+				Divisor: source; Dividend: dx:ax 
+				Quotient: ax; Remainder: dx
+		*/
+		
 	}
 	;
 
@@ -547,6 +593,13 @@ unary_expression : ADDOP unary_expression {
 		}
 
 		$$->addChildren({$1, $2});
+
+		// ---------------------Code generation---------------------
+		if($1->getName() == "-"){
+			genCode("\tPOP AX");
+			genCode("\tNEG AX");
+			genCode("\tPUSH AX");
+		}
 	}
 	| NOT unary_expression {
 		printLog("unary_expression : NOT unary_expression");
@@ -560,6 +613,19 @@ unary_expression : ADDOP unary_expression {
 			// semanticError($2->getStartLine(), error_message);
 		}
 		$$->addChildren({$1, $2});
+
+		// ---------------------Code generation---------------------
+		string label1 = new_label();
+		string label2 = new_label();
+		genCode("\tPOP AX");
+		genCode("\tCMP AX, 0");
+		genCode("\tJNE " + label1);
+		genCode("\tPUSH 1");
+		genCode("\tJMP " + label2);
+		genCode(label1 + ":");
+		genCode("\tPUSH 0");
+		genCode(label2 + ":");
+
 	}
 	| factor {
 		printLog("unary_expression : factor");
@@ -578,8 +644,8 @@ factor : variable {
 		$$->addChildren($1);
 
 		// ---------------------Code generation---------------------
-		genCode("\tMOV AX, " + $1->getAsmName());
 		if($1->isArray() && !$1->isGlobalVar()) genCode("\tPOP BX");
+		genCode("\tMOV AX, " + $1->getAsmName());
 		genCode("\tPUSH AX");
 
 	}
@@ -653,8 +719,9 @@ factor : variable {
 		$$->addChildren($1);
 
 		// ---------------------Code generation---------------------
-		genCode("\tMOV AX, " + $1->getName());
-		genCode("\tPUSH AX");
+		// genCode("\tMOV AX, " + $1->getName());
+		// genCode("\tPUSH AX");
+		genCode("\tPUSH " + $1->getName());
 	}
 	| CONST_FLOAT {
 		printLog("factor : CONST_FLOAT");
@@ -675,6 +742,9 @@ factor : variable {
 
 		$$->setDataType($1->getDataType());
 		$$->addChildren({$1, $2});
+
+		// ---------------------Code generation---------------------
+		genINC_DEC($1, "++");
 	}
 	| variable DECOP {
 		printLog("factor: variable DECOP");
@@ -689,6 +759,9 @@ factor : variable {
 
 		$$->setDataType($1->getDataType());
 		$$->addChildren({$1,$2});
+
+		// ---------------------Code generation---------------------
+		genINC_DEC($1, "--");
 	}
 	;
 
