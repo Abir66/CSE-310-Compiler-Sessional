@@ -307,6 +307,11 @@ statement : var_declaration {
 			std::string error_message = "Undeclared variable " + $3->getName() + " in line " + std::to_string($3->getStartLine());
 			semanticError($3->getStartLine(), error_message);
 		}
+		else{
+			genCode("\tMOV AX, " + symbol->getAsmName());
+			genCode("\tCALL print_output");
+			genCode("\tCALL new_line");
+		}
 
 		$$->addChildren({$1, $2, $3, $4, $5});
 	}
@@ -350,13 +355,17 @@ variable : ID {
 	}
 	| ID LTHIRD expression RTHIRD {
 		printLog("variable : ID LTHIRD expression RTHIRD");
+
 		$1->setArray();
+
+		auto symbol = checkValidVar($1, true);
+		if(symbol) $$ = new SymbolInfo(symbol);
+		else $$ = new SymbolInfo($1);
 		
-		$$ = new SymbolInfo($1);
 		$$->setName("variable");
 		$$->setType("non-terminal");
 
-		auto symbol = checkValidVar($1, true);
+		
 		if(symbol) $$->setDataType(symbol->getDataType());
 		else $$->setDataType("ERROR");
 		
@@ -367,6 +376,14 @@ variable : ID {
 		}
 		
 		$$->addChildren({$1, $2, $3, $4});
+
+		// ------------------code generation------------------
+		genCode("\tPOP AX");							// get the value of index from expression(stack)
+		genCode("\tSHL AX, 1"); 						// multiply by 2
+		genCode("\tLEA BX, " + symbol->getAsmName()); 	// get the address of array[0]
+		genCode("\tSUB BX, AX"); 						// get the address of array[index]
+		genCode("\tPUSH BX"); 							// push the address of array[index] to stack
+		$$->setAsmName("[BX]"); 
 	}
 	;
 
@@ -403,11 +420,10 @@ expression : logic_expression {
 		$$->addChildren({$1, $2, $3});
 
 		// ------------------code generation------------------
-		if(!$1->isArray()){
-			genCode("\tPOP AX");
-			genCode("\tMOV " + $1->getAsmName() + ", AX");
-			genCode("\tPUSH AX");
-		}	
+		genCode("\tPOP AX");
+		genCode("\tMOV " + $1->getAsmName() + ", AX");
+		if($1->isArray() && !$1->isGlobalVar()) genCode("\tPOP BX");
+		genCode("\tPUSH AX");
 	}
 	;
 
@@ -560,6 +576,12 @@ factor : variable {
 		$$->setDataType($1->getDataType());
 		$$->setArray($1->isArray());
 		$$->addChildren($1);
+
+		// ---------------------Code generation---------------------
+		genCode("\tMOV AX, " + $1->getAsmName());
+		if($1->isArray() && !$1->isGlobalVar()) genCode("\tPOP BX");
+		genCode("\tPUSH AX");
+
 	}
 	| ID LPAREN argument_list RPAREN {
 		printLog("factor : ID LPAREN argument_list RPAREN");

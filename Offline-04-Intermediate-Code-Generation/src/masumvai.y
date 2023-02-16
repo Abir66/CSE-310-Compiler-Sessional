@@ -10,41 +10,6 @@
 %%
 
 
-statements : statement {
-		logRule( "statements : statement",*$1);
-		$$ = $1;
-	}
-	| statements statement {
-		string code = *$1 + "\n"+ *$2;
-		logRule( "statements : statements statement",code);
-		$$ = new string(code);
-		delete $1;delete $2;
-	}
-	;
-statement : expression_statement {
-		logRule("statement : expression_statement",$1->getName());
-		genCodeln("\t\tPOP AX", "evaluated exp: "+$1->getName()+"\n");
-		$$ = new string($1->getName()); delete $1;
-	}
-	| compound_statement {
-		logRule("statement : compound_statement",*$1); // auto $$ = $1;
-	}
-	
-	| PRINTLN LPAREN ID RPAREN SEMICOLON {
-		string code = "println("+$3->getName()+");";
-		logRule("statement : PRINTLN LPAREN ID RPAREN SEMICOLON",code);
-		SymbolInfo* info = table.lookup($3->getName());
-		if(info==nullptr){
-			logError("Undeclared variable  "+$3->getName());
-		}else{
-			addCommentln("println("+$3->getName()+")");
-			genCodeln("\t\tMOV BX, "+info->getAsmName(), "load "+$3->getName());
-			genCodeln("\t\tCALL PRINT_NUM_FROM_BX");
-		}
-		$$ = new string(code);
-		delete $3;
-	}
-;
 
 expression_statement : SEMICOLON {
 		logRule("expression_statement : SEMICOLON",";");
@@ -52,13 +17,7 @@ expression_statement : SEMICOLON {
 		genCodeln("\t\tPUSH 1\n"); 
 		$$ = new SymbolInfo(";", "nonterminal");
 	}			
-	| expression SEMICOLON {
-		string code = $1->getName() + ";";
-		logRule("expression_statement : expression SEMICOLON",code);
-		$$ = new SymbolInfo(code, "nonterminal");
-		delete $1;
-	}
-	;
+
 //SymbolInfo* // variable access  // no code gen
 variable : ID { 
 		SymbolInfo *info = table.lookup($1->getName());

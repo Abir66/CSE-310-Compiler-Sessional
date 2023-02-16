@@ -40,14 +40,18 @@ void genCode(string code){
 void genVarDeclarationCode(){
     if(!inGlobalScope){
         for(auto var : vars){
+            var->setStackOffset(stack_offset+2);
+            string asmName = "[BP-" + to_string(stack_offset+2) + "]";
+            var->setAsmName(asmName);
             int size = max(var->getArraySize(),1) * 2;
             stack_offset += size;
-            var->setStackOffset(stack_offset);
             codeOut << "\tSUB SP, " << size << endl;
-            string asmName = "[BP-" + to_string(stack_offset) + "]";
-            var->setAsmName(asmName);
         }
     }
+}
+
+void getVarAddress(){
+    
 }
 
 
