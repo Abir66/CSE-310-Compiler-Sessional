@@ -1,0 +1,14 @@
+Line# 17: Operands of modulus must be integers 
+Line# 18: Warning: possible loss of data in assignment of FLOAT to INT
+Line# 20: Array subscript is not an integer
+Line# 24: Redeclaration of variable 'i'
+Line# 27: Undeclared variable 'j'
+Line# 37: i is not a function
+Line# 44: Too few arguments to function 'mul_float'
+Line# 45: Warning: possible loss of data in assignment of FLOAT to INT
+Line# 50: Void cannot be used in expression 
+Line# 55: Parameter count mismatch with function declaration at line 5
+Line# 64: Undeclared function 'print'
+Line# 65: Undeclared function 'print'
+Line# 66: Undeclared function 'print'
+Line# 67: Undeclared function 'print'

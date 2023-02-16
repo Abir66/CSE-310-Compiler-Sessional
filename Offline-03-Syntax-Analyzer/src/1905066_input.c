@@ -1,72 +1,68 @@
-int x,y,z; float a;
+int a, b;
 
-int var(int a,int b);
+float x, y;
 
-int foo3(int a, int b);
+int add_int(int, int);
 
-int func(int c, int d){
-	return 7;
+float mul_float(float, float, float);
+
+void print_global();
+
+int main() {
+    int list[5], another_list[5], i;
+
+    // a - 1+2-3}4;  // Syntax Error
+    // x = 2.3,4.7;  // Syntax Error
+
+    x = 1+2*3-4/2+(7.1%3);  // Type mismatch (Error/Warning): float = int, Operand of modulus is float (Error)
+    a = 2.3*4.7;  // Type mismatch (Error/Warning): int = float
+
+    list[1] = a+list[0.4]+another_list[0];  // Index of an array is not an integer (Error)
+
+    {
+        int i, j;
+        int i;  // Same name of variables declared in the same scope (Error)
+    }
+
+    j = 7.5;  // Undeclared variable in this scope (Error)
+
+    for(i=0; i<5; i++) {
+        //list[]++;  // No index provided for array (Error)
+    }
+
+  /*  while(a<=0) [  // Syntax Error
+        a--;
+    ]
+  */
+    i();  // Undeclared (or undefined) function called with an existing variable name (Error)
+
+    if(list[4]>10 || another_list[4]>=10) {
+        i = !0;
+    }
+
+    if(a==0 && x!=3.9) {
+        y = mul_float(1.2, 2.5*2.0);  // Function called with improper number of arguments (Error)
+        b = mul_float(1.2, 2.5, 2.0);  // Type mismatch (Error/Warning): float = return(int)
+    } else {
+        b = -add_int(4.1, 7);  // Argument type inconsistent with function declaration (Error)
+    }
+
+    list[2] = print_global();  // Void function calling is part of an assignment expression (Error)
+
+    return 0;
 }
 
-int correct_foo(int a, float b){
-	return a+3;
+int add_int(int a, int b, int c) {  // Inconsistent function definition with its declaration (Error)
+    return a+b;
 }
 
-
-void foo(int a){
-	y = 6;
+float mul_float(float x, float y, float z) {
+    return x*y*z;
 }
 
-int foo2(int a, int a, float b){
-	return a + 2;
-}
-
-void foo3(int a , int b){
-	y = 7;
-}
-
-int z(int d){
-	return d;
-}
-
-int var(int a){
-	return a;
-}
-
-void foo4(int a){
-	return a+3;
-}
-
-int main(){
-	int a,b,c[4],dd,ee;	
-	void e;
-	float a,c[7];
-	
-	func(2.5,3.5);
-	
-	
-	a = correct_foo(a,c);
-	b = correct_foo(a);
-	dd = correct_foo(a, b, a);
-	
-	k = 5+2;
-	b[5] = 7;
-	c[2.5] = 8;
-	c[0] = 2 + 5 * foo4(7);
-	c[1] = 5;
-	foo4(c[1]);
-	c[2] = foo4(c[1]);
-	c[3] = 2.7;
-	b = 5%0;
-	b = 2%3.5;
-	
-	dd = foo5(a);
-	
-	
-	
-	
-	printf(h);
-	return 0;
-	
-	
+void print_global() {
+    print(a);
+    print(b);
+    print(x);
+    print(y);
 }

@@ -5,229 +5,16 @@
 #include<cstring>
 #include<cmath>
 #include"symbol-table/1905066_symbolTable.h"
-//#define YYSTYPE SymbolInfo*
+#include"1905066_parser_helper.h"
+#include"1905066_ICG_helper.h"
 
 using namespace std;
-
-int yyparse(void); 
-int yylex(void);
-extern FILE *yyin;
-extern int yylineno;
-extern int line_count;
-extern int error_count;
-
-int yylex_destroy(void);
-
-
-//io
-std::ofstream logout;
-std::ofstream errorOut;
-std::ofstream parseTreeOut;
-
-
-SymbolTable *symbolTable = new SymbolTable(11, logout);
-
-std::vector<SymbolInfo*> vars, params;
-SymbolInfo* currentFunction = NULL;
-
-
-void yyerror(char *s)
-{
-	logout<<"Error at line no "<<line_count<<": "<<s<<endl;
-	error_count++;
-}
-
-
-void printLog(std::string str){
-	logout<<str<<std::endl;
-}
-
-void semanticError(int lineno, std::string error_text){
-	errorOut<<"Line# "<<lineno<<": "<<error_text<<std::endl;
-	error_count++;
-}
-
-
-void printParseTree(SymbolInfo* symbol, int indent){
-	// print indent number of spaces
-	for(int i = 0; i < indent; i++) parseTreeOut<<" ";
-
-	// print the symbol
-	symbol->printParseGrammarRule(parseTreeOut);
-
-	// print the children
-	for(auto child : symbol->getChildren()) printParseTree(child, indent + 1);
-
-	// delete the symbol
-	if(symbol) delete symbol;
-}
-
-void setVarsDataType(std::string dataType){
-	for(auto var : vars) var->setDataType(dataType);
-}
-
-
-void addFunction(SymbolInfo* function, std::string returnType, bool define = false){
-
-	function->setDataType(returnType);
-	function->addParams(params);
-	function->setFuncDeclared();
-
-	currentFunction = function;
-
-	if(define){
-		
-		function->setFuncDefined(function->getStartLine());
-		
-		for(auto param : params){
-			if(param->getName() == ""){
-				// unnamed parameter error
-				std::string error = "Unnamed parameter at line " + std::to_string(param->getStartLine());
-				semanticError(param->getStartLine(), error);
-			}
-		}
-	}
-	
-	params.clear();
-	
-	bool success = symbolTable->insert(function);
-	//addParamsToScope();
-
-	if(success) {
-		currentFunction = function;
-		return;
-	} 
-	
-
-	SymbolInfo* existingFunction = symbolTable->lookup(function->getName());
-
-
-	if(!existingFunction->isFunction()){
-		// already a declared variable error
-		std::string error = "'" + function->getName() + "' redeclared as different kind of symbol";
-		semanticError(function->getStartLine(), error);
-		return;
-	}
-
-	else if(existingFunction->isFuncDefined()){
-		// function already defined error
-		std::string error = "Function '" + function->getName() + "' already defined at line " + std::to_string(existingFunction->getDefinedLine());
-		semanticError(function->getStartLine(), error);
-	}
-
-	else if(existingFunction->isFuncDeclared() && !define) {
-		// multiple declaration error
-		std::string error = "Function '" + function->getName() + "' already declared at line " + std::to_string(existingFunction->getStartLine());
-		semanticError(function->getStartLine(), error);
-	}
-
-	else if(existingFunction->isFuncDeclared() && define){
-		
-
-		if(existingFunction->getDataType() != returnType){
-			// return type mismatch error
-			std::string error = "Return type mismatch with function declaration at line " + std::to_string(existingFunction->getStartLine());
-			semanticError(function->getStartLine(), error);
-		}
-
-		else if(existingFunction->getParamCount() != function->getParamCount()){
-			// parameter count mismatch error
-			std::string error = "Parameter count mismatch with function declaration at line " + std::to_string(existingFunction->getStartLine());
-			semanticError(function->getStartLine(), error);
-		}
-
-		else {
-
-			auto existingParams = existingFunction->getParams();
-			auto newParams = function->getParams();
-
-			for(int i = 0; i < existingParams.size(); i++){
-				if(existingParams[i]->getDataType() != newParams[i]->getDataType()){
-					// parameter type mismatch error
-					std::string error = "Parameter type mismatch (for parameter : " + existingParams[i]->getName() + ") with function declaration at line " + std::to_string(existingFunction->getStartLine());
-					semanticError(function->getStartLine(), error);
-				}
-			}
-
-			//existingFunction->setDefined();
-			existingFunction->setParams(newParams);
-			currentFunction = function;
-		}
-	}
-
-	if(define && existingFunction->isFunction()) existingFunction->setFuncDefined(function->getStartLine());
-
-}
-
-bool checkParamRedeclaration(SymbolInfo* newParam){
-	for(auto param : params){
-		if(param->getName() == newParam->getName()){
-			// parameter redeclaration error
-			std::string error = "Redefinition of parameter '" + newParam->getName() + "'";
-			semanticError(newParam->getStartLine(), error);
-			return true;
-		}
-	}
-	return false;
-}
-
-void addParamsToScope(){
-	if(currentFunction == NULL) return;
-	//std::cout<<currentFunction->getName()<<std::endl;
-	for(auto param : currentFunction->getParams()){
-		if(param->getName() != ""){
-			symbolTable->insert(param);symbolTable->insert(param);
-		}
-	} 
-	currentFunction = NULL;
-}
-
-SymbolInfo* checkValidVar(SymbolInfo* id, bool isArray = false){
-	
-	auto var = symbolTable->lookup(id->getName());
-
-	if(!var){
-		// undeclared variable error
-		std::string error = "Undeclared variable '" + id->getName() + "'";
-		semanticError(id->getStartLine(), error);
-	}
-
-	else if(isArray && !var->isArray()){
-		// array
-		std::string error = "'" + id->getName() + "' is not an array";
-		semanticError(id->getStartLine(), error);
-	}
-
-	else if(!isArray && var->isArray()){
-		// array
-		std::string error = "Array '" + id->getName() + "' used as a variable at line " + std::to_string(id->getStartLine());
-		semanticError(id->getStartLine(), error); 
-	}
-
-	else if(var->isFunction()){
-		// function call error
-		std::string error = "Function '" + id->getName() + "' used as a variable at line " + std::to_string(id->getStartLine());
-		semanticError(id->getStartLine(), error);
-	}
-
-	return var;
-}
-
-std::string typecast(SymbolInfo *left_symbol, SymbolInfo *right_symbol){
-	if(left_symbol->getDataType() == "VOID" || right_symbol->getDataType() == "VOID") return "VOID"; // error
-	else if(left_symbol->getDataType() == "DOUBLE" || right_symbol->getDataType() == "DOUBLE") return "DOUBLE";
-	else if(left_symbol->getDataType() == "FLOAT" || right_symbol->getDataType() == "FLOAT") return "FLOAT";
-	else return "INT";
-}
-
-
 
 %}
 
 
 %union{
     SymbolInfo* symbolInfo; 
-	
 }
 
 %token<symbolInfo>  IF ELSE FOR WHILE DO BREAK RETURN SWITCH CASE DEFAULT CONTINUE  LPAREN RPAREN LCURL RCURL LTHIRD RTHIRD COMMA SEMICOLON PRINTLN INCOP DECOP ASSIGNOP NOT
@@ -235,7 +22,6 @@ std::string typecast(SymbolInfo *left_symbol, SymbolInfo *right_symbol){
 
 %type<symbolInfo> variable factor term unary_expression simple_expression rel_expression logic_expression expression
 %type<symbolInfo> start program unit func_declaration func_definition parameter_list compound_statement var_declaration type_specifier declaration_list statements statement expression_statement argument_list arguments
-
 
 
 %nonassoc LOWER_THAN_ELSE
@@ -246,14 +32,9 @@ std::string typecast(SymbolInfo *left_symbol, SymbolInfo *right_symbol){
 
 
 start : program {
-		printLog("start : program");
-		logout<<"Total Lines: "<<line_count<<std::endl;
-		logout<<"Total Errors: "<<error_count<<std::endl;
-
 		$$ = new SymbolInfo("start", "non-terminal");
 		$$->addChildren($1);
-		printParseTree($$, 0);
-		delete symbolTable;
+		finishParsing($$);
 	};
 
 program : program unit {
@@ -306,16 +87,29 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON {
 	}
 	;
 
-func_definition : type_specifier ID LPAREN parameter_list RPAREN { addFunction($2, $1->getDataType(), true);} compound_statement {
+func_definition : type_specifier ID LPAREN parameter_list RPAREN { 
+		addFunction($2, $1->getDataType(), true);
+		inGlobalScope = false;
+		genFunctioninitCode($2->getName());
+	} compound_statement {
 		printLog("func_definition : type_specifier ID LPAREN parameter_list RPAREN compound_statement");
 		$$ = new SymbolInfo("func_definition", "non-terminal");
 
 		$$->addChildren({$1, $2, $3, $4, $5, $7});
+		
+		genFunctionEndingCode($2->getName());
+		
 	}
-	| type_specifier ID LPAREN RPAREN { addFunction($2, $1->getDataType(), true); } compound_statement {
+	| type_specifier ID LPAREN RPAREN { 
+		addFunction($2, $1->getDataType(), true); 
+		inGlobalScope = false;
+		genFunctioninitCode($2->getName());
+	} compound_statement {
 		printLog("func_definition : type_specifier ID LPAREN RPAREN compound_statement");
 		$$ = new SymbolInfo("func_definition", "non-terminal");
 		$$->addChildren({$1, $2, $3, $4, $6});
+		
+		genFunctionEndingCode($2->getName());
 	}
 	;
 
@@ -380,6 +174,8 @@ var_declaration : type_specifier declaration_list SEMICOLON {
 		setVarsDataType($1->getDataType());
 		$$->addChildren({$1, $2, $3});
 
+		genVarDeclarationCode();
+
 		// insert in symbol table
 		for(auto var : vars){
 			bool success = symbolTable->insert(var);
@@ -393,6 +189,7 @@ var_declaration : type_specifier declaration_list SEMICOLON {
 				semanticError(var->getStartLine(), error_message);
 			}
 		}
+
 	}
 	;
 
@@ -471,6 +268,8 @@ statement : var_declaration {
 		printLog("statement : expression statement");
 		$$ = new SymbolInfo("statement", "non-terminal");
 		$$->addChildren($1);
+		//------------------code generation------------------
+		genCode("\tPOP AX");
 	}
 	| compound_statement {
 		printLog("statement : compound_statement");
@@ -532,17 +331,22 @@ expression_statement : SEMICOLON {
 
 variable : ID {
 		printLog("variable : ID");
-		$$ = new SymbolInfo($1);
+		
+		auto symbol = checkValidVar($1);
+		
+		if(symbol) $$ = new SymbolInfo(symbol);
+		else $$ = new SymbolInfo($1);
+		
 		$$->setName("variable");
 		$$->setType("non-terminal");
 
-		auto symbol = checkValidVar($1);
+		
 		if(symbol) $$->setDataType(symbol->getDataType());
 		else $$->setDataType("ERROR");
-		
-		//$$->setDataType($1->getDataType());
-		
 		$$->addChildren($1);
+
+		// ------------------code generation------------------
+		// asmName is set in copy constructor
 	}
 	| ID LTHIRD expression RTHIRD {
 		printLog("variable : ID LTHIRD expression RTHIRD");
@@ -591,14 +395,19 @@ expression : logic_expression {
 			semanticError($1->getStartLine(), error_message);
 		}
 
-		//std::cout<<$1->getStartLine()<<" "<<$1->getDataType()<<" "<<$3->getDataType()<<std::endl;
-
 		if($1->getDataType() == "INT" && $3->getDataType() == "FLOAT"){
 			std::string error_message = "Warning: possible loss of data in assignment of FLOAT to INT";
 			semanticError($1->getStartLine(), error_message);
 		}
 
 		$$->addChildren({$1, $2, $3});
+
+		// ------------------code generation------------------
+		if(!$1->isArray()){
+			genCode("\tPOP AX");
+			genCode("\tMOV " + $1->getAsmName() + ", AX");
+			genCode("\tPUSH AX");
+		}	
 	}
 	;
 
@@ -658,13 +467,19 @@ simple_expression : term {
 		$$->setDataType(typecast($1, $3));
 
 		if($3->getDataType() == "VOID"){
-			// std::string error_message = "Can't add void";
-			// semanticError($3->getStartLine(), error_message);
+			std::string error_message = "Can't add void";
+			semanticError($3->getStartLine(), error_message);
 			$$->setDataType("VOID");
-
 		}
 
 		$$->addChildren({$1, $2, $3});
+
+		// ---------------------Code generation---------------------
+		genCode("\tPOP BX");
+		genCode("\tPOP AX");
+		if($2->getName() == "+") genCode("\tADD AX, BX");
+		else genCode("\tSUB AX, BX");
+		genCode("\tPUSH AX");
 	}
 	;
 
@@ -814,6 +629,10 @@ factor : variable {
 		$$->setDataType("INT");
 		$$->setValue($1->getName());
 		$$->addChildren($1);
+
+		// ---------------------Code generation---------------------
+		genCode("\tMOV AX, " + $1->getName());
+		genCode("\tPUSH AX");
 	}
 	| CONST_FLOAT {
 		printLog("factor : CONST_FLOAT");
@@ -889,28 +708,20 @@ int main(int argc,char *argv[])
 		exit(1);
 	}
 
-	/* fp2= fopen(argv[2],"w");
-	fclose(fp2);
-	fp3= fopen(argv[3],"w");
-	fclose(fp3);
 	
-	fp2= fopen(argv[2],"a");
-	fp3= fopen(argv[3],"a"); */
-	
-
 	yyin=fp;
 	errorOut.open("1905066_error.txt");
 	logout.open("1905066_log.txt");
 	parseTreeOut.open("1905066_parseTree.txt");
+
+	codeOut.open("1905066_code.asm");
+	
 	yyparse();
 	yylex_destroy();
 	
 	errorOut.close();
 	logout.close();
-/* 
-	fclose(fp2);
-	fclose(fp3);
-	 */
+
 	return 0;
 }
 
