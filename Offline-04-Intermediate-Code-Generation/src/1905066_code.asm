@@ -1,3 +1,40 @@
+func_a PROC
+	PUSH BP
+	MOV BP, SP
+	PUSH 7
+	POP AX
+	MOV a, AX
+	PUSH AX
+	POP AX
+	ADD SP, 0
+	POP BP
+	RET
+func_a ENDP
+sum PROC
+	PUSH BP
+	MOV BP, SP
+	PUSH 2
+	MOV AX, [BP+6]
+	PUSH AX
+	POP BX
+	POP AX
+	XOR DX, DX
+	IMUL BX
+	PUSH AX
+	MOV AX, [BP+4]
+	PUSH AX
+	POP BX
+	POP AX
+	ADD AX, BX
+	PUSH AX
+	POP AX
+	MOV b, AX
+	PUSH AX
+	POP AX
+	ADD SP, 0
+	POP BP
+	RET 4
+sum ENDP
 main PROC
 	MOV AX, @DATA
 	MOV DS, AX
@@ -7,6 +44,32 @@ main PROC
 	SUB SP, 2
 	SUB SP, 20
 	SUB SP, 2
+	PUSH 5
+	POP AX
+	MOV [BP-2], AX
+	PUSH AX
+	POP AX
+	PUSH 6
+	POP AX
+	MOV [BP-4], AX
+	PUSH AX
+	POP AX
+	MOV AX, [BP-2]
+	PUSH AX
+	MOV AX, [BP-4]
+	PUSH AX
+	CALL sum
+	PUSH 0
+	POP AX
+	MOV AX, b
+	CALL print_output
+	CALL new_line
+	CALL func_a
+	PUSH 0
+	POP AX
+	MOV AX, a
+	CALL print_output
+	CALL new_line
 	PUSH 5
 	POP AX
 	MOV [BP-2], AX

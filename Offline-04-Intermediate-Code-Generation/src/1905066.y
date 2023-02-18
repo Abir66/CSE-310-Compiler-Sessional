@@ -97,7 +97,10 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 
 		$$->addChildren({$1, $2, $3, $4, $5, $7});
 		
-		genFunctionEndingCode($2->getName());
+		//------------------code generation------------------
+		auto func = symbolTable->lookup($2->getName());
+		genFunctionEndingCode(func);
+
 		
 	}
 	| type_specifier ID LPAREN RPAREN { 
@@ -109,7 +112,9 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 		$$ = new SymbolInfo("func_definition", "non-terminal");
 		$$->addChildren({$1, $2, $3, $4, $6});
 		
-		genFunctionEndingCode($2->getName());
+		//------------------code generation------------------
+		auto func = symbolTable->lookup($2->getName());
+		genFunctionEndingCode(func);
 	}
 	;
 
@@ -120,6 +125,7 @@ parameter_list : parameter_list COMMA type_specifier ID {
 		$4->setDataType($3->getDataType());
 
 		if(!checkParamRedeclaration($4)) params.push_back($4);
+		
 		
 		$$->addChildren({$1, $2, $3, $4});
 
@@ -139,7 +145,7 @@ parameter_list : parameter_list COMMA type_specifier ID {
 
 		$2->setDataType($1->getDataType());
 		if(!checkParamRedeclaration($2)) params.push_back($2);
-
+		
 		$$->addChildren({$1, $2});
 	}
 	| type_specifier {
@@ -268,8 +274,7 @@ statement : var_declaration {
 		printLog("statement : expression statement");
 		$$ = new SymbolInfo("statement", "non-terminal");
 		$$->addChildren($1);
-		//------------------code generation------------------
-		genCode("\tPOP AX");
+		
 	}
 	| compound_statement {
 		printLog("statement : compound_statement");
@@ -331,6 +336,9 @@ expression_statement : SEMICOLON {
 		printLog("expression_statement : expression SEMICOLON");
 		$$ = new SymbolInfo("expression_statement", "non-terminal");
 		$$->addChildren({$1, $2});
+
+		//------------------code generation------------------
+		genCode("\tPOP AX");
 	}
 	;
 
@@ -338,6 +346,7 @@ variable : ID {
 		printLog("variable : ID");
 		
 		auto symbol = checkValidVar($1);
+		// std::cout << "symbol: " << symbol->getName() <<" "<<symbol->getAsmName() << std::endl;
 		
 		if(symbol) $$ = new SymbolInfo(symbol);
 		else $$ = new SymbolInfo($1);
@@ -704,6 +713,12 @@ factor : variable {
 
 		if($3->getChildrenSize() == 0) $$->addChildren({$1, $2, $4});
 		else $$->addChildren({$1, $2, $3, $4});
+
+
+		// ---------------------Code generation---------------------
+		genCode("\tCALL " + $1->getName());
+		if($$->getDataType() != "VOID") genCode("\tPUSH AX");
+		else genCode("\tPUSH 0");
 	}
 	| LPAREN expression RPAREN {
 		printLog("factor : LPAREN expression RPAREN");
@@ -808,14 +823,19 @@ int main(int argc,char *argv[])
 	errorOut.open("1905066_error.txt");
 	logout.open("1905066_log.txt");
 	parseTreeOut.open("1905066_parseTree.txt");
-
+	tempOut.open("1905066_temp.txt");
 	codeOut.open("1905066_code.asm");
+
+	asmInit();
 	
 	yyparse();
 	yylex_destroy();
 	
 	errorOut.close();
 	logout.close();
+	codeOut.close();
+	parseTreeOut.close();
+	tempOut.close();
 
 	return 0;
 }

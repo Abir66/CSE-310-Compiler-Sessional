@@ -1,7 +1,39 @@
-int a,b;
+int a,b,c;
+
+void func_a(){
+	a = 7;
+}
+
+void sum(int x, int y){
+    b = 2*x + y;
+}
+
+// int foo(int a){
+// 	a = a + 3;
+// 	return a;
+// }
+
+
+// int bar(int a, int b){	
+// 	c = 4*a + 2*b;
+// 	return c;
+// }
 
 int main(){
     int i,j,l[10],k;
+
+    i = 5;
+	j = 6;
+    
+    sum(i,j);
+    println(b);
+
+
+	func_a();
+	println(a);
+	
+	// k = foo(i);
+	// println(k);
 
     i = 5;
     j = i++;

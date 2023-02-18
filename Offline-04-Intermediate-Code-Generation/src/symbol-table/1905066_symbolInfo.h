@@ -132,8 +132,7 @@ public:
     int getParamCount() { return params.size(); }
     void setDefinedLine(int definedLine) { this->definedLine = definedLine; }
     int getDefinedLine() { return definedLine; }
-
-
+    
 
     // ====================== For Parse Tree ======================
     std::vector<SymbolInfo *> getChildren() { return children; }

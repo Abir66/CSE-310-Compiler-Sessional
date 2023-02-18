@@ -177,13 +177,24 @@ bool checkParamRedeclaration(SymbolInfo* newParam){
 }
 
 void addParamsToScope(){
+	
 	if(currentFunction == NULL) return;
-	//std::cout<<currentFunction->getName()<<std::endl;
+	
+	int offset = 4 + 2*(currentFunction->getParamCount() - 1);
+	
+	// std::cout<<"Adding params to scope "<<symbolTable->getCurrentScopeId()<<std::endl;
+	// std::cout<<"currentFunction->getParamCount() = "<<currentFunction->getParamCount()<<std::endl;
+
 	for(auto param : currentFunction->getParams()){
+		// std::cout<<"param->getName() = "<<param->getName()<<std::endl; 
 		if(param->getName() != ""){
-			symbolTable->insert(param);symbolTable->insert(param);
+			param->setAsmName("[BP+" + to_string(offset) + "]");
+			offset -= 2;
+			symbolTable->insert(param);
+			// std::cout<<"Inserted "<<param->getName()<<" in scope "<<symbolTable->getCurrentScopeId() <<" with asmName "<<param->getAsmName()<<std::endl;
 		}
-	} 
+	}
+
 	currentFunction = NULL;
 }
 
