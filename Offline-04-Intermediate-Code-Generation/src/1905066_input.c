@@ -5,13 +5,15 @@ void func_a(){
 }
 
 void sum(int x, int y){
-    b = 2*x + y;
+    int r;
+    r = 40;
+    b = 2*x + y + r;
 }
 
-// int foo(int a){
-// 	a = a + 3;
-// 	return a;
-// }
+int foo(int a, int b){
+	a = a + 3 + b;
+	return a;
+}
 
 
 // int bar(int a, int b){	
@@ -24,6 +26,9 @@ int main(){
 
     i = 5;
 	j = 6;
+
+    k = foo(i,j) + foo(1,2);
+    println(k);
     
     sum(i,j);
     println(b);

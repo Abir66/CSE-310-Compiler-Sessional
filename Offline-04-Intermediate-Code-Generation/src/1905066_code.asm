@@ -13,6 +13,12 @@ func_a ENDP
 sum PROC
 	PUSH BP
 	MOV BP, SP
+	SUB SP, 2
+	PUSH 40
+	POP AX
+	MOV [BP-2], AX
+	PUSH AX
+	POP AX
 	PUSH 2
 	MOV AX, [BP+6]
 	PUSH AX
@@ -27,14 +33,47 @@ sum PROC
 	POP AX
 	ADD AX, BX
 	PUSH AX
+	MOV AX, [BP-2]
+	PUSH AX
+	POP BX
+	POP AX
+	ADD AX, BX
+	PUSH AX
 	POP AX
 	MOV b, AX
+	PUSH AX
+	POP AX
+	ADD SP, 2
+	POP BP
+	RET 4
+sum ENDP
+foo PROC
+	PUSH BP
+	MOV BP, SP
+	MOV AX, [BP+6]
+	PUSH AX
+	PUSH 3
+	POP BX
+	POP AX
+	ADD AX, BX
+	PUSH AX
+	MOV AX, [BP+4]
+	PUSH AX
+	POP BX
+	POP AX
+	ADD AX, BX
+	PUSH AX
+	POP AX
+	MOV [BP+6], AX
+	PUSH AX
+	POP AX
+	MOV AX, [BP+6]
 	PUSH AX
 	POP AX
 	ADD SP, 0
 	POP BP
 	RET 4
-sum ENDP
+foo ENDP
 main PROC
 	MOV AX, @DATA
 	MOV DS, AX
@@ -54,6 +93,27 @@ main PROC
 	MOV [BP-4], AX
 	PUSH AX
 	POP AX
+	MOV AX, [BP-2]
+	PUSH AX
+	MOV AX, [BP-4]
+	PUSH AX
+	CALL foo
+	PUSH AX
+	PUSH 1
+	PUSH 2
+	CALL foo
+	PUSH AX
+	POP BX
+	POP AX
+	ADD AX, BX
+	PUSH AX
+	POP AX
+	MOV [BP-26], AX
+	PUSH AX
+	POP AX
+	MOV AX, [BP-26]
+	CALL print_output
+	CALL new_line
 	MOV AX, [BP-2]
 	PUSH AX
 	MOV AX, [BP-4]
@@ -291,6 +351,7 @@ L3:
 	CALL print_output
 	CALL new_line
 	PUSH 0
+	POP AX
 	ADD SP, 26
 	POP BP
 	MOV AX, 4CH

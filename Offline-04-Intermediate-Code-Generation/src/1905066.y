@@ -324,6 +324,9 @@ statement : var_declaration {
 		printLog("statement : RETURN expression SEMICOLON");
 		$$ = new SymbolInfo("statement", "non-terminal");
 		$$->addChildren({$1, $2, $3});
+
+		//------------------code generation------------------
+		genCode("\tPOP AX");
 	}
 	;
 
