@@ -35,6 +35,10 @@ class SymbolInfo
     int stackOffset = 0;
     bool isGlobal = false;
     std::string asmName = "";
+    std::string label = "";
+    std::vector<int> trueList;
+    std::vector<int> falseList;
+    std::vector<int> nextList;
 
 public:
 
@@ -83,6 +87,10 @@ public:
         this->stackOffset = symbolInfo->stackOffset;
         this->isGlobal = symbolInfo->isGlobal;
         this->asmName = symbolInfo->asmName;
+        this->label = symbolInfo->label;
+        this->trueList = symbolInfo->trueList;
+        this->falseList = symbolInfo->falseList;
+        this->nextList = symbolInfo->nextList;
     }
 
     // ====================== Setters and Getters ======================
@@ -175,6 +183,17 @@ public:
     bool isGlobalVar() { return isGlobal; }
     void setAsmName(std::string asmName) { this->asmName = asmName; }
     std::string getAsmName() { return asmName; }
+    void setLabel(std::string label) { this->label = label; }
+    std::string getLabel() { return label; }
+    void setTrueList(std::vector<int> trueList) { this->trueList = trueList; }
+    void setFalseList(std::vector<int> falseList) { this->falseList = falseList; }
+    std::vector<int> getTrueList() { return trueList; }
+    std::vector<int> getFalseList() { return falseList; }
+    void addToTrueList(int index) { trueList.push_back(index); }
+    void addToFalseList(int index) { falseList.push_back(index); }
+    void setNextList(std::vector<int> nextList) { this->nextList = nextList; }
+    std::vector<int> getNextList() { return nextList; }
+    void addToNextList(int index) { nextList.push_back(index); }
 
 
 

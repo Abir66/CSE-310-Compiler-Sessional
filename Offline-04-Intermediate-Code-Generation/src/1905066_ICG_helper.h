@@ -5,6 +5,9 @@
 #include<fstream>
 #include<sstream>
 #include<string>
+#include<unordered_map>
+#include<vector>
+#include<set>
 #include"1905066_parser_helper.h"
 #include"symbol-table/1905066_symbolTable.h"
 #include"symbol-table/1905066_symbolInfo.h"
@@ -15,10 +18,18 @@ std::ofstream codeOut;
 std::ofstream tempOut;
 std::ofstream optimzedCodeOut;
 
-
 int label_count = 0;
 int stack_offset = 0;
 bool inGlobalScope = true;
+extern int temp_asm_line_count = 1;
+unordered_map<int, string> label_map;
+
+// void do_backpatching(){
+//     for(auto it = label_map.begin(); it != label_map.end(); it++){
+//         std::cout << it->first << "-";
+//         std::cout << it->second << endl;
+//     }
+// }
 
 
 
@@ -27,16 +38,25 @@ inline string new_label()
     return "L" + to_string(label_count++);
 }
 
-
-void println_instructions(std::ostream &out = std::cout)
+inline void backpatch(vector<int> list, string label)
 {
-    ifstream file("println_instructions.txt");
-    string line;
-    while(getline(file, line)) out << line << endl;   
+    for(auto line : list) label_map[line] = label;
 }
 
+std::vector<int> merge(const std::vector<int> &list1, const std::vector<int> &list2)
+{
+    std::set<int> s(list1.begin(), list1.end());
+    s.insert(list2.begin(), list2.end());
+    std::vector<int> mergedList(s.begin(), s.end());
+    return mergedList;
+}
+
+
+
+
 void genCode(string code){
-    codeOut << code << endl;
+    tempOut << code << endl;
+    temp_asm_line_count++;
 }
 
 void genVarDeclarationCode(){
@@ -47,73 +67,91 @@ void genVarDeclarationCode(){
             var->setAsmName(asmName);
             int size = max(var->getArraySize(),1) * 2;
             stack_offset += size;
-            codeOut << "\tSUB SP, " << size << endl;
+            genCode("\tSUB SP, " + to_string(size));
+
         }
     }
 
     else{
         for(auto var : vars){
             var->setAsmName(var->getName());
-            tempOut << var->getName() << " DW " << var->getArraySize() << " DUP (0000H)" << endl; 
+            codeOut <<"\t" << var->getName() << " DW " << max(1,var->getArraySize()) << " DUP (0000H)" << endl; 
         }
     }
 }
 
 
-
-
 void genINC_DEC(SymbolInfo* var, string op){
     op = op == "++" ? "INC" : "DEC";
-    if(var->isArray() && !var->isGlobalVar()) codeOut<<"\tPOP BX"<<endl;
-    codeOut << "\tMOV AX, " << var->getAsmName() << endl;
-    codeOut << "\tPUSH AX" << endl;
-    codeOut << "\t" << op << " AX" << endl;
-    codeOut << "\tMOV " << var->getAsmName() << ", AX" << endl;
+    if(var->isArray() && !var->isGlobalVar()) genCode("\tPOP BX");
+    genCode("\tMOV AX, " + var->getAsmName());
+    genCode("\tMOV AX, " + var->getAsmName());
+    genCode("\tPUSH AX");
+    genCode("\t" + op + " AX");
+    genCode("\tMOV " + var->getAsmName() + ", AX" );
 }
-
-
 
 void genFunctioninitCode(string func_name){
     
-    codeOut << func_name << " PROC" << endl;
+    genCode( func_name + " PROC");
     if(func_name == "main"){
-        codeOut << "\tMOV AX, @DATA" << endl;
-        codeOut << "\tMOV DS, AX" << endl;
+        genCode("\tMOV AX, @DATA");
+        genCode("\tMOV DS, AX");
     }
-    codeOut << "\tPUSH BP" << endl;
-    codeOut << "\tMOV BP, SP" << endl;
+    genCode("\tPUSH BP");
+    genCode("\tMOV BP, SP");
 }
 
 void genFunctionEndingCode(SymbolInfo* func){
-    codeOut<<"\tADD SP, "<<stack_offset<<endl;
-    codeOut<<"\tPOP BP"<<endl;
+    genCode("\tADD SP, " + to_string(stack_offset));
+    genCode("\tPOP BP");
 
     if(func->getName() == "main"){
-        codeOut << "\tMOV AX, 4CH" << endl;
-        codeOut << "\tINT 21H" << endl;
+        genCode("\tMOV AX, 4CH");
+        genCode("\tINT 21H");
     }
     else{
-        codeOut<<"\tRET";
-        if(func->getParamCount() != 0) codeOut<<" "<<func->getParamCount()*2<<endl;
-        else codeOut<<endl;
+        
+        if(func->getParamCount() != 0) genCode("\tRET " + to_string(func->getParamCount()*2));
+        else genCode("\tRET");
     }
-    codeOut << func->getName() << " ENDP" << endl;
+    genCode(func->getName() + " ENDP");
 
     inGlobalScope = true;
     stack_offset = 0;
 }
 
-
 void asmInit(){
-    tempOut << ";-------" << endl;
-    tempOut << ";   " << endl;
-    tempOut << ";-------" << endl;
-    tempOut << ".MODEL SMALL" << endl;
-    tempOut << ".STACK 1000H" << endl;
-    tempOut << ".Data" << endl;
-    tempOut << "\tCR EQU 0DH" << endl;
-    tempOut << "\tLF EQU 0AH" << endl;
-    tempOut << "\tnumber DB \"00000$\"" << endl;
+    codeOut << ";-------" << endl;
+    codeOut << ";   " << endl;
+    codeOut << ";-------" << endl;
+    codeOut << ".MODEL SMALL" << endl;
+    codeOut << ".STACK 1000H" << endl;
+    codeOut << ".Data" << endl;
+    codeOut << "\tCR EQU 0DH" << endl;
+    codeOut << "\tLF EQU 0AH" << endl;
+    codeOut << "\tnumber DB \"00000$\"" << endl;
+}
+
+void add_println_instructions(std::ostream &out = std::cout)
+{
+    ifstream file("println_instructions.txt");
+    string line;
+    while(getline(file, line)) out << line << endl;
+    file.close();   
+}
+
+void generate_asm_file(){
+    codeOut<<".CODE"<<std::endl;
+    tempOut.close();
+    ifstream tempFile("1905066_temp.txt");
+    string line;
+    int temp_asm_line_count = 1;
+    while(getline(tempFile, line)) {
+        codeOut << line << label_map[temp_asm_line_count] << endl;
+        temp_asm_line_count++;
+    }
+    add_println_instructions(codeOut);
 }
 
 #endif

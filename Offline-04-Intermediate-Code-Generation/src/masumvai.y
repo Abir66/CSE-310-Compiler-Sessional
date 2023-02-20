@@ -115,31 +115,4 @@ logic_expression : rel_expression {
 	;
 
 
-//SymbolInfo*
-factor	: variable {
-		logRule("factor : variable",$1->getName());
-		genCodeln("\t\tPUSH "+getVarAddress($1, true), "save "+$1->getName()+"\n");
-		$$ = $1;
-	}
-	| ID LPAREN {
-		addCommentln("calling function "+$1->getName());
-	} argument_list RPAREN { // function call
-		string code = $1->getName() + "(" + toSymbolNameListStr($4) + ")";
-		logRule("factor : ID LPAREN argument_list RPAREN",code);
-		callFunction($1,$4);
-		$$ = new SymbolInfo(code, "function", $1->getReturnType());
-		//debug($$->getName()+" : "+$$->getDataType());
-		genCodeln("\t\tPUSH 0", "location for return value"); // BP+4
-		genCodeln("\t\tCALL "+$1->getName(), "call function"+$1->getName());
-		genCodeln("\t\tPOP AX", "load return value");
-		genCodeln("\t\tADD SP,"+to_string($4->size()*2), "pop function param from stack");
-		if($1->getReturnType() != "void"){
-			genCodeln("\t\tPUSH AX", "save return value");
-		}else{
-			genCodeln("\t\tPUSH 0", "save dummy return value for void");
-		}
-		addCommentln("returned from function "+$1->getName()+"\n");
-		delete $1; freeSymbolInfoVector($4);
-	}
-
 %%

@@ -1,12 +1,80 @@
-;-------
-;   
-;-------
-.MODEL SMALL
-.STACK 1000H
-.Data
-	CR EQU 0DH
-	LF EQU 0AH
-	number DB "00000$"
-a DW 0 DUP (0000H)
-b DW 0 DUP (0000H)
-c DW 0 DUP (0000H)
+main PROC
+	MOV AX, @DATA
+	MOV DS, AX
+	PUSH BP
+	MOV BP, SP
+	SUB SP, 2
+	SUB SP, 2
+	SUB SP, 20
+	SUB SP, 2
+L0:
+	PUSH 7
+	POP AX
+	MOV [BP-2], AX
+	PUSH AX
+	POP AX
+L1:
+	PUSH 6
+	POP AX
+	MOV [BP-4], AX
+	PUSH AX
+	POP AX
+L2:
+	MOV AX, [BP-2]
+	PUSH AX
+	MOV AX, [BP-4]
+	PUSH AX
+	POP BX
+	POP AX
+	CMP AX, BX
+	JG 
+	JMP 
+L3:
+	MOV AX, [BP-2]
+	CALL print_output
+	CALL new_line
+	JMP 
+L4:
+	MOV AX, [BP-4]
+	CALL print_output
+	CALL new_line
+L5:
+L6:
+	MOV AX, [BP-4]
+	PUSH AX
+	PUSH 0
+	POP BX
+	POP AX
+	CMP AX, BX
+	JG 
+	JMP 
+L7:
+	MOV AX, [BP-4]
+	CALL print_output
+	CALL new_line
+L8:
+	MOV AX, [BP-4]
+	MOV AX, [BP-4]
+	PUSH AX
+	DEC AX
+	MOV [BP-4], AX
+	POP AX
+	JMP L6
+L9:
+	PUSH 30
+	POP AX
+	MOV [BP-26], AX
+	PUSH AX
+	POP AX
+L10:
+	MOV AX, [BP-26]
+	CALL print_output
+	CALL new_line
+L11:
+	PUSH 0
+	POP AX
+	ADD SP, 26
+	POP BP
+	MOV AX, 4CH
+	INT 21H
+main ENDP

@@ -10,6 +10,7 @@
 
 using namespace std;
 
+
 %}
 
 
@@ -20,7 +21,7 @@ using namespace std;
 %token<symbolInfo>  IF ELSE FOR WHILE DO BREAK RETURN SWITCH CASE DEFAULT CONTINUE  LPAREN RPAREN LCURL RCURL LTHIRD RTHIRD COMMA SEMICOLON PRINTLN INCOP DECOP ASSIGNOP NOT
 %token<symbolInfo> ID INT FLOAT DOUBLE CONST_INT CONST_FLOAT CHAR VOID ADDOP MULOP RELOP  LOGICOP BITOP 
 
-%type<symbolInfo> variable factor term unary_expression simple_expression rel_expression logic_expression expression
+%type<symbolInfo> variable factor term unary_expression simple_expression rel_expression logic_expression expression M N
 %type<symbolInfo> start program unit func_declaration func_definition parameter_list compound_statement var_declaration type_specifier declaration_list statements statement expression_statement argument_list arguments
 
 
@@ -257,11 +258,18 @@ statements : statement {
 		printLog("statements : statement");
 		$$ = new SymbolInfo("statements", "non-terminal");
 		$$->addChildren($1);
+
+		// ------------------ code generation ------------------
+		$$->setNextList($1->getNextList());
 	}
-	| statements statement {
+	| statements M statement {
 		printLog("statements : statements statement");
 		$$ = new SymbolInfo("statements", "non-terminal");
 		$$->addChildren({$1, $2});
+
+		// ------------------ code generation ------------------
+		backpatch($1->getNextList(), $2->getLabel());
+		$$->setNextList($3->getNextList());
 	}
 	;
 
@@ -280,27 +288,58 @@ statement : var_declaration {
 		printLog("statement : compound_statement");
 		$$ = new SymbolInfo("statement", "non-terminal");
 		$$->addChildren($1);
+
+		// ------------------ code generation ------------------
+		$$->setNextList($1->getNextList());
 	}
 	| FOR LPAREN expression_statement expression_statement expression RPAREN statement {
 		printLog("statement : FOR LPAREN expression_statement expression_statement expression RPAREN statement");
 		$$ = new SymbolInfo("statement", "non-terminal");
 		$$->addChildren({$1, $2, $3, $4, $5, $6, $7});
 	}
-	| IF LPAREN expression RPAREN statement %prec LOWER_THAN_ELSE {
+	| IF LPAREN expression RPAREN M statement %prec LOWER_THAN_ELSE {
 		printLog("statement : IF LPAREN expression RPAREN statement");
 		$$ = new SymbolInfo("statement", "non-terminal");
 		$$->addChildren({$1, $2, $3, $4, $5});
+
+		//------------------code generation------------------
+		backpatch($3->getTrueList(), $5->getLabel());
+		$$->setNextList(merge($3->getFalseList(), $6->getNextList()));
 		
 	}
-	| IF LPAREN expression RPAREN statement ELSE statement {
+	| IF LPAREN expression RPAREN M statement ELSE N M statement {
 		printLog("statement : IF LPAREN expression RPAREN statement ELSE statement");
 		$$ = new SymbolInfo("statement", "non-terminal");
 		$$->addChildren({$1, $2, $3, $4, $5, $6, $7});
+
+		//------------------code generation------------------
+		auto B = $3;
+		auto M1 = $5;
+		auto M2 = $9;
+		auto N = $8;
+		auto S1 = $6;
+		auto S2 = $10;
+
+		backpatch(B->getTrueList(), M1->getLabel());
+		backpatch(B->getFalseList(), M2->getLabel());
+		auto temp = merge(S1->getNextList(), N->getNextList());
+		$$->setNextList(merge(temp, S2->getNextList()));
 	}
-	| WHILE LPAREN expression RPAREN statement {
+	| WHILE M LPAREN expression RPAREN M statement {
 		printLog("statement : WHILE LPAREN expression RPAREN statement");
 		$$ = new SymbolInfo("statement", "non-terminal");
 		$$->addChildren({$1, $2, $3, $4, $5});
+
+		//------------------code generation------------------
+		auto M1 = $2;
+		auto B = $4;
+		auto M2 = $6;
+		auto S1 = $7;
+
+		backpatch(S1->getNextList(), M1->getLabel());
+		backpatch(B->getTrueList(), M2->getLabel());
+		$$->setNextList(B->getFalseList());
+		genCode("\tJMP " + M1->getLabel());
 	}
 	| PRINTLN LPAREN ID RPAREN SEMICOLON {
 		printLog("statement : PRINTLN LPAREN ID RPAREN SEMICOLON");
@@ -349,7 +388,6 @@ variable : ID {
 		printLog("variable : ID");
 		
 		auto symbol = checkValidVar($1);
-		// std::cout << "symbol: " << symbol->getName() <<" "<<symbol->getAsmName() << std::endl;
 		
 		if(symbol) $$ = new SymbolInfo(symbol);
 		else $$ = new SymbolInfo($1);
@@ -399,10 +437,31 @@ variable : ID {
 	}
 	;
 
+N : {
+		$$ = new SymbolInfo();
+		$$->addToNextList(temp_asm_line_count);
+		genCode("\tJMP ");
+	}
+	; 
+
+M : {
+		std::string label = new_label();
+		$$ = new SymbolInfo();
+		$$->setLabel(label);
+
+		//------------------code generation------------------
+		genCode(label + ":");
+	}
+	;
+
+
+
+
 expression : logic_expression {
 		printLog("expression : logic_expression");
-		$$ = new SymbolInfo("expression", "non-terminal");
-		$$->setDataType($1->getDataType());
+		$$ = new SymbolInfo($1);
+		$$->setName("expression");
+		$$->setType("non-terminal");
 		$$->addChildren($1);
 	}
 	| variable ASSIGNOP logic_expression {
@@ -441,11 +500,13 @@ expression : logic_expression {
 
 logic_expression : rel_expression {
 		printLog("logic_expression : rel_expression");
-		$$ = new SymbolInfo("logic_expression", "non-terminal");
-		$$->setDataType($1->getDataType());
+		//$$ = new SymbolInfo("logic_expression", "non-terminal");
+		$$ = new SymbolInfo($1);
+		$$->setName("logic_expression");
+		$$->setType("non-terminal");
 		$$->addChildren($1);
 	}
-	| rel_expression LOGICOP rel_expression {
+	| rel_expression LOGICOP M rel_expression {
 		printLog("logic_expression : rel_expression LOGICOP rel_expression");
 		$$ = new SymbolInfo("logic_expression", "non-terminal");
 		$$->setDataType("INT");
@@ -457,6 +518,22 @@ logic_expression : rel_expression {
 		}
 
 		$$->addChildren({$1, $2, $3});
+
+		// ------------------code generation------------------
+		// short circuit code and backpatching
+		SymbolInfo* B = $$;
+		SymbolInfo* B1 = $1;
+		SymbolInfo* B2 = $4;
+		if($2->getName() == "&&"){
+			backpatch(B1->getTrueList(), $3->getLabel());
+			B->setTrueList(B2->getTrueList());
+			B->setFalseList(merge(B1->getFalseList(), B2->getFalseList()));
+		}
+		else if($2->getName() == "||"){
+			backpatch(B1->getFalseList(), $3->getLabel());
+			B->setFalseList(B2->getFalseList());
+			B->setTrueList(merge(B1->getTrueList(), B2->getTrueList()));
+		}
 	}
 	;
 
@@ -482,26 +559,50 @@ rel_expression : simple_expression {
 		$$->addChildren({$1, $2, $3});
 
 		// ------------------code generation------------------
-		string l1 = new_label();
-		string l2 = new_label();
-		string op = $2->getName();
+		// string l1 = new_label();
+		// string l2 = new_label();
+		// string op = $2->getName();
+
+		// genCode("\tPOP BX");
+		// genCode("\tPOP AX");
+		// genCode("\tCMP AX, BX");
+
+		// if(op == "<") genCode("\tJL " + l1);
+		// else if(op == ">") genCode("\tJG " + l1);
+		// else if(op == "<=") genCode("\tJLE " + l1);
+		// else if(op == ">=") genCode("\tJGE " + l1);
+		// else if(op == "==") genCode("\tJE " + l1);
+		// else if(op == "!=") genCode("\tJNE " + l1);
+
+		// genCode("\tPUSH 0");
+		// genCode("\tJMP " + l2);
+		// genCode(l1 + ":");
+		// genCode("\tPUSH 1");
+		// genCode(l2 + ":");
+
+		// use short circuit code and backpatching instead
+		
 
 		genCode("\tPOP BX");
 		genCode("\tPOP AX");
 		genCode("\tCMP AX, BX");
 
-		if(op == "<") genCode("\tJL " + l1);
-		else if(op == ">") genCode("\tJG " + l1);
-		else if(op == "<=") genCode("\tJLE " + l1);
-		else if(op == ">=") genCode("\tJGE " + l1);
-		else if(op == "==") genCode("\tJE " + l1);
-		else if(op == "!=") genCode("\tJNE " + l1);
+		$$->addToTrueList(temp_asm_line_count);
+		$$->addToFalseList(temp_asm_line_count + 1);
 
-		genCode("\tPUSH 0");
-		genCode("\tJMP " + l2);
-		genCode(l1 + ":");
-		genCode("\tPUSH 1");
-		genCode(l2 + ":");
+		// auto list = $$->getTrueList();
+		// for(auto i : list) cout << i << " ";
+		// cout << endl;
+
+		string op = $2->getName();
+		if(op == "<") genCode("\tJL ");
+		else if(op == ">") genCode("\tJG ");
+		else if(op == "<=") genCode("\tJLE ");
+		else if(op == ">=") genCode("\tJGE ");
+		else if(op == "==") genCode("\tJE ");
+		else if(op == "!=") genCode("\tJNE ");
+
+		genCode("\tJMP ");
 	}
 	;
 
@@ -627,8 +728,10 @@ unary_expression : ADDOP unary_expression {
 		$$->addChildren({$1, $2});
 
 		// ---------------------Code generation---------------------
-		string label1 = new_label();
-		string label2 = new_label();
+		// string label1 = new_label();
+		// string label2 = new_label();
+		string label1 = "LL0";
+		string label2 = "LL1";
 		genCode("\tPOP AX");
 		genCode("\tCMP AX, 0");
 		genCode("\tJNE " + label1);
@@ -728,6 +831,10 @@ factor : variable {
 		$$ = new SymbolInfo("factor", "non-terminal");
 		$$->setDataType($2->getDataType());
 		$$->addChildren({$1, $2, $3});
+
+		// ---------------------Code generation---------------------
+		$$->setTrueList($2->getTrueList());
+		$$->setFalseList($2->getFalseList());
 	}
 	| CONST_INT {
 		printLog("factor : CONST_INT");
@@ -833,6 +940,8 @@ int main(int argc,char *argv[])
 	
 	yyparse();
 	yylex_destroy();
+
+	generate_asm_file();
 	
 	errorOut.close();
 	logout.close();
