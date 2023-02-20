@@ -22,15 +22,33 @@ int main(){
     i = 7;
 	j = 6;
 
-    if(i > j){
-        println(i);
+    if(i > j && 4 < 2){
+        k = 10;
     }
     else{
-        println(j);
+        k = 20;
     }
 
+    println(k);
+
+    // if(i > j){
+    //     println(i);
+    // }
+    // else{
+    //     println(j);
+    // }
+
+    for(j = 9; j > 5; j--){
+         println(j);
+    }
+
+    j = 14;
+
     while(j > 0){
-        println(j);
+        
+        if(j > 3){
+            println(j);
+        }
         j--;
     }
     

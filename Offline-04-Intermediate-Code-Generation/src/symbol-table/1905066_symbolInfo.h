@@ -93,6 +93,16 @@ public:
         this->nextList = symbolInfo->nextList;
     }
 
+    void copyICGData(SymbolInfo *symbolInfo){
+        this->stackOffset = symbolInfo->stackOffset;
+        this->isGlobal = symbolInfo->isGlobal;
+        this->asmName = symbolInfo->asmName;
+        this->label = symbolInfo->label;
+        this->trueList = symbolInfo->trueList;
+        this->falseList = symbolInfo->falseList;
+        this->nextList = symbolInfo->nextList;
+    }
+
     // ====================== Setters and Getters ======================
     void setName(std::string name) { this->name = name; }
     void setType(std::string type) { this->type = type; }
@@ -194,6 +204,7 @@ public:
     void setNextList(std::vector<int> nextList) { this->nextList = nextList; }
     std::vector<int> getNextList() { return nextList; }
     void addToNextList(int index) { nextList.push_back(index); }
+    void clearNextList() { nextList.clear(); }
 
 
 

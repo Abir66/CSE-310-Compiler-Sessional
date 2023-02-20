@@ -1,5 +1,5 @@
-start : program 	<Line: 1-87>
- program : program unit 	<Line: 1-87>
+start : program 	<Line: 1-105>
+ program : program unit 	<Line: 1-105>
   program : unit 	<Line: 1-1>
    unit : var_declaration 	<Line: 1-1>
     var_declaration : type_specifier declaration_list SEMICOLON 	<Line: 1-1>
@@ -14,47 +14,230 @@ start : program 	<Line: 1-87>
       COMMA : ,	<Line: 1>
       ID : c	<Line: 1>
      SEMICOLON : ;	<Line: 1>
-  unit : func_definition 	<Line: 19-87>
-   func_definition : type_specifier ID LPAREN RPAREN compound_statement 	<Line: 19-87>
+  unit : func_definition 	<Line: 19-105>
+   func_definition : type_specifier ID LPAREN RPAREN compound_statement 	<Line: 19-105>
     type_specifier : INT 	<Line: 19-19>
      INT : int	<Line: 19>
     ID : main	<Line: 19>
     LPAREN : (	<Line: 19>
     RPAREN : )	<Line: 19>
-    compound_statement : LCURL statements RCURL 	<Line: 19-87>
+    compound_statement : LCURL statements RCURL 	<Line: 19-105>
      LCURL : {	<Line: 19>
-     statements : statements  	<Line: 20-0>
-      statements : statements  	<Line: 20-0>
-       statements : statements  	<Line: 20-0>
-        statements : statements  	<Line: 20-0>
-         statements : statements  	<Line: 20-0>
-          statements : statements  	<Line: 20-0>
-           statements : statements  	<Line: 20-0>
-            statements : statement 	<Line: 20-20>
-             statement : var_declaration 	<Line: 20-20>
-              var_declaration : type_specifier declaration_list SEMICOLON 	<Line: 20-20>
-               type_specifier : INT 	<Line: 20-20>
-                INT : int	<Line: 20>
-               declaration_list : declaration_list COMMA ID 	<Line: 20-20>
-                declaration_list : declaration_list COMMA ID LSQUARE CONST_INT RSQUARE 	<Line: 20-20>
-                 declaration_list : declaration_list COMMA ID 	<Line: 20-20>
-                  declaration_list : ID 	<Line: 20-20>
-                   ID : i	<Line: 20>
-                  COMMA : ,	<Line: 20>
-                  ID : j	<Line: 20>
-                 COMMA : ,	<Line: 20>
-                 ID : l	<Line: 20>
-                 LSQUARE : [	<Line: 20>
-                 CONST_INT : 10	<Line: 20>
-                 RSQUARE : ]	<Line: 20>
-                COMMA : ,	<Line: 20>
-                ID : k	<Line: 20>
-               SEMICOLON : ;	<Line: 20>
+     statements : statements statement 	<Line: 20-104>
+      statements : statements statement 	<Line: 20-56>
+       statements : statements statement 	<Line: 20-55>
+        statements : statements statement 	<Line: 20-47>
+         statements : statements statement 	<Line: 20-45>
+          statements : statements statement 	<Line: 20-41>
+           statements : statements statement 	<Line: 20-32>
+            statements : statements statement 	<Line: 20-28>
+             statements : statements statement 	<Line: 20-23>
+              statements : statements statement 	<Line: 20-22>
+               statements : statement 	<Line: 20-20>
+                statement : var_declaration 	<Line: 20-20>
+                 var_declaration : type_specifier declaration_list SEMICOLON 	<Line: 20-20>
+                  type_specifier : INT 	<Line: 20-20>
+                   INT : int	<Line: 20>
+                  declaration_list : declaration_list COMMA ID 	<Line: 20-20>
+                   declaration_list : declaration_list COMMA ID LSQUARE CONST_INT RSQUARE 	<Line: 20-20>
+                    declaration_list : declaration_list COMMA ID 	<Line: 20-20>
+                     declaration_list : ID 	<Line: 20-20>
+                      ID : i	<Line: 20>
+                     COMMA : ,	<Line: 20>
+                     ID : j	<Line: 20>
+                    COMMA : ,	<Line: 20>
+                    ID : l	<Line: 20>
+                    LSQUARE : [	<Line: 20>
+                    CONST_INT : 10	<Line: 20>
+                    RSQUARE : ]	<Line: 20>
+                   COMMA : ,	<Line: 20>
+                   ID : k	<Line: 20>
+                  SEMICOLON : ;	<Line: 20>
+               statement : expression_statement 	<Line: 22-22>
+                expression_statement : expression SEMICOLON 	<Line: 22-22>
+                 expression : variable ASSIGNOP logic_expression 	<Line: 22-22>
+                  variable : ID 	<Line: 22-22>
+                   ID : i	<Line: 22>
+                  ASSIGNOP : =	<Line: 22>
+                  logic_expression : rel_expression 	<Line: 22-22>
+                   rel_expression : simple_expression 	<Line: 22-22>
+                    simple_expression : term 	<Line: 22-22>
+                     term : unary_expression 	<Line: 22-22>
+                      unary_expression : factor 	<Line: 22-22>
+                       factor : CONST_INT 	<Line: 22-22>
+                        CONST_INT : 7	<Line: 22>
+                 SEMICOLON : ;	<Line: 22>
+              statement : expression_statement 	<Line: 23-23>
+               expression_statement : expression SEMICOLON 	<Line: 23-23>
+                expression : variable ASSIGNOP logic_expression 	<Line: 23-23>
+                 variable : ID 	<Line: 23-23>
+                  ID : j	<Line: 23>
+                 ASSIGNOP : =	<Line: 23>
+                 logic_expression : rel_expression 	<Line: 23-23>
+                  rel_expression : simple_expression 	<Line: 23-23>
+                   simple_expression : term 	<Line: 23-23>
+                    term : unary_expression 	<Line: 23-23>
+                     unary_expression : factor 	<Line: 23-23>
+                      factor : CONST_INT 	<Line: 23-23>
+                       CONST_INT : 6	<Line: 23>
+                SEMICOLON : ;	<Line: 23>
+             statement : IF LPAREN expression RPAREN  statement ELSE 	<Line: 25-28>
+              IF : if	<Line: 25>
+              LPAREN : (	<Line: 25>
+              expression : logic_expression 	<Line: 25-0>
+               logic_expression : rel_expression LOGICOP  	<Line: 25-0>
+                rel_expression : simple_expression RELOP simple_expression 	<Line: 25-25>
+                 simple_expression : term 	<Line: 25-25>
+                  term : unary_expression 	<Line: 25-25>
+                   unary_expression : factor 	<Line: 25-25>
+                    factor : variable 	<Line: 25-25>
+                     variable : ID 	<Line: 25-25>
+                      ID : i	<Line: 25>
+                 RELOP : >	<Line: 25>
+                 simple_expression : term 	<Line: 25-25>
+                  term : unary_expression 	<Line: 25-25>
+                   unary_expression : factor 	<Line: 25-25>
+                    factor : variable 	<Line: 25-25>
+                     variable : ID 	<Line: 25-25>
+                      ID : j	<Line: 25>
+                LOGICOP : &&	<Line: 25>
+                 : 	<Line: 0>
+              RPAREN : )	<Line: 25>
+               : 	<Line: 0>
+              statement : compound_statement 	<Line: 25-27>
+               compound_statement : LCURL statements RCURL 	<Line: 25-27>
+                LCURL : {	<Line: 25>
+                statements : statement 	<Line: 26-26>
+                 statement : expression_statement 	<Line: 26-26>
+                  expression_statement : expression SEMICOLON 	<Line: 26-26>
+                   expression : variable ASSIGNOP logic_expression 	<Line: 26-26>
+                    variable : ID 	<Line: 26-26>
+                     ID : k	<Line: 26>
+                    ASSIGNOP : =	<Line: 26>
+                    logic_expression : rel_expression 	<Line: 26-26>
+                     rel_expression : simple_expression 	<Line: 26-26>
+                      simple_expression : term 	<Line: 26-26>
+                       term : unary_expression 	<Line: 26-26>
+                        unary_expression : factor 	<Line: 26-26>
+                         factor : CONST_INT 	<Line: 26-26>
+                          CONST_INT : 10	<Line: 26>
+                   SEMICOLON : ;	<Line: 26>
+                RCURL : }	<Line: 27>
+              ELSE : else	<Line: 28>
+            statement : PRINTLN LPAREN ID RPAREN SEMICOLON 	<Line: 32-32>
+             PRINTLN : println	<Line: 32>
+             LPAREN : (	<Line: 32>
+             ID : k	<Line: 32>
+             RPAREN : )	<Line: 32>
+             SEMICOLON : ;	<Line: 32>
+           statement : FOR LPAREN expression_statement  expression_statement  expression 	<Line: 41-41>
+            FOR : for	<Line: 41>
+            LPAREN : (	<Line: 41>
+            expression_statement : expression SEMICOLON 	<Line: 41-41>
+             expression : variable ASSIGNOP logic_expression 	<Line: 41-41>
+              variable : ID 	<Line: 41-41>
+               ID : j	<Line: 41>
+              ASSIGNOP : =	<Line: 41>
+              logic_expression : rel_expression 	<Line: 41-41>
+               rel_expression : simple_expression 	<Line: 41-41>
+                simple_expression : term 	<Line: 41-41>
+                 term : unary_expression 	<Line: 41-41>
+                  unary_expression : factor 	<Line: 41-41>
+                   factor : CONST_INT 	<Line: 41-41>
+                    CONST_INT : 9	<Line: 41>
+             SEMICOLON : ;	<Line: 41>
              : 	<Line: 0>
-            : 	<Line: 0>
+            expression_statement : expression SEMICOLON 	<Line: 41-41>
+             expression : logic_expression 	<Line: 41-41>
+              logic_expression : rel_expression 	<Line: 41-41>
+               rel_expression : simple_expression RELOP simple_expression 	<Line: 41-41>
+                simple_expression : term 	<Line: 41-41>
+                 term : unary_expression 	<Line: 41-41>
+                  unary_expression : factor 	<Line: 41-41>
+                   factor : variable 	<Line: 41-41>
+                    variable : ID 	<Line: 41-41>
+                     ID : j	<Line: 41>
+                RELOP : >	<Line: 41>
+                simple_expression : term 	<Line: 41-41>
+                 term : unary_expression 	<Line: 41-41>
+                  unary_expression : factor 	<Line: 41-41>
+                   factor : CONST_INT 	<Line: 41-41>
+                    CONST_INT : 5	<Line: 41>
+             SEMICOLON : ;	<Line: 41>
+             : 	<Line: 0>
+            expression : logic_expression 	<Line: 41-41>
+             logic_expression : rel_expression 	<Line: 41-41>
+              rel_expression : simple_expression 	<Line: 41-41>
+               simple_expression : term 	<Line: 41-41>
+                term : unary_expression 	<Line: 41-41>
+                 unary_expression : factor 	<Line: 41-41>
+                  factor : variable DECOP 	<Line: 41-41>
+                   variable : ID 	<Line: 41-41>
+                    ID : j	<Line: 41>
+                   DECOP : --	<Line: 41>
+          statement : expression_statement 	<Line: 45-45>
+           expression_statement : expression SEMICOLON 	<Line: 45-45>
+            expression : variable ASSIGNOP logic_expression 	<Line: 45-45>
+             variable : ID 	<Line: 45-45>
+              ID : j	<Line: 45>
+             ASSIGNOP : =	<Line: 45>
+             logic_expression : rel_expression 	<Line: 45-45>
+              rel_expression : simple_expression 	<Line: 45-45>
+               simple_expression : term 	<Line: 45-45>
+                term : unary_expression 	<Line: 45-45>
+                 unary_expression : factor 	<Line: 45-45>
+                  factor : CONST_INT 	<Line: 45-45>
+                   CONST_INT : 14	<Line: 45>
+            SEMICOLON : ;	<Line: 45>
+         statement : WHILE  LPAREN expression RPAREN 	<Line: 47-47>
+          WHILE : while	<Line: 47>
            : 	<Line: 0>
-          : 	<Line: 0>
-         : 	<Line: 0>
-        : 	<Line: 0>
-       : 	<Line: 0>
-     RCURL : }	<Line: 87>
+          LPAREN : (	<Line: 47>
+          expression : logic_expression 	<Line: 47-47>
+           logic_expression : rel_expression 	<Line: 47-47>
+            rel_expression : simple_expression RELOP simple_expression 	<Line: 47-47>
+             simple_expression : term 	<Line: 47-47>
+              term : unary_expression 	<Line: 47-47>
+               unary_expression : factor 	<Line: 47-47>
+                factor : variable 	<Line: 47-47>
+                 variable : ID 	<Line: 47-47>
+                  ID : j	<Line: 47>
+             RELOP : >	<Line: 47>
+             simple_expression : term 	<Line: 47-47>
+              term : unary_expression 	<Line: 47-47>
+               unary_expression : factor 	<Line: 47-47>
+                factor : CONST_INT 	<Line: 47-47>
+                 CONST_INT : 0	<Line: 47>
+          RPAREN : )	<Line: 47>
+        statement : expression_statement 	<Line: 55-55>
+         expression_statement : expression SEMICOLON 	<Line: 55-55>
+          expression : variable ASSIGNOP logic_expression 	<Line: 55-55>
+           variable : ID 	<Line: 55-55>
+            ID : k	<Line: 55>
+           ASSIGNOP : =	<Line: 55>
+           logic_expression : rel_expression 	<Line: 55-55>
+            rel_expression : simple_expression 	<Line: 55-55>
+             simple_expression : term 	<Line: 55-55>
+              term : unary_expression 	<Line: 55-55>
+               unary_expression : factor 	<Line: 55-55>
+                factor : CONST_INT 	<Line: 55-55>
+                 CONST_INT : 30	<Line: 55>
+          SEMICOLON : ;	<Line: 55>
+       statement : PRINTLN LPAREN ID RPAREN SEMICOLON 	<Line: 56-56>
+        PRINTLN : println	<Line: 56>
+        LPAREN : (	<Line: 56>
+        ID : k	<Line: 56>
+        RPAREN : )	<Line: 56>
+        SEMICOLON : ;	<Line: 56>
+      statement : RETURN expression SEMICOLON 	<Line: 104-104>
+       RETURN : return	<Line: 104>
+       expression : logic_expression 	<Line: 104-104>
+        logic_expression : rel_expression 	<Line: 104-104>
+         rel_expression : simple_expression 	<Line: 104-104>
+          simple_expression : term 	<Line: 104-104>
+           term : unary_expression 	<Line: 104-104>
+            unary_expression : factor 	<Line: 104-104>
+             factor : CONST_INT 	<Line: 104-104>
+              CONST_INT : 0	<Line: 104>
+       SEMICOLON : ;	<Line: 104>
+     RCURL : }	<Line: 105>

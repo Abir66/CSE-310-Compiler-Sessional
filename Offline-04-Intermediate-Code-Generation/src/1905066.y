@@ -265,7 +265,7 @@ statements : statement {
 	| statements M statement {
 		printLog("statements : statements statement");
 		$$ = new SymbolInfo("statements", "non-terminal");
-		$$->addChildren({$1, $2});
+		$$->addChildren({$1, $3});
 
 		// ------------------ code generation ------------------
 		backpatch($1->getNextList(), $2->getLabel());
@@ -292,10 +292,24 @@ statement : var_declaration {
 		// ------------------ code generation ------------------
 		$$->setNextList($1->getNextList());
 	}
-	| FOR LPAREN expression_statement expression_statement expression RPAREN statement {
+	| FOR LPAREN expression_statement M expression_statement M expression {genCode("\tJMP " + $4->getLabel());} RPAREN M statement {
 		printLog("statement : FOR LPAREN expression_statement expression_statement expression RPAREN statement");
 		$$ = new SymbolInfo("statement", "non-terminal");
 		$$->addChildren({$1, $2, $3, $4, $5, $6, $7});
+
+		//------------------code generation------------------
+		auto S1 = $3;
+		auto B = $5;
+		auto S2 = $7;
+		auto S3 = $11;
+		auto M1 = $4;
+		auto M2 = $6;
+		auto M3 = $10;
+
+		backpatch(B->getTrueList(), M3->getLabel());
+		$$->setNextList(merge(B->getFalseList(), S3->getNextList()));
+		genCode("\tJMP " + M2->getLabel());
+
 	}
 	| IF LPAREN expression RPAREN M statement %prec LOWER_THAN_ELSE {
 		printLog("statement : IF LPAREN expression RPAREN statement");
@@ -324,6 +338,7 @@ statement : var_declaration {
 		backpatch(B->getFalseList(), M2->getLabel());
 		auto temp = merge(S1->getNextList(), N->getNextList());
 		$$->setNextList(merge(temp, S2->getNextList()));
+
 	}
 	| WHILE M LPAREN expression RPAREN M statement {
 		printLog("statement : WHILE LPAREN expression RPAREN statement");
@@ -377,8 +392,8 @@ expression_statement : SEMICOLON {
 	| expression SEMICOLON {
 		printLog("expression_statement : expression SEMICOLON");
 		$$ = new SymbolInfo("expression_statement", "non-terminal");
+		$$->copyICGData($1);
 		$$->addChildren({$1, $2});
-
 		//------------------code generation------------------
 		genCode("\tPOP AX");
 	}
@@ -459,9 +474,8 @@ M : {
 
 expression : logic_expression {
 		printLog("expression : logic_expression");
-		$$ = new SymbolInfo($1);
-		$$->setName("expression");
-		$$->setType("non-terminal");
+		$$ = new SymbolInfo("expression", "non-terminal");
+		$$->copyICGData($1);
 		$$->addChildren($1);
 	}
 	| variable ASSIGNOP logic_expression {
@@ -495,15 +509,15 @@ expression : logic_expression {
 		if($1->isArray() && !$1->isGlobalVar()) genCode("\tPOP BX");
 		genCode("\tMOV " + $1->getAsmName() + ", AX");
 		genCode("\tPUSH AX");
+
+		$$->clearNextList();
 	}
 	;
 
 logic_expression : rel_expression {
 		printLog("logic_expression : rel_expression");
-		//$$ = new SymbolInfo("logic_expression", "non-terminal");
-		$$ = new SymbolInfo($1);
-		$$->setName("logic_expression");
-		$$->setType("non-terminal");
+		$$ = new SymbolInfo("logic_expression", "non-terminal");
+		$$->copyICGData($1);
 		$$->addChildren($1);
 	}
 	| rel_expression LOGICOP M rel_expression {
@@ -540,6 +554,7 @@ logic_expression : rel_expression {
 rel_expression : simple_expression {
 		printLog("rel_expression : simple_expression");
 		$$ = new SymbolInfo("rel_expression", "non-terminal");
+		$$->copyICGData($1);
 		$$->setDataType($1->getDataType());
 		$$->addChildren($1);
 	}
@@ -555,44 +570,15 @@ rel_expression : simple_expression {
 			// semanticError($3->getStartLine(), error_message);
 		}
 
-
 		$$->addChildren({$1, $2, $3});
 
 		// ------------------code generation------------------
-		// string l1 = new_label();
-		// string l2 = new_label();
-		// string op = $2->getName();
-
-		// genCode("\tPOP BX");
-		// genCode("\tPOP AX");
-		// genCode("\tCMP AX, BX");
-
-		// if(op == "<") genCode("\tJL " + l1);
-		// else if(op == ">") genCode("\tJG " + l1);
-		// else if(op == "<=") genCode("\tJLE " + l1);
-		// else if(op == ">=") genCode("\tJGE " + l1);
-		// else if(op == "==") genCode("\tJE " + l1);
-		// else if(op == "!=") genCode("\tJNE " + l1);
-
-		// genCode("\tPUSH 0");
-		// genCode("\tJMP " + l2);
-		// genCode(l1 + ":");
-		// genCode("\tPUSH 1");
-		// genCode(l2 + ":");
-
-		// use short circuit code and backpatching instead
-		
-
 		genCode("\tPOP BX");
 		genCode("\tPOP AX");
 		genCode("\tCMP AX, BX");
 
 		$$->addToTrueList(temp_asm_line_count);
 		$$->addToFalseList(temp_asm_line_count + 1);
-
-		// auto list = $$->getTrueList();
-		// for(auto i : list) cout << i << " ";
-		// cout << endl;
 
 		string op = $2->getName();
 		if(op == "<") genCode("\tJL ");
@@ -609,6 +595,7 @@ rel_expression : simple_expression {
 simple_expression : term {
 		printLog("simple_expression : term");
 		$$ = new SymbolInfo("simple_expression", "non-terminal");
+		$$->copyICGData($1);
 		$$->setDataType($1->getDataType());
 		$$->addChildren($1);
 	}
@@ -639,6 +626,8 @@ term : unary_expression {
 		$$ = new SymbolInfo("term", "non-terminal");
 		$$->setDataType($1->getDataType());
 		$$->addChildren($1);
+
+		$$->copyICGData($1);
 	}
 	| term MULOP unary_expression {
 		printLog("term : term MULOP unary_expression");
@@ -728,18 +717,21 @@ unary_expression : ADDOP unary_expression {
 		$$->addChildren({$1, $2});
 
 		// ---------------------Code generation---------------------
-		// string label1 = new_label();
-		// string label2 = new_label();
-		string label1 = "LL0";
-		string label2 = "LL1";
-		genCode("\tPOP AX");
-		genCode("\tCMP AX, 0");
-		genCode("\tJNE " + label1);
-		genCode("\tPUSH 1");
-		genCode("\tJMP " + label2);
-		genCode(label1 + ":");
-		genCode("\tPUSH 0");
-		genCode(label2 + ":");
+		// genCode("\tPOP AX");
+		// genCode("\tCMP AX, 0");
+
+		// string label1 = "LL0";
+		// string label2 = "LL1";
+
+		// genCode("\tJNE " + label1);
+		// genCode("\tPUSH 1");
+		// genCode("\tJMP " + label2);
+		// genCode(label1 + ":");
+		// genCode("\tPUSH 0");
+		// genCode(label2 + ":");
+
+		$$->setTrueList($2->getFalseList());
+		$$->setFalseList($2->getTrueList());
 
 	}
 	| factor {
@@ -748,6 +740,8 @@ unary_expression : ADDOP unary_expression {
 		$$->setDataType($1->getDataType());
 		$$->setValue($1->getValue());
 		$$->addChildren($1);
+
+		$$->copyICGData($1);
 	}
 	;
 

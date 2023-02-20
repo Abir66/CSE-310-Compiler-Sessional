@@ -1,0 +1,60 @@
+write the backpatch rule of for loop similar to this
+
+S -> if(B) M S1 {
+    backpatch(B.truelist, M.instr);
+    S.nextlist = merge(B.falselist, S1.nextlist);
+}
+
+S -> if(B) M1 S1 N else M2 S2 {
+    backpatch(B.truelist, M1.instr);
+    backpatch(B.falselist, M2.instr);
+    temp = merge(S1.nextlist, N.nextlist);
+    S.nextlist = merge(temp, S2.nextlist);
+}
+
+S -> while M1 (B) M2 S1 {
+    backpatch(S1.nextlist, M1.instr);
+    backpatch(B.truelist, M2.instr);
+    S.nextlist = B.falselist;
+    emit("goto " + M1.instr);
+}
+
+M -> {
+    M.instr = nextinstr();
+}
+
+N -> {
+    N.nextlist = makelist(nextinstr());
+    emit("goto _");
+}
+
+S -> for (S1, M1 B, M3 E) M2 S2{
+
+    backpatch(B.truelist, M2.instr);
+    backpatch(S2.nextlist, M3.instr);
+    // goto M1
+
+    S.nextlist = B.falselist;
+    emit("goto " + M3.instr);
+
+
+}
+
+
+S -> for (M1; B; M2) S1 {
+backpatch(B.truelist, S1.instr);
+temp = merge(S1.nextlist, M2.instr);
+backpatch(temp, M1.instr);
+S.nextlist = B.falselist;
+emit("goto " + M1.instr);
+}
+
+M1 -> {
+M1.instr = nextinstr();
+}
+
+M2 -> {
+M2.instr = nextinstr();
+}
+
+where M1 is the starting point of the loop, M2 is the point after the body of the loop, B is the condition, and S1 is the body of the loop. The truelist of B is backpatched to the instruction after the body of the loop, and the nextlist of S1 is merged with the instruction after the body of the loop to create a list of instructions that need to be executed before the loop condition is evaluated again. This list is then backpatched to the starting point of the loop. The falselist of the loop condition is the nextlist of the loop. Finally, a jump is emitted to the starting point of the loop.
