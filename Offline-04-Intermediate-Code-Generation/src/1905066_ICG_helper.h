@@ -166,7 +166,17 @@ void generate_asm_file(){
     codeOut.close();
 }
 
+void normal_expression_to_logic(SymbolInfo* B, bool pop_ax = true){
+    if(B->getTrueList().empty()){
+		if(pop_ax) genCode("\tPOP AX");
+		genCode("\tCMP AX, 0");
 
+		B->addToTrueList(temp_asm_line_count);
+		B->addToFalseList(temp_asm_line_count + 1);
+		genCode("\tJNE ");
+		genCode("\tJMP ");
+	}
+}
 
 
 

@@ -21,7 +21,7 @@ using namespace std;
 %token<symbolInfo>  IF ELSE FOR WHILE DO BREAK RETURN SWITCH CASE DEFAULT CONTINUE  LPAREN RPAREN LCURL RCURL LTHIRD RTHIRD COMMA SEMICOLON PRINTLN INCOP DECOP ASSIGNOP NOT
 %token<symbolInfo> ID INT FLOAT DOUBLE CONST_INT CONST_FLOAT CHAR VOID ADDOP MULOP RELOP  LOGICOP BITOP 
 
-%type<symbolInfo> variable factor term unary_expression simple_expression rel_expression logic_expression expression M N
+%type<symbolInfo> variable factor term unary_expression simple_expression rel_expression logic_expression expression M N P
 %type<symbolInfo> start program unit func_declaration func_definition parameter_list compound_statement var_declaration type_specifier declaration_list statements statement expression_statement argument_list arguments
 
 
@@ -261,6 +261,8 @@ statements : statement {
 
 		// ------------------ code generation ------------------
 		$$->setNextList($1->getNextList());
+		// std::cout<<"here - "<<$2->getLabel()<<std::endl;
+		// backpatch($1->getNextList(), $2->getLabel());
 	}
 	| statements M statement {
 		printLog("statements : statements statement");
@@ -293,47 +295,48 @@ statement : var_declaration {
 		// ------------------ code generation ------------------
 		$$->setNextList($1->getNextList());
 	}
-	| FOR LPAREN expression_statement M expression_statement M expression {genCode("\tJMP " + $4->getLabel());} RPAREN M statement {
+	| FOR LPAREN expression_statement M expression_statement { normal_expression_to_logic($5, false); } M expression {genCode("\tJMP " + $4->getLabel());} RPAREN M statement {
 		printLog("statement : FOR LPAREN expression_statement expression_statement expression RPAREN statement");
 		$$ = new SymbolInfo("statement", "non-terminal");
-		$$->addChildren({$1, $2, $3, $4, $5, $6, $7});
+		$$->addChildren({$1, $2, $3, $5, $8, $10, $12});
 
 		//------------------code generation------------------
 		auto S1 = $3;
 		auto B = $5;
-		auto S2 = $7;
-		auto S3 = $11;
+		auto S2 = $8;
+		auto S3 = $12;
 		auto M1 = $4;
-		auto M2 = $6;
-		auto M3 = $10;
+		auto M2 = $7;
+		auto M3 = $11;
+
+		normal_expression_to_logic(B);
 
 		backpatch(B->getTrueList(), M3->getLabel());
 		$$->setNextList(merge(B->getFalseList(), S3->getNextList()));
 		genCode("\tJMP " + M2->getLabel());
 
 	}
-	| IF LPAREN expression RPAREN M statement %prec LOWER_THAN_ELSE {
+	| IF LPAREN expression P RPAREN M statement %prec LOWER_THAN_ELSE {
 		printLog("statement : IF LPAREN expression RPAREN statement");
 		$$ = new SymbolInfo("statement", "non-terminal");
-		$$->addChildren({$1, $2, $3, $4, $5});
+		$$->addChildren({$1, $2, $3, $5, $7});
 
 		//------------------code generation------------------
-		backpatch($3->getTrueList(), $5->getLabel());
-		$$->setNextList(merge($3->getFalseList(), $6->getNextList()));
-		
+		backpatch($3->getTrueList(), $6->getLabel());
+		$$->setNextList(merge($3->getFalseList(), $7->getNextList()));
 	}
-	| IF LPAREN expression RPAREN M statement ELSE N M statement {
+	| IF LPAREN expression P RPAREN M statement ELSE N M statement {
 		printLog("statement : IF LPAREN expression RPAREN statement ELSE statement");
 		$$ = new SymbolInfo("statement", "non-terminal");
-		$$->addChildren({$1, $2, $3, $4, $5, $6, $7});
+		$$->addChildren({$1, $2, $3, $5, $7, $8, $11});
 
 		//------------------code generation------------------
 		auto B = $3;
-		auto M1 = $5;
-		auto M2 = $9;
-		auto N = $8;
-		auto S1 = $6;
-		auto S2 = $10;
+		auto M1 = $6;
+		auto M2 = $10;
+		auto N = $9;
+		auto S1 = $7;
+		auto S2 = $11;
 
 		backpatch(B->getTrueList(), M1->getLabel());
 		backpatch(B->getFalseList(), M2->getLabel());
@@ -341,16 +344,16 @@ statement : var_declaration {
 		$$->setNextList(merge(temp, S2->getNextList()));
 
 	}
-	| WHILE M LPAREN expression RPAREN M statement {
+	| WHILE M LPAREN expression { normal_expression_to_logic($4); } RPAREN M statement {
 		printLog("statement : WHILE LPAREN expression RPAREN statement");
 		$$ = new SymbolInfo("statement", "non-terminal");
-		$$->addChildren({$1, $2, $3, $4, $5});
+		$$->addChildren({$1, $3, $4, $6, $7});
 
 		//------------------code generation------------------
 		auto M1 = $2;
 		auto B = $4;
-		auto M2 = $6;
-		auto S1 = $7;
+		auto M2 = $7;
+		auto S1 = $6;
 
 		backpatch(S1->getNextList(), M1->getLabel());
 		backpatch(B->getTrueList(), M2->getLabel());
@@ -387,6 +390,10 @@ statement : var_declaration {
 		
 	}
 	;
+
+P : {	
+		normal_expression_to_logic($<symbolInfo>0); 
+	};
 
 expression_statement : SEMICOLON {
 		printLog("expression_statement : SEMICOLON");
@@ -559,6 +566,11 @@ logic_expression : rel_expression {
 		SymbolInfo* B = $$;
 		SymbolInfo* B1 = $1;
 		SymbolInfo* B2 = $4;
+
+		// careful with the order
+		normal_expression_to_logic(B2);
+		normal_expression_to_logic(B1);
+
 		if($2->getName() == "&&"){
 			backpatch(B1->getTrueList(), $3->getLabel());
 			B->setTrueList(B2->getTrueList());
