@@ -11,6 +11,7 @@
 #include"1905066_parser_helper.h"
 #include"symbol-table/1905066_symbolTable.h"
 #include"symbol-table/1905066_symbolInfo.h"
+#include "1905066_optimization_helper.h"
 
 using namespace std;
 
@@ -178,10 +179,9 @@ void normal_expression_to_logic(SymbolInfo* B, bool pop_ax = true){
 }
 
 
-
-
 void generate_Optimize_Code(){
-    
+    remove_unnecessary_push_pop(code_file_name, temp_file_name);
+    remove_unnecessary_jumps(temp_file_name, optimized_code_file_name);
 }
 
 #endif

@@ -1,21 +1,19 @@
-
-
-void g(int a, int b){
-    int x,i;
-    
-    for(i=0;i<7;i++){
-    	if(i%3 == 0){
-    		a = a+5;
-    	}
-    	else{
-    		a = a-1;
-    	}
-		println(a);
-    }
-}
+// #include<stdio.h>
 
 int main()
 {
-	g(2,3);
-    return 0;
+    int ara[5], i, j, k;
+
+    j = 13;
+    k = j-12;
+    println(k);
+    // printf("%d\n",k);
+    ara[j - 12] = 10;
+    i = 5;
+    k = j*2 - 5*i;
+    println(k);
+    //printf("%d\n",k);
+    i = ara[j * 2 - 5 * i];
+    println(i);
+    //printf("%d\n",i);
 }

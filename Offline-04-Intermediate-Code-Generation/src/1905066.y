@@ -291,6 +291,25 @@ statement : var_declaration {
 		$$ = new SymbolInfo("statement", "non-terminal");
 		$$->addChildren($1);
 		$$->copyICGData($1);
+
+		if(!$1->getTrueList().empty()){
+			std::string label = new_label();
+			genCode(label + ":");
+			genCode("\tPUSH 1");
+			$$->addToNextList(temp_asm_line_count);
+			genCode("\tJMP ");
+			backpatch($1->getTrueList(), label);
+
+			label = new_label();
+			genCode(label + ":");
+			genCode("\tPUSH 0");
+			backpatch($1->getFalseList(), label);
+
+			// label = new_label();
+			// genCode(label + ":");
+			// backpatch($$->getNextList(), label);			
+		}
+
 		
 	}
 	| compound_statement {
