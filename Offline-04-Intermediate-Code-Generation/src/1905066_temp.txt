@@ -1,24 +1,15 @@
 g PROC
 	PUSH BP
 	MOV BP, SP
-	PUSH 5
-	PUSH 6
-	POP BX
-	POP AX
-	CMP AX, BX
-	JL 
-	JMP 
-	POP AX
+	SUB SP, 2
+	SUB SP, 2
 L0:
-	SUB SP, 2
-	SUB SP, 2
-L1:
 	PUSH 0
 	POP AX
 	MOV [BP-4], AX
 	PUSH AX
 	POP AX
-L2:
+L1:
 	MOV AX, [BP-4]
 	PUSH AX
 	PUSH 7
@@ -28,22 +19,60 @@ L2:
 	JL 
 	JMP 
 	POP AX
-L3:
-	MOV AX, [BP-4]
+L2:
 	MOV AX, [BP-4]
 	PUSH AX
 	INC AX
 	MOV [BP-4], AX
-	JMP L2
-L4:
+	POP AX
+	JMP L1
+L3:
 	MOV AX, [BP-4]
+	PUSH AX
+	PUSH 3
+	POP BX
+	POP AX
+	XOR DX, DX
+	IDIV BX
+	PUSH DX
+	PUSH 0
+	POP BX
+	POP AX
+	CMP AX, BX
+	JE 
+	JMP 
+L4:
+	MOV AX, [BP+6]
+	PUSH AX
+	PUSH 5
+	POP BX
+	POP AX
+	ADD AX, BX
+	PUSH AX
+	POP AX
+	MOV [BP+6], AX
+	PUSH AX
+	POP AX
+	JMP 
+L5:
+	MOV AX, [BP+6]
+	PUSH AX
+	PUSH 1
+	POP BX
+	POP AX
+	SUB AX, BX
+	PUSH AX
+	POP AX
+	MOV [BP+6], AX
+	PUSH AX
+	POP AX
+L6:
+	MOV AX, [BP+6]
 	CALL print_output
 	CALL new_line
-	JMP L3
-L5:
-	SUB SP, 2
-L6:
-	ADD SP, 6
+	JMP L2
+L7:
+	ADD SP, 4
 	POP BP
 	RET 4
 g ENDP
@@ -57,7 +86,11 @@ main PROC
 	CALL g
 	PUSH 0
 	POP AX
-L7:
+L8:
+	PUSH 0
+	POP AX
+	JMP 
+L9:
 	ADD SP, 0
 	POP BP
 	MOV AX, 4CH

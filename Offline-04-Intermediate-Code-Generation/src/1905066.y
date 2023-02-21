@@ -166,13 +166,19 @@ compound_statement : LCURL {symbolTable->enterScope(); addParamsToScope();} stat
 		$$->addChildren({$1, $3, $4});
 		symbolTable->printAllScopeTable();
 		symbolTable->exitScope();
+
+		// ------------------code generation------------------
+		if($3->getNextList().size() > 0){
+			for(auto line : $3->getNextList()) function_return_lines.push_back(line);
+		}
 	}
 	| LCURL {symbolTable->enterScope(); addParamsToScope();} RCURL {
 		printLog("compound_statement : LCURL RCURL");
 		$$ = new SymbolInfo("compound_statement", "non-terminal");
 		$$->addChildren({$1, $3});
 		symbolTable->printAllScopeTable();
-		symbolTable->exitScope();}
+		symbolTable->exitScope();
+	}
 	;
 
 var_declaration : type_specifier declaration_list SEMICOLON {
@@ -295,7 +301,7 @@ statement : var_declaration {
 		// ------------------ code generation ------------------
 		$$->setNextList($1->getNextList());
 	}
-	| FOR LPAREN expression_statement M expression_statement { normal_expression_to_logic($5, false); } M expression {genCode("\tJMP " + $4->getLabel());} RPAREN M statement {
+	| FOR LPAREN expression_statement M expression_statement { normal_expression_to_logic($5, false); } M expression {genCode("\tPOP AX"); genCode("\tJMP " + $4->getLabel());} RPAREN M statement {
 		printLog("statement : FOR LPAREN expression_statement expression_statement expression RPAREN statement");
 		$$ = new SymbolInfo("statement", "non-terminal");
 		$$->addChildren({$1, $2, $3, $5, $8, $10, $12});
@@ -515,9 +521,9 @@ expression : logic_expression {
 		$$->addChildren({$1, $2, $3});
 
 		// ------------------code generation------------------
-		bool isLogic = $3->getTrueList().size() > 0;
+
 		$$->clearNextList();
-		if(isLogic){
+		if(!$3->getTrueList().empty()){
 			std::string label = new_label();
 			genCode(label + ":");
 			genCode("\tPUSH 1");

@@ -81,7 +81,6 @@ void genINC_DEC(SymbolInfo* var, string op){
     op = op == "++" ? "INC" : "DEC";
     if(var->isArray() && !var->isGlobalVar()) genCode("\tPOP BX");
     genCode("\tMOV AX, " + var->getAsmName());
-    genCode("\tMOV AX, " + var->getAsmName());
     genCode("\tPUSH AX");
     genCode("\t" + op + " AX");
     genCode("\tMOV " + var->getAsmName() + ", AX" );
