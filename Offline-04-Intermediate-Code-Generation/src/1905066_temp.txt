@@ -13,90 +13,55 @@ main PROC
 	MOV DS, AX
 	PUSH BP
 	MOV BP, SP
-	SUB SP, 10
-	SUB SP, 2
+; ------------------ Line 4 ------------------
 	SUB SP, 2
 	SUB SP, 2
 L0:
-	MOV AX, 13
-	MOV [BP-14], AX
-L1:
-	MOV AX, [BP-14]
-	PUSH AX
-	MOV BX, 12
-	POP AX
-	SUB AX, BX
-	MOV [BP-16], AX
-L2:
-	MOV AX, [BP-16]
-	CALL print_output
-	CALL new_line
-L3:
-	MOV AX, [BP-14]
-	PUSH AX
-	MOV BX, 12
-	POP AX
-	SUB AX, BX
-	SHL AX, 1
-	LEA BX, [BP-2]
-	SUB BX, AX
-	PUSH BX
-	MOV AX, 10
-	POP BX
-	MOV [BX], AX
-L4:
+; ------------------ Line 6 ------------------
 	MOV AX, 5
-	MOV [BP-12], AX
+	MOV [BP-2], AX
+L1:
+	MOV AX, [BP-2]
+	PUSH AX
+	MOV AX, 2
+	NEG AX
+	MOV BX, AX
+	POP AX
+	CMP AX, BX
+	JG L3
+	JMP L6
+	POP AX
+L2:
+	MOV AX, [BP-2]
+	PUSH AX
+	DEC AX
+	MOV [BP-2], AX
+	POP AX
+	JMP L1
+L3:
+; ------------------ Line 8 ------------------
+	MOV AX, [BP-2]
+	PUSH AX
+	MOV BX, 2
+	POP AX
+	XOR DX, DX
+	IDIV BX
+	MOV AX, DX
+	MOV [BP-4], AX
+L4:
+; ------------------ Line 10 ------------------
+	MOV AX, [BP-4]
+	CMP AX, 0
+	JNE L5
+	JMP L2
 L5:
-	MOV AX, [BP-14]
-	PUSH AX
-	MOV BX, 2
-	POP AX
-	XOR DX, DX
-	IMUL BX
-	PUSH AX
-	PUSH 5
-	MOV AX, [BP-12]
-	MOV BX, AX
-	POP AX
-	XOR DX, DX
-	IMUL BX
-	MOV BX, AX
-	POP AX
-	SUB AX, BX
-	MOV [BP-16], AX
+; ------------------ Line 11 ------------------
+	MOV AX, [BP-2]
+	CALL print_output
+	CALL new_line
+	JMP L2
 L6:
-	MOV AX, [BP-16]
-	CALL print_output
-	CALL new_line
-L7:
-	MOV AX, [BP-14]
-	PUSH AX
-	MOV BX, 2
-	POP AX
-	XOR DX, DX
-	IMUL BX
-	PUSH AX
-	PUSH 5
-	MOV AX, [BP-12]
-	MOV BX, AX
-	POP AX
-	XOR DX, DX
-	IMUL BX
-	MOV BX, AX
-	POP AX
-	SUB AX, BX
-	SHL AX, 1
-	LEA BX, [BP-2]
-	SUB BX, AX
-	MOV AX, [BX]
-	MOV [BP-12], AX
-L8:
-	MOV AX, [BP-12]
-	CALL print_output
-	CALL new_line
-L9:
-	ADD SP, 16
+	ADD SP, 4
 	POP BP
 	MOV AX, 4CH
 	INT 21H

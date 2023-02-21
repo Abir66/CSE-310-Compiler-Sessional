@@ -1,7 +1,0 @@
-    MOV AX, BX
-    MOV AX, BX
-    JNL L1
-    MOV BX, AX
-    MOV BX, AX
-    MOV BX, AX
-    MOV CX, BX

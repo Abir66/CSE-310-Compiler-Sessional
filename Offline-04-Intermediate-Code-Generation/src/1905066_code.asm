@@ -13,125 +13,66 @@ main PROC
 	MOV DS, AX
 	PUSH BP
 	MOV BP, SP
-	SUB SP, 10
-	SUB SP, 2
+; ------------------ Line 4 ------------------
 	SUB SP, 2
 	SUB SP, 2
 L0:
-	PUSH 13
+; ------------------ Line 6 ------------------
+	PUSH 5
 	POP AX
-	MOV [BP-14], AX
+	MOV [BP-2], AX
 	PUSH AX
 	POP AX
 L1:
-	MOV AX, [BP-14]
+	MOV AX, [BP-2]
 	PUSH AX
-	PUSH 12
+	PUSH 2
+	POP AX
+	NEG AX
+	PUSH AX
 	POP BX
 	POP AX
-	SUB AX, BX
-	PUSH AX
-	POP AX
-	MOV [BP-16], AX
-	PUSH AX
+	CMP AX, BX
+	JG L3
+	JMP L6
 	POP AX
 L2:
-	MOV AX, [BP-16]
-	CALL print_output
-	CALL new_line
+	MOV AX, [BP-2]
+	PUSH AX
+	DEC AX
+	MOV [BP-2], AX
+	POP AX
+	JMP L1
 L3:
-	MOV AX, [BP-14]
+; ------------------ Line 8 ------------------
+	MOV AX, [BP-2]
 	PUSH AX
-	PUSH 12
+	PUSH 2
 	POP BX
 	POP AX
-	SUB AX, BX
-	PUSH AX
+	XOR DX, DX
+	IDIV BX
+	PUSH DX
 	POP AX
-	SHL AX, 1
-	LEA BX, [BP-2]
-	SUB BX, AX
-	PUSH BX
-	PUSH 10
-	POP AX
-	POP BX
-	MOV [BX], AX
+	MOV [BP-4], AX
 	PUSH AX
 	POP AX
 L4:
-	PUSH 5
-	POP AX
-	MOV [BP-12], AX
+; ------------------ Line 10 ------------------
+	MOV AX, [BP-4]
 	PUSH AX
 	POP AX
+	CMP AX, 0
+	JNE L5
+	JMP L2
 L5:
-	MOV AX, [BP-14]
-	PUSH AX
-	PUSH 2
-	POP BX
-	POP AX
-	XOR DX, DX
-	IMUL BX
-	PUSH AX
-	PUSH 5
-	MOV AX, [BP-12]
-	PUSH AX
-	POP BX
-	POP AX
-	XOR DX, DX
-	IMUL BX
-	PUSH AX
-	POP BX
-	POP AX
-	SUB AX, BX
-	PUSH AX
-	POP AX
-	MOV [BP-16], AX
-	PUSH AX
-	POP AX
+; ------------------ Line 11 ------------------
+	MOV AX, [BP-2]
+	CALL print_output
+	CALL new_line
+	JMP L2
 L6:
-	MOV AX, [BP-16]
-	CALL print_output
-	CALL new_line
-L7:
-	MOV AX, [BP-14]
-	PUSH AX
-	PUSH 2
-	POP BX
-	POP AX
-	XOR DX, DX
-	IMUL BX
-	PUSH AX
-	PUSH 5
-	MOV AX, [BP-12]
-	PUSH AX
-	POP BX
-	POP AX
-	XOR DX, DX
-	IMUL BX
-	PUSH AX
-	POP BX
-	POP AX
-	SUB AX, BX
-	PUSH AX
-	POP AX
-	SHL AX, 1
-	LEA BX, [BP-2]
-	SUB BX, AX
-	PUSH BX
-	POP BX
-	MOV AX, [BX]
-	PUSH AX
-	POP AX
-	MOV [BP-12], AX
-	PUSH AX
-	POP AX
-L8:
-	MOV AX, [BP-12]
-	CALL print_output
-	CALL new_line
-L9:
-	ADD SP, 16
+	ADD SP, 4
 	POP BP
 	MOV AX, 4CH
 	INT 21H

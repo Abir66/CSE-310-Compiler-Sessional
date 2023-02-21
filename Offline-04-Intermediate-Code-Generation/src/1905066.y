@@ -100,7 +100,13 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 		
 		//------------------code generation------------------
 		auto func = symbolTable->lookup($2->getName());
+		if($7->getNextList().size() > 0){
+			for(auto line : $7->getNextList()) function_return_lines.push_back(line);
+		}
 		genFunctionEndingCode(func);
+
+		
+
 
 		
 	}
@@ -115,7 +121,11 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 		
 		//------------------code generation------------------
 		auto func = symbolTable->lookup($2->getName());
+		if($6->getNextList().size() > 0){
+			for(auto line : $6->getNextList()) function_return_lines.push_back(line);
+		}
 		genFunctionEndingCode(func);
+
 	}
 	;
 
@@ -168,9 +178,12 @@ compound_statement : LCURL {symbolTable->enterScope(); addParamsToScope();} stat
 		symbolTable->exitScope();
 
 		// ------------------code generation------------------
-		if($3->getNextList().size() > 0){
-			for(auto line : $3->getNextList()) function_return_lines.push_back(line);
-		}
+		// if($3->getNextList().size() > 0){
+		// 	for(auto line : $3->getNextList()) function_return_lines.push_back(line);
+		// }
+
+		$$->setNextList($3->getNextList());
+		
 	}
 	| LCURL {symbolTable->enterScope(); addParamsToScope();} RCURL {
 		printLog("compound_statement : LCURL RCURL");
@@ -260,24 +273,25 @@ declaration_list : declaration_list COMMA ID {
 	}
 	;
 
-statements : statement {
+statements : {genComment("------------------ Line " + to_string(line_count) + " ------------------");} statement {
 		printLog("statements : statement");
 		$$ = new SymbolInfo("statements", "non-terminal");
-		$$->addChildren($1);
+		$$->addChildren($2);
 
 		// ------------------ code generation ------------------
-		$$->setNextList($1->getNextList());
+		$$->setNextList($2->getNextList());
+		
 		// std::cout<<"here - "<<$2->getLabel()<<std::endl;
 		// backpatch($1->getNextList(), $2->getLabel());
 	}
-	| statements M statement {
+	| statements M {genComment("------------------ Line " + to_string(line_count) + " ------------------");} statement {
 		printLog("statements : statements statement");
 		$$ = new SymbolInfo("statements", "non-terminal");
-		$$->addChildren({$1, $3});
+		$$->addChildren({$1, $4});
 
 		// ------------------ code generation ------------------
 		backpatch($1->getNextList(), $2->getLabel());
-		$$->setNextList($3->getNextList());
+		$$->setNextList($4->getNextList());
 	}
 	;
 
@@ -337,7 +351,9 @@ statement : var_declaration {
 		normal_expression_to_logic(B);
 
 		backpatch(B->getTrueList(), M3->getLabel());
-		$$->setNextList(merge(B->getFalseList(), S3->getNextList()));
+		backpatch(S3->getNextList(), M2->getLabel());
+		// $$->setNextList(merge(B->getFalseList(), S3->getNextList()));
+		$$->setNextList(B->getFalseList());
 		genCode("\tJMP " + M2->getLabel());
 
 	}
@@ -349,6 +365,7 @@ statement : var_declaration {
 		//------------------code generation------------------
 		backpatch($3->getTrueList(), $6->getLabel());
 		$$->setNextList(merge($3->getFalseList(), $7->getNextList()));
+
 	}
 	| IF LPAREN expression P RPAREN M statement ELSE N M statement {
 		printLog("statement : IF LPAREN expression RPAREN statement ELSE statement");

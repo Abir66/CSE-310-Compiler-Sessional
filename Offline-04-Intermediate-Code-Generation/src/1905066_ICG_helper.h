@@ -56,6 +56,11 @@ void genCode(string code){
     temp_asm_line_count++;
 }
 
+void genComment(string comment){
+    tempOut << "; " << comment << endl;
+    temp_asm_line_count++;
+}
+
 void genVarDeclarationCode(){
     if(!inGlobalScope){
         for(auto var : vars){
@@ -76,7 +81,6 @@ void genVarDeclarationCode(){
         }
     }
 }
-
 
 void genINC_DEC(SymbolInfo* var, string op){
     op = op == "++" ? "INC" : "DEC";
