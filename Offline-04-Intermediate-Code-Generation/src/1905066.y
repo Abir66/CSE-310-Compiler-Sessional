@@ -402,7 +402,7 @@ statement : var_declaration {
 		$$->setNextList(B->getFalseList());
 		genCode("\tJMP " + M1->getLabel());
 	}
-	| PRINTLN LPAREN ID RPAREN SEMICOLON {
+	/* | PRINTLN LPAREN ID RPAREN SEMICOLON {
 		printLog("statement : PRINTLN LPAREN ID RPAREN SEMICOLON");
 		$$ = new SymbolInfo("statement", "non-terminal");
 
@@ -419,6 +419,32 @@ statement : var_declaration {
 		}
 
 		$$->addChildren({$1, $2, $3, $4, $5});
+	} */
+	| PRINTLN  LPAREN expression RPAREN SEMICOLON {
+		$$ = new SymbolInfo("statement", "non-terminal");
+
+		if(!$3->getTrueList().empty()){
+			std::string label = new_label();
+			genCode(label + ":");
+			genCode("\tPUSH 1");
+			$$->addToNextList(temp_asm_line_count);
+			genCode("\tJMP ");
+			backpatch($3->getTrueList(), label);
+
+			label = new_label();
+			genCode(label + ":");
+			genCode("\tPUSH 0");
+			backpatch($3->getFalseList(), label);
+
+			label = new_label();
+			genCode(label + ":");
+			backpatch($$->getNextList(), label);
+			$$->setNextList({});		
+		}
+
+		genCode("\tPOP AX");
+		genCode("\tCALL print_output");
+		genCode("\tCALL new_line");
 	}
 	| RETURN expression SEMICOLON {
 		printLog("statement : RETURN expression SEMICOLON");
