@@ -1,55 +1,24 @@
 
-new_line proc
-    push ax
-    push dx
-    mov ah,2
-    mov dl,cr
-    int 21h
-    mov ah,2
-    mov dl,lf
-    int 21h
-    pop dx
-    pop ax
-    ret
-new_line endp
-print_output proc  ;print what is in ax
-    push ax
-    push bx
-    push cx
-    push dx
-    push si
-    lea si,number
-    mov bx,10
-    add si,4
-    cmp ax,0
-    jnge negate
-    print:
-    xor dx,dx
-    div bx
-    mov [si],dl
-    add [si],'0'
-    dec si
-    cmp ax,0
-    jne print
-    inc si
-    lea dx,si
-    mov ah,9
-    int 21h
-    pop si
-    pop dx
-    pop cx
-    pop bx
-    pop ax
-    ret
-    negate:
-    push ax
-    mov ah,2
-    mov dl,'-'
-    int 21h
-    pop ax
-    neg ax
-    jmp print
-print_output endp
+.MODEL SMALL
+.STACK 1000H
+.Data
+	CR EQU 0DH
+	LF EQU 0AH
+	number DB "00000$"
+	INT_ DW 0
+.CODE
+main PROC
+	MOV AX, @DATA
+	MOV DS, AX
+    PUSH BP
+	MOV BP, SP
+
+    call int_intput
+
+    POP BP
+	MOV AX,4CH
+	INT 21H
+main ENDP
 
 int_intput PROC
     PUSH BP
@@ -97,8 +66,7 @@ L_MINUS_SIGN:
     ADD AX, CX
     MOV BX, AX
     JMP L_INPUT_LOOP
-
-
+    
 L_NEW_LINE:
 
     ; check if minus sign
@@ -110,9 +78,7 @@ L_NEW_LINE:
 L_ALL_DONE:
 
     MOV INT_ , BX
-    
-    call new_line
-    
+
     POP DX
     POP CX
     POP BX
@@ -121,4 +87,7 @@ L_ALL_DONE:
     ADD SP, 2
     POP BP
     RET
-int_intput endp
+int_intput ENDP
+
+
+END main

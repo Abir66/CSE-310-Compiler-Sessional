@@ -87,8 +87,8 @@ FLOAT ({DIGIT}+(\.{DIGIT}+)?|(\.{DIGIT}+))([Ee][+-]?{DIGIT}+)?|{INTEGER}\.
 "default"	{ yylval.symbolInfo = new SymbolInfo(yytext, "DEFAULT", line_count, line_count); 			printFunc("DEFAULT",yytext);  	return DEFAULT;}
 "continue"	{ yylval.symbolInfo = new SymbolInfo(yytext, "CONTINUE", line_count, line_count); 			printFunc("CONTINUE",yytext);  	return CONTINUE;}
 "println"	{ yylval.symbolInfo = new SymbolInfo(yytext, "PRINTLN", line_count, line_count); 			printFunc("PRINTLN",yytext); 	return PRINTLN;}
-
-
+"print"		{ yylval.symbolInfo = new SymbolInfo(yytext, "PRINT", line_count, line_count); 				printFunc("PRINT",yytext); 		return PRINT;}
+"scan"		{ yylval.symbolInfo = new SymbolInfo(yytext, "scanInt", line_count, line_count); 				printFunc("scanInt",yytext); 		return SCANINT;}
 
  /* ===================== Identifiers ===================== */
 {IDENTIFIER} {
@@ -258,8 +258,11 @@ FLOAT ({DIGIT}+(\.{DIGIT}+)?|(\.{DIGIT}+))([Ee][+-]?{DIGIT}+)?|{INTEGER}\.
 						string_log += "\"";
 						//printLog(string_type, string_log);
 						//printToken(string_type, string_token);
+						yylval.symbolInfo = new SymbolInfo(string_token, "CONST_STRING", line_count, line_count+temp_line_count);
 						line_count += temp_line_count;
+						
 						BEGIN INITIAL;
+						return CONST_STRING;
 					}
 
 

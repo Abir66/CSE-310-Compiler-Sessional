@@ -1,15 +1,23 @@
-
 int main()
 {
-    int x, ara[3];
-    ara[0] = 5;
-    x = 2;
-    println(ara[0]*2 + x-1);
-    println(x);
-    println(ara[0]);
-    println(5>6 || ara[0] == 5);
-    x = 3;
-    println(x > 3);
-    return 0;
+  int n, c, k;
 
+  print("Enter number of rows : ");
+  scan(n);
+
+  for (k = 1; k <= n; k++)
+  {
+    for (c = 1; c <= n-k; c++){
+      print(" ");
+    }
+
+    for (c = 1; c <= 2*k-1; c++){
+      print("*");
+    }
+
+    print("\n");
+    
+  }
+
+  return 0;
 }

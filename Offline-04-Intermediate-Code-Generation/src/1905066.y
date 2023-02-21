@@ -18,8 +18,8 @@ using namespace std;
     SymbolInfo* symbolInfo; 
 }
 
-%token<symbolInfo>  IF ELSE FOR WHILE DO BREAK RETURN SWITCH CASE DEFAULT CONTINUE  LPAREN RPAREN LCURL RCURL LTHIRD RTHIRD COMMA SEMICOLON PRINTLN INCOP DECOP ASSIGNOP NOT
-%token<symbolInfo> ID INT FLOAT DOUBLE CONST_INT CONST_FLOAT CHAR VOID ADDOP MULOP RELOP  LOGICOP BITOP 
+%token<symbolInfo>  IF ELSE FOR WHILE DO BREAK RETURN SWITCH CASE DEFAULT CONTINUE  LPAREN RPAREN LCURL RCURL LTHIRD RTHIRD COMMA SEMICOLON PRINTLN PRINT INCOP DECOP ASSIGNOP NOT
+%token<symbolInfo> ID INT FLOAT DOUBLE CONST_INT CONST_FLOAT CHAR VOID ADDOP MULOP RELOP  LOGICOP BITOP CONST_STRING SCANINT
 
 %type<symbolInfo> variable factor term unary_expression simple_expression rel_expression logic_expression expression M N P
 %type<symbolInfo> start program unit func_declaration func_definition parameter_list compound_statement var_declaration type_specifier declaration_list statements statement expression_statement argument_list arguments
@@ -104,11 +104,7 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 			for(auto line : $7->getNextList()) function_return_lines.push_back(line);
 		}
 		genFunctionEndingCode(func);
-
-		
-
-
-		
+	
 	}
 	| type_specifier ID LPAREN RPAREN { 
 		addFunction($2, $1->getDataType(), true); 
@@ -422,29 +418,13 @@ statement : var_declaration {
 	} */
 	| PRINTLN  LPAREN expression RPAREN SEMICOLON {
 		$$ = new SymbolInfo("statement", "non-terminal");
-
-		if(!$3->getTrueList().empty()){
-			std::string label = new_label();
-			genCode(label + ":");
-			genCode("\tPUSH 1");
-			$$->addToNextList(temp_asm_line_count);
-			genCode("\tJMP ");
-			backpatch($3->getTrueList(), label);
-
-			label = new_label();
-			genCode(label + ":");
-			genCode("\tPUSH 0");
-			backpatch($3->getFalseList(), label);
-
-			label = new_label();
-			genCode(label + ":");
-			backpatch($$->getNextList(), label);
-			$$->setNextList({});		
-		}
-
-		genCode("\tPOP AX");
-		genCode("\tCALL print_output");
-		genCode("\tCALL new_line");
+		$$->addChildren({$1, $2, $3, $4, $5});
+		printExpression($3, true);
+	}
+	| PRINT LPAREN expression RPAREN SEMICOLON {
+		$$ = new SymbolInfo("statement", "non-terminal");
+		$$->addChildren({$1, $2, $3, $4, $5});
+		printExpression($3, false);
 	}
 	| RETURN expression SEMICOLON {
 		printLog("statement : RETURN expression SEMICOLON");
@@ -455,7 +435,28 @@ statement : var_declaration {
 		genCode("\tPOP AX");
 		function_return_lines.push_back(temp_asm_line_count);
 		genCode("\tJMP ");
-		
+	}
+	| PRINTLN LPAREN CONST_STRING RPAREN SEMICOLON {
+		printLog("statement : PRINTLN LPAREN RPAREN SEMICOLON");
+		$$ = new SymbolInfo("statement", "non-terminal");
+		$$->addChildren({$1, $2, $3, $4, $5});
+
+		//------------------code generation------------------
+		printString($3, true);
+	}
+	| PRINT LPAREN CONST_STRING RPAREN SEMICOLON {
+		printLog("statement : PRINTLN LPAREN RPAREN SEMICOLON");
+		$$ = new SymbolInfo("statement", "non-terminal");
+		$$->addChildren({$1, $2, $3, $4, $5});
+
+		//------------------code generation------------------
+		printString($3, false);
+	}
+	| SCANINT LPAREN variable RPAREN SEMICOLON{
+		genCode("\tCALL int_intput");
+		genCode("\tMOV AX, INT_");
+		if($1->isArray() && !$1->isGlobalVar()) genCode("\tPOP BX");
+		genCode("\tMOV " + $3->getAsmName() + ", AX");
 	}
 	;
 

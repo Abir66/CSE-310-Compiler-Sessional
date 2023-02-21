@@ -1,4 +1,0 @@
-Line# 5: Array subscript is not an integer
-Line# 7: Array subscript is not an integer
-Line# 9: Array subscript is not an integer
-Line# 10: Array subscript is not an integer

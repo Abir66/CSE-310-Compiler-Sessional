@@ -114,6 +114,7 @@ void genFunctionEndingCode(SymbolInfo* func){
         genCode("\tMOV AX, 4CH");
         genCode("\tINT 21H");
     }
+
     else{
         
         if(func->getParamCount() != 0) genCode("\tRET " + to_string(func->getParamCount()*2));
@@ -138,6 +139,8 @@ void asmInit(){
     codeOut << "\tCR EQU 0DH" << endl;
     codeOut << "\tLF EQU 0AH" << endl;
     codeOut << "\tnumber DB \"00000$\"" << endl;
+    codeOut << "\tSTRING DB 100 DUP(?)" << endl;
+    codeOut << "\tINT_ DW 0"<< endl;
 }
 
 void add_println_instructions(std::ostream &out = std::cout)
@@ -182,10 +185,66 @@ void normal_expression_to_logic(SymbolInfo* B, bool pop_ax = true){
 	}
 }
 
-
+ 
 void generate_Optimize_Code(){
     remove_unnecessary_push_pop(code_file_name, temp_file_name);
     remove_unnecessary_jumps(temp_file_name, optimized_code_file_name);
+}
+
+void printExpression(SymbolInfo* expression, bool newLine = false){
+    if(!expression->getTrueList().empty()){
+			std::string label = new_label();
+			genCode(label + ":");
+			genCode("\tPUSH 1");
+            bool next_dest = temp_asm_line_count;
+			//$$->addToNextList(temp_asm_line_count);
+			genCode("\tJMP ");
+			backpatch(expression->getTrueList(), label);
+
+			label = new_label();
+			genCode(label + ":");
+			genCode("\tPUSH 0");
+			backpatch(expression->getFalseList(), label);
+
+			label = new_label();
+			genCode(label + ":");
+			backpatch({next_dest}, label);
+			//$$->setNextList({});		
+		}
+
+		genCode("\tPOP AX");
+		genCode("\tCALL print_output");
+		if(newLine) genCode("\tCALL new_line");
+}
+
+
+void printString(string str){
+    if(str.length() == 0) return;
+    genCode("\tLEA SI, STRING");
+	for(int i = 0, j = i; i < str.length(); i++, j++) {
+		genCode("\tMOV [SI+" + to_string(i) + "], '" + str[j] + "'");
+	}
+	genCode("\tMOV [SI+" + to_string(str.length()) + "], '$'");
+	genCode("\tLEA DX, STRING");
+	genCode("\tMOV AH, 09H");
+	genCode("\tINT 21H");
+}
+
+void printString(SymbolInfo* symbol, bool newLine = false){
+    string temp = "";
+	std::string str = symbol->getName(); 
+	for(int i = 0; i < str.length(); i++) {
+        if(str[i] == '\n') {
+            printString(temp);
+            genCode("\tCALL new_line");
+            temp = "";
+        }
+        else{
+            temp += str[i];
+        }
+	}
+    if(temp.length() != 0) printString(temp);
+	if(newLine) genCode("\tCALL new_line");
 }
 
 #endif

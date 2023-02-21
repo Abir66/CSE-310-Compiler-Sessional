@@ -74,24 +74,27 @@ extern int yydebug;
     COMMA = 275,                   /* COMMA  */
     SEMICOLON = 276,               /* SEMICOLON  */
     PRINTLN = 277,                 /* PRINTLN  */
-    INCOP = 278,                   /* INCOP  */
-    DECOP = 279,                   /* DECOP  */
-    ASSIGNOP = 280,                /* ASSIGNOP  */
-    NOT = 281,                     /* NOT  */
-    ID = 282,                      /* ID  */
-    INT = 283,                     /* INT  */
-    FLOAT = 284,                   /* FLOAT  */
-    DOUBLE = 285,                  /* DOUBLE  */
-    CONST_INT = 286,               /* CONST_INT  */
-    CONST_FLOAT = 287,             /* CONST_FLOAT  */
-    CHAR = 288,                    /* CHAR  */
-    VOID = 289,                    /* VOID  */
-    ADDOP = 290,                   /* ADDOP  */
-    MULOP = 291,                   /* MULOP  */
-    RELOP = 292,                   /* RELOP  */
-    LOGICOP = 293,                 /* LOGICOP  */
-    BITOP = 294,                   /* BITOP  */
-    LOWER_THAN_ELSE = 295          /* LOWER_THAN_ELSE  */
+    PRINT = 278,                   /* PRINT  */
+    INCOP = 279,                   /* INCOP  */
+    DECOP = 280,                   /* DECOP  */
+    ASSIGNOP = 281,                /* ASSIGNOP  */
+    NOT = 282,                     /* NOT  */
+    ID = 283,                      /* ID  */
+    INT = 284,                     /* INT  */
+    FLOAT = 285,                   /* FLOAT  */
+    DOUBLE = 286,                  /* DOUBLE  */
+    CONST_INT = 287,               /* CONST_INT  */
+    CONST_FLOAT = 288,             /* CONST_FLOAT  */
+    CHAR = 289,                    /* CHAR  */
+    VOID = 290,                    /* VOID  */
+    ADDOP = 291,                   /* ADDOP  */
+    MULOP = 292,                   /* MULOP  */
+    RELOP = 293,                   /* RELOP  */
+    LOGICOP = 294,                 /* LOGICOP  */
+    BITOP = 295,                   /* BITOP  */
+    CONST_STRING = 296,            /* CONST_STRING  */
+    SCANINT = 297,                 /* SCANINT  */
+    LOWER_THAN_ELSE = 298          /* LOWER_THAN_ELSE  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -120,24 +123,27 @@ extern int yydebug;
 #define COMMA 275
 #define SEMICOLON 276
 #define PRINTLN 277
-#define INCOP 278
-#define DECOP 279
-#define ASSIGNOP 280
-#define NOT 281
-#define ID 282
-#define INT 283
-#define FLOAT 284
-#define DOUBLE 285
-#define CONST_INT 286
-#define CONST_FLOAT 287
-#define CHAR 288
-#define VOID 289
-#define ADDOP 290
-#define MULOP 291
-#define RELOP 292
-#define LOGICOP 293
-#define BITOP 294
-#define LOWER_THAN_ELSE 295
+#define PRINT 278
+#define INCOP 279
+#define DECOP 280
+#define ASSIGNOP 281
+#define NOT 282
+#define ID 283
+#define INT 284
+#define FLOAT 285
+#define DOUBLE 286
+#define CONST_INT 287
+#define CONST_FLOAT 288
+#define CHAR 289
+#define VOID 290
+#define ADDOP 291
+#define MULOP 292
+#define RELOP 293
+#define LOGICOP 294
+#define BITOP 295
+#define CONST_STRING 296
+#define SCANINT 297
+#define LOWER_THAN_ELSE 298
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -147,7 +153,7 @@ union YYSTYPE
 
     SymbolInfo* symbolInfo; 
 
-#line 151 "y.tab.h"
+#line 157 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
