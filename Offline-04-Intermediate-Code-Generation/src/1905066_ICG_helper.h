@@ -3,16 +3,20 @@
 
 #include<iostream>
 #include<fstream>
-#include<sstream>
 #include<string>
 #include<unordered_map>
 #include<vector>
 #include<set>
+#include<stack>
 #include"1905066_parser_helper.h"
 #include"symbol-table/1905066_symbolTable.h"
 #include"symbol-table/1905066_symbolInfo.h"
 
 using namespace std;
+
+#define temp_file_name "1905066_temp.txt"
+#define code_file_name "1905066_code.asm"
+#define optimized_code_file_name "1905066_optimized_code.asm"
 
 std::ofstream codeOut;
 std::ofstream tempOut;
@@ -24,13 +28,6 @@ bool inGlobalScope = true;
 extern int temp_asm_line_count = 1;
 unordered_map<int, string> label_map;
 vector<int> function_return_lines;
-
-// void do_backpatching(){
-//     for(auto it = label_map.begin(); it != label_map.end(); it++){
-//         std::cout << it->first << "-";
-//         std::cout << it->second << endl;
-//     }
-// }
 
 
 
@@ -51,8 +48,6 @@ std::vector<int> merge(const std::vector<int> &list1, const std::vector<int> &li
     std::vector<int> mergedList(s.begin(), s.end());
     return mergedList;
 }
-
-
 
 
 void genCode(string code){
@@ -127,6 +122,9 @@ void genFunctionEndingCode(SymbolInfo* func){
 }
 
 void asmInit(){
+    tempOut.open(temp_file_name);
+    codeOut.open(code_file_name);
+
     codeOut << ";-------" << endl;
     codeOut << ";   " << endl;
     codeOut << ";-------" << endl;
@@ -146,10 +144,16 @@ void add_println_instructions(std::ostream &out = std::cout)
     file.close();   
 }
 
+void closeAsmFiles(){
+    if(tempOut.is_open()) tempOut.close();
+    if(codeOut.is_open()) codeOut.close();
+    if(optimzedCodeOut.is_open()) optimzedCodeOut.close();
+}
+
 void generate_asm_file(){
     codeOut<<".CODE"<<std::endl;
     tempOut.close();
-    ifstream tempFile("1905066_temp.txt");
+    ifstream tempFile(temp_file_name);
     string line;
     int temp_asm_line_count = 1;
     while(getline(tempFile, line)) {
@@ -158,6 +162,17 @@ void generate_asm_file(){
     }
     add_println_instructions(codeOut);
     codeOut<<"END main"<<std::endl;
+    tempFile.close();
+    codeOut.close();
+}
+
+
+
+
+
+
+void generate_Optimize_Code(){
+    
 }
 
 #endif

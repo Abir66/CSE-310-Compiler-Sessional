@@ -949,21 +949,21 @@ int main(int argc,char *argv[])
 	errorOut.open("1905066_error.txt");
 	logout.open("1905066_log.txt");
 	parseTreeOut.open("1905066_parseTree.txt");
-	tempOut.open("1905066_temp.txt");
-	codeOut.open("1905066_code.asm");
-
+	
+	
 	asmInit();
 	
 	yyparse();
 	yylex_destroy();
 
 	generate_asm_file();
+	generate_Optimize_Code();
+	closeAsmFiles();
 	
 	errorOut.close();
 	logout.close();
-	codeOut.close();
 	parseTreeOut.close();
-	tempOut.close();
+	
 
 	return 0;
 }
