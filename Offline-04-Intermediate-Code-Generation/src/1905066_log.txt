@@ -12,219 +12,585 @@ declaration_list : declaration_list COMMA ID
 var_declaration : type_specifier declaration_list SEMICOLON
 unit : var_declaration
 program : unit
-Line# 19: Token <INT> Lexeme int found
+Line# 3: Token <INT> Lexeme int found
 type_specifier : INT
-Line# 19: Token <ID> Lexeme main found
-Line# 19: Token <LPAREN> Lexeme ( found
-Line# 19: Token <RPAREN> Lexeme ) found
-Line# 19: Token <LCURL> Lexeme { found
-Line# 20: Token <INT> Lexeme int found
+Line# 3: Token <ID> Lexeme f found
+Line# 3: Token <LPAREN> Lexeme ( found
+Line# 3: Token <INT> Lexeme int found
 type_specifier : INT
-Line# 20: Token <ID> Lexeme i found
-Line# 20: Token <COMMA> Lexeme , found
+Line# 3: Token <ID> Lexeme x found
+parameter_list : type_specifier ID
+Line# 3: Token <RPAREN> Lexeme ) found
+Line# 3: Token <LCURL> Lexeme { found
+Line# 4: Token <PRINTLN> Lexeme println found
+Line# 4: Token <LPAREN> Lexeme ( found
+Line# 4: Token <ID> Lexeme x found
+Line# 4: Token <RPAREN> Lexeme ) found
+Line# 4: Token <SEMICOLON> Lexeme ; found
+statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+statements : statement
+Line# 5: Token <IF> Lexeme if found
+Line# 5: Token <LPAREN> Lexeme ( found
+Line# 5: Token <ID> Lexeme x found
+Line# 5: Token <RELOP> Lexeme == found
+variable : ID
+factor : variable
+unary_expression : factor
+term : unary_expression
+simple_expression : term
+Line# 5: Token <CONST_INT> Lexeme 1 found
+factor : CONST_INT
+unary_expression : factor
+term : unary_expression
+Line# 5: Token <RPAREN> Lexeme ) found
+simple_expression : term
+rel_expression : simple_expression RELOP simple_expression
+logic_expression : rel_expression
+expression : logic_expression
+Line# 5: Token <LCURL> Lexeme { found
+Line# 6: Token <RETURN> Lexeme return found
+Line# 6: Token <CONST_INT> Lexeme 1 found
+factor : CONST_INT
+unary_expression : factor
+term : unary_expression
+Line# 6: Token <SEMICOLON> Lexeme ; found
+simple_expression : term
+rel_expression : simple_expression
+logic_expression : rel_expression
+expression : logic_expression
+statement : RETURN expression SEMICOLON
+statements : statement
+Line# 7: Token <RCURL> Lexeme } found
+compound_statement : LCURL statements RCURL
+	ScopeTable# 3
+	ScopeTable# 2
+	11--> <x, INT> 
+	ScopeTable# 1
+	1--> <c, INT> 
+	4--> <f, FUNCTION, INT> 
+	10--> <a, INT> 
+	11--> <b, INT> 
+statement : compound_statement
+Line# 9: Token <RETURN> Lexeme return found
+statement : IF LPAREN expression RPAREN statement
+statements : statements statement
+Line# 9: Token <ID> Lexeme x found
+Line# 9: Token <ADDOP> Lexeme + found
+variable : ID
+factor : variable
+unary_expression : factor
+term : unary_expression
+simple_expression : term
+Line# 9: Token <ID> Lexeme f found
+Line# 9: Token <LPAREN> Lexeme ( found
+Line# 9: Token <ID> Lexeme x found
+Line# 9: Token <ADDOP> Lexeme - found
+variable : ID
+factor : variable
+unary_expression : factor
+term : unary_expression
+simple_expression : term
+Line# 9: Token <CONST_INT> Lexeme 1 found
+factor : CONST_INT
+unary_expression : factor
+term : unary_expression
+Line# 9: Token <RPAREN> Lexeme ) found
+simple_expression : simple_expression ADDOP term
+rel_expression : simple_expression
+logic_expression : rel_expression
+arguments : logic_expression
+argument_list : arguments
+factor : ID LPAREN argument_list RPAREN
+unary_expression : factor
+term : unary_expression
+Line# 9: Token <SEMICOLON> Lexeme ; found
+simple_expression : simple_expression ADDOP term
+rel_expression : simple_expression
+logic_expression : rel_expression
+expression : logic_expression
+statement : RETURN expression SEMICOLON
+statements : statements statement
+Line# 10: Token <RCURL> Lexeme } found
+compound_statement : LCURL statements RCURL
+	ScopeTable# 2
+	11--> <x, INT> 
+	ScopeTable# 1
+	1--> <c, INT> 
+	4--> <f, FUNCTION, INT> 
+	10--> <a, INT> 
+	11--> <b, INT> 
+func_definition : type_specifier ID LPAREN parameter_list RPAREN compound_statement
+unit : func_definition
+program : program unit
+Line# 28: Token <INT> Lexeme int found
+type_specifier : INT
+Line# 28: Token <ID> Lexeme main found
+Line# 28: Token <LPAREN> Lexeme ( found
+Line# 28: Token <RPAREN> Lexeme ) found
+Line# 28: Token <LCURL> Lexeme { found
+Line# 29: Token <INT> Lexeme int found
+type_specifier : INT
+Line# 29: Token <ID> Lexeme i found
+Line# 29: Token <COMMA> Lexeme , found
 declaration_list : ID
-Line# 20: Token <ID> Lexeme j found
-Line# 20: Token <COMMA> Lexeme , found
+Line# 29: Token <ID> Lexeme j found
+Line# 29: Token <COMMA> Lexeme , found
 declaration_list : declaration_list COMMA ID
-Line# 20: Token <ID> Lexeme l found
-Line# 20: Token <LSQUARE> Lexeme [ found
-Line# 20: Token <CONST_INT> Lexeme 10 found
-Line# 20: Token <RSQUARE> Lexeme ] found
+Line# 29: Token <ID> Lexeme l found
+Line# 29: Token <LSQUARE> Lexeme [ found
+Line# 29: Token <CONST_INT> Lexeme 10 found
+Line# 29: Token <RSQUARE> Lexeme ] found
 declaration_list : declaration_list COMMA ID LTHIRD CONST_INT RTHIRD
-Line# 20: Token <COMMA> Lexeme , found
-Line# 20: Token <ID> Lexeme k found
-Line# 20: Token <SEMICOLON> Lexeme ; found
+Line# 29: Token <COMMA> Lexeme , found
+Line# 29: Token <ID> Lexeme k found
+Line# 29: Token <SEMICOLON> Lexeme ; found
 declaration_list : declaration_list COMMA ID
 var_declaration : type_specifier declaration_list SEMICOLON
 statement : var_declaration
 statements : statement
-Line# 22: Token <ID> Lexeme i found
-Line# 22: Token <ASSIGNOP> Lexeme = found
+Line# 31: Token <ID> Lexeme i found
+Line# 31: Token <ASSIGNOP> Lexeme = found
 variable : ID
-Line# 22: Token <CONST_INT> Lexeme 7 found
+Line# 31: Token <ID> Lexeme f found
+Line# 31: Token <LPAREN> Lexeme ( found
+Line# 31: Token <CONST_INT> Lexeme 5 found
 factor : CONST_INT
 unary_expression : factor
 term : unary_expression
-Line# 22: Token <SEMICOLON> Lexeme ; found
+Line# 31: Token <RPAREN> Lexeme ) found
+simple_expression : term
+rel_expression : simple_expression
+logic_expression : rel_expression
+arguments : logic_expression
+argument_list : arguments
+factor : ID LPAREN argument_list RPAREN
+unary_expression : factor
+term : unary_expression
+Line# 31: Token <SEMICOLON> Lexeme ; found
 simple_expression : term
 rel_expression : simple_expression
 logic_expression : rel_expression
 expression : variable ASSIGNOP logic_expression
 expression_statement : expression SEMICOLON
 statement : expression statement
-statements : statements statement
-Line# 23: Token <ID> Lexeme j found
-Line# 23: Token <ASSIGNOP> Lexeme = found
-variable : ID
-Line# 23: Token <CONST_INT> Lexeme 6 found
-factor : CONST_INT
-unary_expression : factor
-term : unary_expression
-Line# 23: Token <SEMICOLON> Lexeme ; found
-simple_expression : term
-rel_expression : simple_expression
-logic_expression : rel_expression
-expression : variable ASSIGNOP logic_expression
-expression_statement : expression SEMICOLON
-statement : expression statement
-statements : statements statement
-Line# 25: Token <IF> Lexeme if found
-Line# 25: Token <LPAREN> Lexeme ( found
-Line# 25: Token <ID> Lexeme i found
-Line# 25: Token <RELOP> Lexeme > found
-variable : ID
-factor : variable
-unary_expression : factor
-term : unary_expression
-simple_expression : term
-Line# 25: Token <ID> Lexeme j found
-Line# 25: Token <LOGICOP> Lexeme && found
-variable : ID
-factor : variable
-unary_expression : factor
-term : unary_expression
-simple_expression : term
-rel_expression : simple_expression RELOP simple_expression
-Line# 25: Token <CONST_INT> Lexeme 4 found
-factor : CONST_INT
-unary_expression : factor
-term : unary_expression
-Line# 25: Token <RELOP> Lexeme < found
-simple_expression : term
-Line# 25: Token <CONST_INT> Lexeme 2 found
-factor : CONST_INT
-unary_expression : factor
-term : unary_expression
-Line# 25: Token <RPAREN> Lexeme ) found
-simple_expression : term
-rel_expression : simple_expression RELOP simple_expression
-logic_expression : rel_expression LOGICOP rel_expression
-expression : logic_expression
-Line# 25: Token <LCURL> Lexeme { found
-Line# 26: Token <ID> Lexeme k found
-Line# 26: Token <ASSIGNOP> Lexeme = found
-variable : ID
-Line# 26: Token <CONST_INT> Lexeme 10 found
-factor : CONST_INT
-unary_expression : factor
-term : unary_expression
-Line# 26: Token <SEMICOLON> Lexeme ; found
-simple_expression : term
-rel_expression : simple_expression
-logic_expression : rel_expression
-expression : variable ASSIGNOP logic_expression
-expression_statement : expression SEMICOLON
-statement : expression statement
-statements : statement
-Line# 27: Token <RCURL> Lexeme } found
-compound_statement : LCURL statements RCURL
-	ScopeTable# 3
-	ScopeTable# 2
-	7--> <i, INT> 
-	8--> <j, INT> 
-	9--> <k, INT> 
-	10--> <l, ARRAY, INT> 
-	ScopeTable# 1
-	1--> <c, INT> 
-	2--> <main, FUNCTION, INT> 
-	10--> <a, INT> 
-	11--> <b, INT> 
-statement : compound_statement
-Line# 28: Token <ELSE> Lexeme else found
-Line# 28: Token <LCURL> Lexeme { found
-Line# 29: Token <ID> Lexeme k found
-Line# 29: Token <ASSIGNOP> Lexeme = found
-variable : ID
-Line# 29: Token <CONST_INT> Lexeme 20 found
-factor : CONST_INT
-unary_expression : factor
-term : unary_expression
-Line# 29: Token <SEMICOLON> Lexeme ; found
-simple_expression : term
-rel_expression : simple_expression
-logic_expression : rel_expression
-expression : variable ASSIGNOP logic_expression
-expression_statement : expression SEMICOLON
-statement : expression statement
-statements : statement
-Line# 30: Token <RCURL> Lexeme } found
-compound_statement : LCURL statements RCURL
-	ScopeTable# 4
-	ScopeTable# 2
-	7--> <i, INT> 
-	8--> <j, INT> 
-	9--> <k, INT> 
-	10--> <l, ARRAY, INT> 
-	ScopeTable# 1
-	1--> <c, INT> 
-	2--> <main, FUNCTION, INT> 
-	10--> <a, INT> 
-	11--> <b, INT> 
-statement : compound_statement
-statement : IF LPAREN expression RPAREN statement ELSE statement
 statements : statements statement
 Line# 32: Token <PRINTLN> Lexeme println found
 Line# 32: Token <LPAREN> Lexeme ( found
-Line# 32: Token <ID> Lexeme k found
+Line# 32: Token <ID> Lexeme i found
 Line# 32: Token <RPAREN> Lexeme ) found
 Line# 32: Token <SEMICOLON> Lexeme ; found
 statement : PRINTLN LPAREN ID RPAREN SEMICOLON
 statements : statements statement
-Line# 41: Token <FOR> Lexeme for found
-Line# 41: Token <LPAREN> Lexeme ( found
-Line# 41: Token <ID> Lexeme j found
-Line# 41: Token <ASSIGNOP> Lexeme = found
+Line# 89: Token <ID> Lexeme i found
+Line# 89: Token <ASSIGNOP> Lexeme = found
 variable : ID
-Line# 41: Token <CONST_INT> Lexeme 9 found
+Line# 89: Token <CONST_INT> Lexeme 5 found
 factor : CONST_INT
 unary_expression : factor
 term : unary_expression
-Line# 41: Token <SEMICOLON> Lexeme ; found
+Line# 89: Token <SEMICOLON> Lexeme ; found
 simple_expression : term
 rel_expression : simple_expression
 logic_expression : rel_expression
 expression : variable ASSIGNOP logic_expression
 expression_statement : expression SEMICOLON
-Line# 41: Token <ID> Lexeme j found
-Line# 41: Token <RELOP> Lexeme > found
+statement : expression statement
+statements : statements statement
+Line# 90: Token <ID> Lexeme j found
+Line# 90: Token <ASSIGNOP> Lexeme = found
+variable : ID
+Line# 90: Token <CONST_INT> Lexeme 6 found
+factor : CONST_INT
+unary_expression : factor
+term : unary_expression
+Line# 90: Token <SEMICOLON> Lexeme ; found
+simple_expression : term
+rel_expression : simple_expression
+logic_expression : rel_expression
+expression : variable ASSIGNOP logic_expression
+expression_statement : expression SEMICOLON
+statement : expression statement
+statements : statements statement
+Line# 92: Token <ID> Lexeme k found
+Line# 92: Token <ASSIGNOP> Lexeme = found
+variable : ID
+Line# 92: Token <ID> Lexeme i found
+Line# 92: Token <RELOP> Lexeme < found
 variable : ID
 factor : variable
 unary_expression : factor
 term : unary_expression
 simple_expression : term
-Line# 41: Token <CONST_INT> Lexeme 5 found
+Line# 92: Token <ID> Lexeme j found
+Line# 92: Token <LOGICOP> Lexeme && found
+variable : ID
+factor : variable
+unary_expression : factor
+term : unary_expression
+simple_expression : term
+rel_expression : simple_expression RELOP simple_expression
+Line# 92: Token <ID> Lexeme i found
+Line# 92: Token <RELOP> Lexeme > found
+variable : ID
+factor : variable
+unary_expression : factor
+term : unary_expression
+simple_expression : term
+Line# 92: Token <CONST_INT> Lexeme 0 found
 factor : CONST_INT
 unary_expression : factor
 term : unary_expression
-Line# 41: Token <SEMICOLON> Lexeme ; found
+Line# 92: Token <SEMICOLON> Lexeme ; found
+simple_expression : term
+rel_expression : simple_expression RELOP simple_expression
+logic_expression : rel_expression LOGICOP rel_expression
+expression : variable ASSIGNOP logic_expression
+expression_statement : expression SEMICOLON
+statement : expression statement
+statements : statements statement
+Line# 93: Token <PRINTLN> Lexeme println found
+Line# 93: Token <LPAREN> Lexeme ( found
+Line# 93: Token <ID> Lexeme k found
+Line# 93: Token <RPAREN> Lexeme ) found
+Line# 93: Token <SEMICOLON> Lexeme ; found
+statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+statements : statements statement
+Line# 95: Token <ID> Lexeme k found
+Line# 95: Token <ASSIGNOP> Lexeme = found
+variable : ID
+Line# 95: Token <ID> Lexeme i found
+Line# 95: Token <RELOP> Lexeme > found
+variable : ID
+factor : variable
+unary_expression : factor
+term : unary_expression
+simple_expression : term
+Line# 95: Token <ID> Lexeme j found
+Line# 95: Token <LOGICOP> Lexeme || found
+variable : ID
+factor : variable
+unary_expression : factor
+term : unary_expression
+simple_expression : term
+rel_expression : simple_expression RELOP simple_expression
+Line# 95: Token <CONST_INT> Lexeme 5 found
+factor : CONST_INT
+unary_expression : factor
+term : unary_expression
+Line# 95: Token <RELOP> Lexeme != found
+simple_expression : term
+Line# 95: Token <CONST_INT> Lexeme 5 found
+factor : CONST_INT
+unary_expression : factor
+term : unary_expression
+Line# 95: Token <SEMICOLON> Lexeme ; found
+simple_expression : term
+rel_expression : simple_expression RELOP simple_expression
+logic_expression : rel_expression LOGICOP rel_expression
+expression : variable ASSIGNOP logic_expression
+expression_statement : expression SEMICOLON
+statement : expression statement
+statements : statements statement
+Line# 96: Token <PRINTLN> Lexeme println found
+Line# 96: Token <LPAREN> Lexeme ( found
+Line# 96: Token <ID> Lexeme k found
+Line# 96: Token <RPAREN> Lexeme ) found
+Line# 96: Token <SEMICOLON> Lexeme ; found
+statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+statements : statements statement
+Line# 99: Token <ID> Lexeme i found
+Line# 99: Token <ASSIGNOP> Lexeme = found
+variable : ID
+Line# 99: Token <CONST_INT> Lexeme 5 found
+factor : CONST_INT
+unary_expression : factor
+term : unary_expression
+Line# 99: Token <MULOP> Lexeme * found
+Line# 99: Token <CONST_INT> Lexeme 6 found
+factor : CONST_INT
+unary_expression : factor
+term : term MULOP unary_expression
+Line# 99: Token <ADDOP> Lexeme - found
+simple_expression : term
+Line# 99: Token <CONST_INT> Lexeme 2 found
+factor : CONST_INT
+unary_expression : factor
+term : unary_expression
+Line# 99: Token <MULOP> Lexeme * found
+Line# 99: Token <CONST_INT> Lexeme 3 found
+factor : CONST_INT
+unary_expression : factor
+term : term MULOP unary_expression
+Line# 99: Token <SEMICOLON> Lexeme ; found
+simple_expression : simple_expression ADDOP term
+rel_expression : simple_expression
+logic_expression : rel_expression
+expression : variable ASSIGNOP logic_expression
+expression_statement : expression SEMICOLON
+statement : expression statement
+statements : statements statement
+Line# 100: Token <PRINTLN> Lexeme println found
+Line# 100: Token <LPAREN> Lexeme ( found
+Line# 100: Token <ID> Lexeme i found
+Line# 100: Token <RPAREN> Lexeme ) found
+Line# 100: Token <SEMICOLON> Lexeme ; found
+statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+statements : statements statement
+Line# 101: Token <ID> Lexeme j found
+Line# 101: Token <ASSIGNOP> Lexeme = found
+variable : ID
+Line# 101: Token <ID> Lexeme i found
+Line# 101: Token <MULOP> Lexeme / found
+variable : ID
+factor : variable
+unary_expression : factor
+term : unary_expression
+Line# 101: Token <CONST_INT> Lexeme 2 found
+factor : CONST_INT
+unary_expression : factor
+term : term MULOP unary_expression
+Line# 101: Token <SEMICOLON> Lexeme ; found
+simple_expression : term
+rel_expression : simple_expression
+logic_expression : rel_expression
+expression : variable ASSIGNOP logic_expression
+expression_statement : expression SEMICOLON
+statement : expression statement
+statements : statements statement
+Line# 102: Token <PRINTLN> Lexeme println found
+Line# 102: Token <LPAREN> Lexeme ( found
+Line# 102: Token <ID> Lexeme j found
+Line# 102: Token <RPAREN> Lexeme ) found
+Line# 102: Token <SEMICOLON> Lexeme ; found
+statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+statements : statements statement
+Line# 103: Token <ID> Lexeme k found
+Line# 103: Token <ASSIGNOP> Lexeme = found
+variable : ID
+Line# 103: Token <CONST_INT> Lexeme 1 found
+factor : CONST_INT
+unary_expression : factor
+term : unary_expression
+Line# 103: Token <SEMICOLON> Lexeme ; found
+simple_expression : term
+rel_expression : simple_expression
+logic_expression : rel_expression
+expression : variable ASSIGNOP logic_expression
+expression_statement : expression SEMICOLON
+statement : expression statement
+statements : statements statement
+Line# 104: Token <ID> Lexeme l found
+Line# 104: Token <LSQUARE> Lexeme [ found
+Line# 104: Token <ID> Lexeme k found
+Line# 104: Token <ADDOP> Lexeme + found
+variable : ID
+factor : variable
+unary_expression : factor
+term : unary_expression
+simple_expression : term
+Line# 104: Token <CONST_INT> Lexeme 2 found
+factor : CONST_INT
+unary_expression : factor
+term : unary_expression
+Line# 104: Token <RSQUARE> Lexeme ] found
+simple_expression : simple_expression ADDOP term
+rel_expression : simple_expression
+logic_expression : rel_expression
+expression : logic_expression
+variable : ID LTHIRD expression RTHIRD
+Line# 104: Token <ASSIGNOP> Lexeme = found
+Line# 104: Token <ID> Lexeme i found
+Line# 104: Token <MULOP> Lexeme / found
+variable : ID
+factor : variable
+unary_expression : factor
+term : unary_expression
+Line# 104: Token <CONST_INT> Lexeme 3 found
+factor : CONST_INT
+unary_expression : factor
+term : term MULOP unary_expression
+Line# 104: Token <ADDOP> Lexeme + found
+simple_expression : term
+Line# 104: Token <CONST_INT> Lexeme 5 found
+factor : CONST_INT
+unary_expression : factor
+term : unary_expression
+Line# 104: Token <MULOP> Lexeme * found
+Line# 104: Token <CONST_INT> Lexeme 2 found
+factor : CONST_INT
+unary_expression : factor
+term : term MULOP unary_expression
+Line# 104: Token <ADDOP> Lexeme + found
+simple_expression : simple_expression ADDOP term
+Line# 104: Token <CONST_INT> Lexeme 1 found
+factor : CONST_INT
+unary_expression : factor
+term : unary_expression
+Line# 104: Token <SEMICOLON> Lexeme ; found
+simple_expression : simple_expression ADDOP term
+rel_expression : simple_expression
+logic_expression : rel_expression
+expression : variable ASSIGNOP logic_expression
+expression_statement : expression SEMICOLON
+statement : expression statement
+statements : statements statement
+Line# 105: Token <ID> Lexeme k found
+Line# 105: Token <ASSIGNOP> Lexeme = found
+variable : ID
+Line# 105: Token <ID> Lexeme l found
+Line# 105: Token <LSQUARE> Lexeme [ found
+Line# 105: Token <CONST_INT> Lexeme 1 found
+factor : CONST_INT
+unary_expression : factor
+term : unary_expression
+Line# 105: Token <ADDOP> Lexeme + found
+simple_expression : term
+Line# 105: Token <ID> Lexeme k found
+Line# 105: Token <ADDOP> Lexeme + found
+variable : ID
+factor : variable
+unary_expression : factor
+term : unary_expression
+simple_expression : simple_expression ADDOP term
+Line# 105: Token <CONST_INT> Lexeme 1 found
+factor : CONST_INT
+unary_expression : factor
+term : unary_expression
+Line# 105: Token <RSQUARE> Lexeme ] found
+simple_expression : simple_expression ADDOP term
+rel_expression : simple_expression
+logic_expression : rel_expression
+expression : logic_expression
+variable : ID LTHIRD expression RTHIRD
+Line# 105: Token <SEMICOLON> Lexeme ; found
+factor : variable
+unary_expression : factor
+term : unary_expression
+simple_expression : term
+rel_expression : simple_expression
+logic_expression : rel_expression
+expression : variable ASSIGNOP logic_expression
+expression_statement : expression SEMICOLON
+statement : expression statement
+statements : statements statement
+Line# 106: Token <PRINTLN> Lexeme println found
+Line# 106: Token <LPAREN> Lexeme ( found
+Line# 106: Token <ID> Lexeme k found
+Line# 106: Token <RPAREN> Lexeme ) found
+Line# 106: Token <SEMICOLON> Lexeme ; found
+statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+statements : statements statement
+Line# 107: Token <ID> Lexeme k found
+Line# 107: Token <ASSIGNOP> Lexeme = found
+variable : ID
+Line# 107: Token <ID> Lexeme k found
+Line# 107: Token <MULOP> Lexeme % found
+variable : ID
+factor : variable
+unary_expression : factor
+term : unary_expression
+Line# 107: Token <CONST_INT> Lexeme 3 found
+factor : CONST_INT
+unary_expression : factor
+term : term MULOP unary_expression
+Line# 107: Token <SEMICOLON> Lexeme ; found
+simple_expression : term
+rel_expression : simple_expression
+logic_expression : rel_expression
+expression : variable ASSIGNOP logic_expression
+expression_statement : expression SEMICOLON
+statement : expression statement
+statements : statements statement
+Line# 108: Token <PRINTLN> Lexeme println found
+Line# 108: Token <LPAREN> Lexeme ( found
+Line# 108: Token <ID> Lexeme k found
+Line# 108: Token <RPAREN> Lexeme ) found
+Line# 108: Token <SEMICOLON> Lexeme ; found
+statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+statements : statements statement
+Line# 109: Token <ID> Lexeme k found
+Line# 109: Token <ASSIGNOP> Lexeme = found
+variable : ID
+Line# 109: Token <ID> Lexeme k found
+Line# 109: Token <MULOP> Lexeme % found
+variable : ID
+factor : variable
+unary_expression : factor
+term : unary_expression
+Line# 109: Token <CONST_INT> Lexeme 3 found
+factor : CONST_INT
+unary_expression : factor
+term : term MULOP unary_expression
+Line# 109: Token <SEMICOLON> Lexeme ; found
+simple_expression : term
+rel_expression : simple_expression
+logic_expression : rel_expression
+expression : variable ASSIGNOP logic_expression
+expression_statement : expression SEMICOLON
+statement : expression statement
+statements : statements statement
+Line# 110: Token <PRINTLN> Lexeme println found
+Line# 110: Token <LPAREN> Lexeme ( found
+Line# 110: Token <ID> Lexeme k found
+Line# 110: Token <RPAREN> Lexeme ) found
+Line# 110: Token <SEMICOLON> Lexeme ; found
+statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+statements : statements statement
+Line# 112: Token <FOR> Lexeme for found
+Line# 112: Token <LPAREN> Lexeme ( found
+Line# 112: Token <ID> Lexeme k found
+Line# 112: Token <ASSIGNOP> Lexeme = found
+variable : ID
+Line# 112: Token <CONST_INT> Lexeme 100 found
+factor : CONST_INT
+unary_expression : factor
+term : unary_expression
+Line# 112: Token <SEMICOLON> Lexeme ; found
+simple_expression : term
+rel_expression : simple_expression
+logic_expression : rel_expression
+expression : variable ASSIGNOP logic_expression
+expression_statement : expression SEMICOLON
+Line# 112: Token <ID> Lexeme k found
+Line# 112: Token <RELOP> Lexeme > found
+variable : ID
+factor : variable
+unary_expression : factor
+term : unary_expression
+simple_expression : term
+Line# 112: Token <CONST_INT> Lexeme 0 found
+factor : CONST_INT
+unary_expression : factor
+term : unary_expression
+Line# 112: Token <SEMICOLON> Lexeme ; found
 simple_expression : term
 rel_expression : simple_expression RELOP simple_expression
 logic_expression : rel_expression
 expression : logic_expression
 expression_statement : expression SEMICOLON
-Line# 41: Token <ID> Lexeme j found
-Line# 41: Token <DECOP> Lexeme -- found
+Line# 112: Token <ID> Lexeme k found
+Line# 112: Token <DECOP> Lexeme -- found
 variable : ID
 factor: variable DECOP
 unary_expression : factor
 term : unary_expression
-Line# 41: Token <RPAREN> Lexeme ) found
+Line# 112: Token <RPAREN> Lexeme ) found
 simple_expression : term
 rel_expression : simple_expression
 logic_expression : rel_expression
 expression : logic_expression
-Line# 41: Token <LCURL> Lexeme { found
-Line# 42: Token <PRINTLN> Lexeme println found
-Line# 42: Token <LPAREN> Lexeme ( found
-Line# 42: Token <ID> Lexeme j found
-Line# 42: Token <RPAREN> Lexeme ) found
-Line# 42: Token <SEMICOLON> Lexeme ; found
+Line# 112: Token <LCURL> Lexeme { found
+Line# 113: Token <PRINTLN> Lexeme println found
+Line# 113: Token <LPAREN> Lexeme ( found
+Line# 113: Token <ID> Lexeme k found
+Line# 113: Token <RPAREN> Lexeme ) found
+Line# 113: Token <SEMICOLON> Lexeme ; found
 statement : PRINTLN LPAREN ID RPAREN SEMICOLON
 statements : statement
-Line# 43: Token <RCURL> Lexeme } found
+Line# 114: Token <RCURL> Lexeme } found
 compound_statement : LCURL statements RCURL
 	ScopeTable# 5
-	ScopeTable# 2
+	ScopeTable# 4
 	7--> <i, INT> 
 	8--> <j, INT> 
 	9--> <k, INT> 
@@ -232,155 +598,27 @@ compound_statement : LCURL statements RCURL
 	ScopeTable# 1
 	1--> <c, INT> 
 	2--> <main, FUNCTION, INT> 
+	4--> <f, FUNCTION, INT> 
 	10--> <a, INT> 
 	11--> <b, INT> 
 statement : compound_statement
 statement : FOR LPAREN expression_statement expression_statement expression RPAREN statement
 statements : statements statement
-Line# 45: Token <ID> Lexeme j found
-Line# 45: Token <ASSIGNOP> Lexeme = found
-variable : ID
-Line# 45: Token <CONST_INT> Lexeme 14 found
+Line# 117: Token <RETURN> Lexeme return found
+Line# 117: Token <CONST_INT> Lexeme 0 found
 factor : CONST_INT
 unary_expression : factor
 term : unary_expression
-Line# 45: Token <SEMICOLON> Lexeme ; found
-simple_expression : term
-rel_expression : simple_expression
-logic_expression : rel_expression
-expression : variable ASSIGNOP logic_expression
-expression_statement : expression SEMICOLON
-statement : expression statement
-statements : statements statement
-Line# 47: Token <WHILE> Lexeme while found
-Line# 47: Token <LPAREN> Lexeme ( found
-Line# 47: Token <ID> Lexeme j found
-Line# 47: Token <RELOP> Lexeme > found
-variable : ID
-factor : variable
-unary_expression : factor
-term : unary_expression
-simple_expression : term
-Line# 47: Token <CONST_INT> Lexeme 0 found
-factor : CONST_INT
-unary_expression : factor
-term : unary_expression
-Line# 47: Token <RPAREN> Lexeme ) found
-simple_expression : term
-rel_expression : simple_expression RELOP simple_expression
-logic_expression : rel_expression
-expression : logic_expression
-Line# 47: Token <LCURL> Lexeme { found
-Line# 49: Token <IF> Lexeme if found
-Line# 49: Token <LPAREN> Lexeme ( found
-Line# 49: Token <ID> Lexeme j found
-Line# 49: Token <RELOP> Lexeme > found
-variable : ID
-factor : variable
-unary_expression : factor
-term : unary_expression
-simple_expression : term
-Line# 49: Token <CONST_INT> Lexeme 3 found
-factor : CONST_INT
-unary_expression : factor
-term : unary_expression
-Line# 49: Token <RPAREN> Lexeme ) found
-simple_expression : term
-rel_expression : simple_expression RELOP simple_expression
-logic_expression : rel_expression
-expression : logic_expression
-Line# 49: Token <LCURL> Lexeme { found
-Line# 50: Token <PRINTLN> Lexeme println found
-Line# 50: Token <LPAREN> Lexeme ( found
-Line# 50: Token <ID> Lexeme j found
-Line# 50: Token <RPAREN> Lexeme ) found
-Line# 50: Token <SEMICOLON> Lexeme ; found
-statement : PRINTLN LPAREN ID RPAREN SEMICOLON
-statements : statement
-Line# 51: Token <RCURL> Lexeme } found
-compound_statement : LCURL statements RCURL
-	ScopeTable# 7
-	ScopeTable# 6
-	ScopeTable# 2
-	7--> <i, INT> 
-	8--> <j, INT> 
-	9--> <k, INT> 
-	10--> <l, ARRAY, INT> 
-	ScopeTable# 1
-	1--> <c, INT> 
-	2--> <main, FUNCTION, INT> 
-	10--> <a, INT> 
-	11--> <b, INT> 
-statement : compound_statement
-Line# 52: Token <ID> Lexeme j found
-statement : IF LPAREN expression RPAREN statement
-statements : statement
-Line# 52: Token <DECOP> Lexeme -- found
-variable : ID
-factor: variable DECOP
-unary_expression : factor
-term : unary_expression
-Line# 52: Token <SEMICOLON> Lexeme ; found
-simple_expression : term
-rel_expression : simple_expression
-logic_expression : rel_expression
-expression : logic_expression
-expression_statement : expression SEMICOLON
-statement : expression statement
-statements : statements statement
-Line# 53: Token <RCURL> Lexeme } found
-compound_statement : LCURL statements RCURL
-	ScopeTable# 6
-	ScopeTable# 2
-	7--> <i, INT> 
-	8--> <j, INT> 
-	9--> <k, INT> 
-	10--> <l, ARRAY, INT> 
-	ScopeTable# 1
-	1--> <c, INT> 
-	2--> <main, FUNCTION, INT> 
-	10--> <a, INT> 
-	11--> <b, INT> 
-statement : compound_statement
-statement : WHILE LPAREN expression RPAREN statement
-statements : statements statement
-Line# 55: Token <ID> Lexeme k found
-Line# 55: Token <ASSIGNOP> Lexeme = found
-variable : ID
-Line# 55: Token <CONST_INT> Lexeme 30 found
-factor : CONST_INT
-unary_expression : factor
-term : unary_expression
-Line# 55: Token <SEMICOLON> Lexeme ; found
-simple_expression : term
-rel_expression : simple_expression
-logic_expression : rel_expression
-expression : variable ASSIGNOP logic_expression
-expression_statement : expression SEMICOLON
-statement : expression statement
-statements : statements statement
-Line# 56: Token <PRINTLN> Lexeme println found
-Line# 56: Token <LPAREN> Lexeme ( found
-Line# 56: Token <ID> Lexeme k found
-Line# 56: Token <RPAREN> Lexeme ) found
-Line# 56: Token <SEMICOLON> Lexeme ; found
-statement : PRINTLN LPAREN ID RPAREN SEMICOLON
-statements : statements statement
-Line# 104: Token <RETURN> Lexeme return found
-Line# 104: Token <CONST_INT> Lexeme 0 found
-factor : CONST_INT
-unary_expression : factor
-term : unary_expression
-Line# 104: Token <SEMICOLON> Lexeme ; found
+Line# 117: Token <SEMICOLON> Lexeme ; found
 simple_expression : term
 rel_expression : simple_expression
 logic_expression : rel_expression
 expression : logic_expression
 statement : RETURN expression SEMICOLON
 statements : statements statement
-Line# 105: Token <RCURL> Lexeme } found
+Line# 118: Token <RCURL> Lexeme } found
 compound_statement : LCURL statements RCURL
-	ScopeTable# 2
+	ScopeTable# 4
 	7--> <i, INT> 
 	8--> <j, INT> 
 	9--> <k, INT> 
@@ -388,11 +626,12 @@ compound_statement : LCURL statements RCURL
 	ScopeTable# 1
 	1--> <c, INT> 
 	2--> <main, FUNCTION, INT> 
+	4--> <f, FUNCTION, INT> 
 	10--> <a, INT> 
 	11--> <b, INT> 
 func_definition : type_specifier ID LPAREN RPAREN compound_statement
 unit : func_definition
 program : program unit
 start : program
-Total Lines: 105
-Total Errors: 0
+Total Lines: 118
+Total Errors: 2

@@ -282,6 +282,7 @@ statement : var_declaration {
 		printLog("statement : expression statement");
 		$$ = new SymbolInfo("statement", "non-terminal");
 		$$->addChildren($1);
+		$$->copyICGData($1);
 		
 	}
 	| compound_statement {
@@ -381,6 +382,9 @@ statement : var_declaration {
 
 		//------------------code generation------------------
 		genCode("\tPOP AX");
+		function_return_lines.push_back(temp_asm_line_count);
+		genCode("\tJMP ");
+		
 	}
 	;
 
@@ -482,7 +486,6 @@ expression : logic_expression {
 		printLog("expression : variable ASSIGNOP logic_expression");
 		$$ = new SymbolInfo("expression", "non-terminal");
 		$$->setDataType($1->getDataType());
-
 		if($3->getDataType() == "VOID"){
 			// can't assign  void
 			$$->setDataType("VOID");
@@ -505,11 +508,29 @@ expression : logic_expression {
 		$$->addChildren({$1, $2, $3});
 
 		// ------------------code generation------------------
+		bool isLogic = $3->getTrueList().size() > 0;
+		$$->clearNextList();
+		if(isLogic){
+			std::string label = new_label();
+			genCode(label + ":");
+			genCode("\tPUSH 1");
+			$$->addToNextList(temp_asm_line_count);
+			genCode("\tJMP ");
+			backpatch($3->getTrueList(), label);
+
+			label = new_label();
+			genCode(label + ":");
+			genCode("\tPUSH 0");
+			backpatch($3->getFalseList(), label);
+
+			label = new_label();
+			genCode(label + ":");
+			backpatch($$->getNextList(), label);			
+		}
 		genCode("\tPOP AX");
 		if($1->isArray() && !$1->isGlobalVar()) genCode("\tPOP BX");
 		genCode("\tMOV " + $1->getAsmName() + ", AX");
 		genCode("\tPUSH AX");
-
 		$$->clearNextList();
 	}
 	;
@@ -548,6 +569,7 @@ logic_expression : rel_expression {
 			B->setFalseList(B2->getFalseList());
 			B->setTrueList(merge(B1->getTrueList(), B2->getTrueList()));
 		}
+		genCode("\tPUSH AX");
 	}
 	;
 
@@ -587,7 +609,7 @@ rel_expression : simple_expression {
 		else if(op == ">=") genCode("\tJGE ");
 		else if(op == "==") genCode("\tJE ");
 		else if(op == "!=") genCode("\tJNE ");
-
+		
 		genCode("\tJMP ");
 	}
 	;

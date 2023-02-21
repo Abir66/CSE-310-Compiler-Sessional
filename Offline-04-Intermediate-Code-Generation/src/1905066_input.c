@@ -1,5 +1,14 @@
 int a,b,c;
 
+int f(int x){
+	println(x);
+	if(x==1) {
+		return 1;
+	}
+	
+	return x + f(x-1);
+}
+
 // void func_a(){
 // 	a = 7;
 // }
@@ -19,41 +28,41 @@ int a,b,c;
 int main(){
     int i,j,l[10],k;
 
-    i = 7;
-	j = 6;
+    i = f(5);
+	println(i);
 
-    if(i > j && 4 < 2){
-        k = 10;
-    }
-    else{
-        k = 20;
-    }
-
-    println(k);
-
-    // if(i > j){
-    //     println(i);
+    // if(i > j && 4 < 2){
+    //     k = 10;
     // }
     // else{
-    //     println(j);
+    //     k = 20;
     // }
 
-    for(j = 9; j > 5; j--){
-         println(j);
-    }
+    // println(k);
 
-    j = 14;
+    // // if(i > j){
+    // //     println(i);
+    // // }
+    // // else{
+    // //     println(j);
+    // // }
 
-    while(j > 0){
+    // for(j = 9; j > 5; j--){
+    //      println(j);
+    // }
+
+    // j = 14;
+
+    // while(j > 0){
         
-        if(j > 3){
-            println(j);
-        }
-        j--;
-    }
+    //     if(j > 3){
+    //         println(j);
+    //     }
+    //     j--;
+    // }
     
-    k = 30;
-    println(k);
+    // k = 30;
+    // println(k);
     
 
     // k = foo(i,j) + foo(1,2);
@@ -66,8 +75,8 @@ int main(){
 	// func_a();
 	// println(a);
 	
-	// // k = foo(i);
-	// // println(k);
+	// k = foo(i);
+	// println(k);
 
     // i = 5;
     // j = i++;
@@ -77,28 +86,32 @@ int main(){
     // j--;
     // println(j);
 
-    // i = 5;
-    // j = 6;
+    i = 5;
+    j = 6;
 
-    // k = i < j;
-    // println(k);
+    k =  i < j && i > 0;
+    println(k);
 
-    // k = i > j;
-    // println(k);
+    k = i > j || 5 != 5;
+    println(k);
     
 
-    // i = 5*6-2*3;
-    // println(i);
-    // j = i/2;
-    // println(j);
-    // k = 1;
-    // l[k+2] = i/3 + 5*2 + 1;
-    // k = l[1+k+1];
-    // println(k);
-    // k = k % 3;
-    // println(k);
-    // k = k % 3;
-    // println(k);
+    i = 5*6-2*3;
+    println(i);
+    j = i/2;
+    println(j);
+    k = 1;
+    l[k+2] = i/3 + 5*2 + 1;
+    k = l[1+k+1];
+    println(k);
+    k = k % 3;
+    println(k);
+    k = k % 3;
+    println(k);
+
+    for(k = 100; k > 0; k--){
+        println(k);
+    }
    
 
     return 0;

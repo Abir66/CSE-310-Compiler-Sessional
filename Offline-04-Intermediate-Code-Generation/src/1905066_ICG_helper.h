@@ -23,6 +23,7 @@ int stack_offset = 0;
 bool inGlobalScope = true;
 extern int temp_asm_line_count = 1;
 unordered_map<int, string> label_map;
+vector<int> function_return_lines;
 
 // void do_backpatching(){
 //     for(auto it = label_map.begin(); it != label_map.end(); it++){
@@ -103,6 +104,10 @@ void genFunctioninitCode(string func_name){
 }
 
 void genFunctionEndingCode(SymbolInfo* func){
+    std::string label = new_label();
+    genCode(label + ":");
+    backpatch(function_return_lines, label);
+    function_return_lines.clear();
     genCode("\tADD SP, " + to_string(stack_offset));
     genCode("\tPOP BP");
 
@@ -152,6 +157,7 @@ void generate_asm_file(){
         temp_asm_line_count++;
     }
     add_println_instructions(codeOut);
+    codeOut<<"END main"<<std::endl;
 }
 
 #endif
