@@ -436,6 +436,13 @@ statement : var_declaration {
 		function_return_lines.push_back(temp_asm_line_count);
 		genCode("\tJMP ");
 	}
+	| RETURN SEMICOLON{
+		printLog("statement : RETURN SEMICOLON");
+		$$ = new SymbolInfo("statement", "non-terminal");
+		$$->addChildren({$1, $2});
+		function_return_lines.push_back(temp_asm_line_count);
+		genCode("\tJMP ");
+	}
 	| PRINTLN LPAREN CONST_STRING RPAREN SEMICOLON {
 		printLog("statement : PRINTLN LPAREN RPAREN SEMICOLON");
 		$$ = new SymbolInfo("statement", "non-terminal");

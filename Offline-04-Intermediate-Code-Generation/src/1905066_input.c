@@ -1,5 +1,12 @@
+void f(int n){
+  println(n);
+  if(n == 1) {
+    return ;
+  }
+  n--;
+  f(n);
+}
+
 int main(){
-  int x;
-  x = -1250/7;
-  println(x);
+  f(5);
 }

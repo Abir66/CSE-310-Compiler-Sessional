@@ -10,38 +10,59 @@
 	STRING DB 100 DUP(?)
 	INT_ DW 0
 .CODE
+f PROC
+	PUSH BP
+	MOV BP, SP
+; ------------------ Line 2 ------------------
+	MOV AX, [BP+4]
+	PUSH AX
+	POP AX
+	CALL print_output
+	CALL new_line
+L0:
+; ------------------ Line 3 ------------------
+	MOV AX, [BP+4]
+	PUSH AX
+	PUSH 1
+	POP BX
+	POP AX
+	CMP AX, BX
+	JE L1
+	JMP L2
+L1:
+; ------------------ Line 4 ------------------
+	JMP L4
+L2:
+; ------------------ Line 6 ------------------
+	MOV AX, [BP+4]
+	PUSH AX
+	DEC AX
+	MOV [BP+4], AX
+	POP AX
+L3:
+; ------------------ Line 7 ------------------
+	MOV AX, [BP+4]
+	PUSH AX
+	CALL f
+	PUSH 0
+	POP AX
+L4:
+	ADD SP, 0
+	POP BP
+	RET 2
+f ENDP
 main PROC
 	MOV AX, @DATA
 	MOV DS, AX
 	PUSH BP
 	MOV BP, SP
-; ------------------ Line 2 ------------------
-	SUB SP, 2
-L0:
-; ------------------ Line 3 ------------------
-	PUSH 1250
+; ------------------ Line 11 ------------------
+	PUSH 5
+	CALL f
+	PUSH 0
 	POP AX
-	NEG AX
-	PUSH AX
-	PUSH 7
-	POP BX
-	POP AX
-	CWD
-	IDIV BX
-	PUSH AX
-	POP AX
-	MOV [BP-2], AX
-	PUSH AX
-	POP AX
-L1:
-; ------------------ Line 4 ------------------
-	MOV AX, [BP-2]
-	PUSH AX
-	POP AX
-	CALL print_output
-	CALL new_line
-L2:
-	ADD SP, 2
+L5:
+	ADD SP, 0
 	POP BP
 	MOV AX, 4CH
 	INT 21H
