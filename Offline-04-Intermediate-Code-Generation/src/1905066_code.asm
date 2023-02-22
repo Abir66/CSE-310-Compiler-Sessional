@@ -15,166 +15,33 @@ main PROC
 	MOV DS, AX
 	PUSH BP
 	MOV BP, SP
-; ------------------ Line 3 ------------------
-	SUB SP, 2
-	SUB SP, 2
+; ------------------ Line 2 ------------------
 	SUB SP, 2
 L0:
-; ------------------ Line 5 ------------------
-	LEA SI, STRING
-	MOV [SI+0], 'E'
-	MOV [SI+1], 'n'
-	MOV [SI+2], 't'
-	MOV [SI+3], 'e'
-	MOV [SI+4], 'r'
-	MOV [SI+5], ' '
-	MOV [SI+6], 'n'
-	MOV [SI+7], 'u'
-	MOV [SI+8], 'm'
-	MOV [SI+9], 'b'
-	MOV [SI+10], 'e'
-	MOV [SI+11], 'r'
-	MOV [SI+12], ' '
-	MOV [SI+13], 'o'
-	MOV [SI+14], 'f'
-	MOV [SI+15], ' '
-	MOV [SI+16], 'r'
-	MOV [SI+17], 'o'
-	MOV [SI+18], 'w'
-	MOV [SI+19], 's'
-	MOV [SI+20], ' '
-	MOV [SI+21], ':'
-	MOV [SI+22], ' '
-	MOV [SI+23], '$'
-	LEA DX, STRING
-	MOV AH, 09H
-	INT 21H
-L1:
-; ------------------ Line 6 ------------------
-	CALL int_intput
-	MOV AX, INT_
+; ------------------ Line 3 ------------------
+	PUSH 1250
+	POP AX
+	NEG AX
+	PUSH AX
+	PUSH 7
+	POP BX
+	POP AX
+	CWD
+	IDIV BX
+	PUSH AX
+	POP AX
 	MOV [BP-2], AX
-L2:
-; ------------------ Line 8 ------------------
-	PUSH 1
-	POP AX
-	MOV [BP-6], AX
 	PUSH AX
 	POP AX
-L3:
-	MOV AX, [BP-6]
-	PUSH AX
+L1:
+; ------------------ Line 4 ------------------
 	MOV AX, [BP-2]
 	PUSH AX
-	POP BX
 	POP AX
-	CMP AX, BX
-	JLE L5
-	JMP L14
-	POP AX
-L4:
-	MOV AX, [BP-6]
-	PUSH AX
-	INC AX
-	MOV [BP-6], AX
-	POP AX
-	JMP L3
-L5:
-; ------------------ Line 10 ------------------
-	PUSH 1
-	POP AX
-	MOV [BP-4], AX
-	PUSH AX
-	POP AX
-L6:
-	MOV AX, [BP-4]
-	PUSH AX
-	MOV AX, [BP-2]
-	PUSH AX
-	MOV AX, [BP-6]
-	PUSH AX
-	POP BX
-	POP AX
-	SUB AX, BX
-	PUSH AX
-	POP BX
-	POP AX
-	CMP AX, BX
-	JLE L8
-	JMP L9
-	POP AX
-L7:
-	MOV AX, [BP-4]
-	PUSH AX
-	INC AX
-	MOV [BP-4], AX
-	POP AX
-	JMP L6
-L8:
-; ------------------ Line 11 ------------------
-	LEA SI, STRING
-	MOV [SI+0], ' '
-	MOV [SI+1], '$'
-	LEA DX, STRING
-	MOV AH, 09H
-	INT 21H
-	JMP L7
-L9:
-; ------------------ Line 14 ------------------
-	PUSH 1
-	POP AX
-	MOV [BP-4], AX
-	PUSH AX
-	POP AX
-L10:
-	MOV AX, [BP-4]
-	PUSH AX
-	PUSH 2
-	MOV AX, [BP-6]
-	PUSH AX
-	POP BX
-	POP AX
-	XOR DX, DX
-	IMUL BX
-	PUSH AX
-	PUSH 1
-	POP BX
-	POP AX
-	SUB AX, BX
-	PUSH AX
-	POP BX
-	POP AX
-	CMP AX, BX
-	JLE L12
-	JMP L13
-	POP AX
-L11:
-	MOV AX, [BP-4]
-	PUSH AX
-	INC AX
-	MOV [BP-4], AX
-	POP AX
-	JMP L10
-L12:
-; ------------------ Line 15 ------------------
-	LEA SI, STRING
-	MOV [SI+0], '*'
-	MOV [SI+1], '$'
-	LEA DX, STRING
-	MOV AH, 09H
-	INT 21H
-	JMP L11
-L13:
-; ------------------ Line 18 ------------------
+	CALL print_output
 	CALL new_line
-	JMP L4
-L14:
-; ------------------ Line 22 ------------------
-	PUSH 0
-	POP AX
-	JMP L15
-L15:
-	ADD SP, 6
+L2:
+	ADD SP, 2
 	POP BP
 	MOV AX, 4CH
 	INT 21H

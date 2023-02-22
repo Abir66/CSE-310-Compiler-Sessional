@@ -762,7 +762,8 @@ term : unary_expression {
 		// ---------------------Code generation---------------------
 		genCode("\tPOP BX");
 		genCode("\tPOP AX");
-		genCode("\tXOR DX, DX");
+		//genCode("\tXOR DX, DX");
+		genCode("\tCWD");
 		if($2->getName() == "*") genCode("\tIMUL BX");
 		else genCode("\tIDIV BX");
 
